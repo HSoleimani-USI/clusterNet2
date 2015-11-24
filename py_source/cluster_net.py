@@ -17,8 +17,6 @@ class array(object):
 			lib.funcs.fto_gpu(numpy_array.ctypes.data_as(ct.POINTER(ct.c_float)), self.pt)
 		
 		self.cpu_arr = numpy_array
-
-
 		
 
 
@@ -36,3 +34,9 @@ def handle_shape(shape):
 	if len(shape) == 1: return (shape[0],1)
 	elif len(shape) > 2: raise Exception("Array must be one or two dimensional!")
 	else: return shape
+	
+def dot(A,B,out=None):
+	if not out: out = ones((A.shape[0],B.shape[1]))
+	print A.shape, B.shape, out.shape
+	lib.funcs.fdot(lib.pt_clusterNet, A.pt, B.pt, out.pt)
+	return out

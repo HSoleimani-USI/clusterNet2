@@ -75,4 +75,3 @@ template <typename T> Matrix<T> *fill_matrix(int rows, int cols, T fill_value)
 }
 
 
-

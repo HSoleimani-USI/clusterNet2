@@ -4,9 +4,8 @@ using namespace std;
 
 int main(int argc, char const *argv[])
 {
-	ClusterNet2 * fooClass = new ClusterNet2();
+	ClusterNet2<float>* fooClass = new ClusterNet2<float>();
 
-    fooClass->runThreads();
 
     Matrix<int> *A = empty<int>(10,10);
 

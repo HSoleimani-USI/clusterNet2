@@ -22,5 +22,16 @@ def test_togpu():
     B = gpu.array(A)
     C = B.tocpu()
     t.assert_array_almost_equal(A,C,4,"array.tocpu not equal to init array!")   
+    
+    
+def test_dot():
+    A1 = np.float32(np.random.rand(2,2))
+    A2 = np.float32(np.random.rand(2,2))
+    B1 = gpu.array(A1)
+    B2 = gpu.array(A2)
+    B3 = gpu.dot(B1,B2)
+    C = B3.tocpu()
+    
+    t.assert_array_almost_equal(np.dot(A1,A2),C,4,"array.tocpu not equal to init array!")  
 
     
