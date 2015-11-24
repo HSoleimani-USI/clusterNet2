@@ -1,13 +1,7 @@
-#include "fooclass.h"
-
-char* FooClass::SayHello() 
-{
-    return "Hello Im a Linux Shared Library";
-}
+#include "clusterNet2.h"
 
 
-
-FooClass::FooClass(){}
+ClusterNet2::ClusterNet2(){}
 
 void workerFunc()
 {
@@ -37,7 +31,7 @@ void workerFunc()
 
     std::cout << "Worker: finished" << std::endl;
 }
-void FooClass::runThreads()
+void ClusterNet2::runThreads()
 {
 	std::cout << "main: startup" << std::endl;
 

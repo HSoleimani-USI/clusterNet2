@@ -3,15 +3,14 @@
 #include <iostream>
 #include <basicOps.cuh>
 
-#ifndef __FOOCLASS_H__
-#define __FOOCLASS_H__
+#ifndef __CLUSTERNET2_H__
+#define __CLUSTERNET2_H__
 
-class FooClass 
+class ClusterNet2
 {
     public:
-        char* SayHello(); 
-  		FooClass();
+        ClusterNet2();
   		void runThreads();
 };
 
-#endif //__FOOCLASS_H__
+#endif //__CLUSTERNET2_H__

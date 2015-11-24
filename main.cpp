@@ -1,10 +1,10 @@
-#include "fooclass.h"
+#include "clusterNet2.h"
 
 using namespace std;
 
 int main(int argc, char const *argv[])
 {
-    FooClass * fooClass = new FooClass();
+	ClusterNet2 * fooClass = new ClusterNet2();
 
     fooClass->runThreads();
 
