@@ -31,9 +31,11 @@ pages = []
 i = 0
 titels = []
 
+
 with open(wiki_xml_path,'r') as f:
     
     page = []
+    headers = {}
     start = False
     end = False
     for line in f:
@@ -47,15 +49,17 @@ with open(wiki_xml_path,'r') as f:
             
             i+=1      
             page = "".join(page)
-            headers = rHeaders.search(page)
-            if headers:
+            match = rHeaders.search(page)
+            if match:
                 header = headers.group(1)
                 level = len(headers.group(2))
+                if level not in headers: headers[level] = []
+                headers[level].append(header)
             #match = rSummary.search(page)
             #if match: print match.group(1)
+            page_data = {'raw' : page, 'headers' : headers}
             
-            #print page
-            raw.set(title, page)
+            raw.set(title, page_data)
             
             page = []
             if i % 10000 == 0: print i
