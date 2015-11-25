@@ -23,7 +23,7 @@ raw = db.get_table('raw_pages')
 
 
 rTitle = re.compile(".*<title>(.*?)</title>")
-rSummary = re.compile(".*}}(.*?)==")
+rshortSummary = re.compile("(?:''')(.*)")
 
 rHeaders = re.compile("(?:={2,4})(\w*?)(={2,4}\s)")
 
@@ -35,33 +35,41 @@ titels = []
 with open(wiki_xml_path,'r') as f:
     
     page = []
-    headers = {}
+    headers = []
     start = False
     end = False
     for line in f:
-        if '<page>' in line: start = True
+        if '<page>' in line: 
+            start = True        
+            page = []
+            headers = []
         
         if start: page.append(line)
-        if '</page>' in line:    
-            
-            title =  rTitle.search(page[1]).group(1)
-            
-            
-            i+=1      
+        if '</page>' in line:   
+            i+=1       
+            title =  rTitle.search(page[1]).group(1)            
             page = "".join(page)
-            match = rHeaders.search(page)
-            if match:
-                header = headers.group(1)
-                level = len(headers.group(2))
-                if level not in headers: headers[level] = []
-                headers[level].append(header)
+            if len(page) < 1000: 
+                continue            
+            matches = rHeaders.findall(page)            
+            if matches:
+                for match in matches:
+                    if len(match[0]) == 0: continue
+                    header = match[0]
+                    level = len(match[1])-1
+                    headers.append((level, header))
             #match = rSummary.search(page)
             #if match: print match.group(1)
+            
+            
+            match = rshortSummary.search(page)
+            
             page_data = {'raw' : page, 'headers' : headers}
+            if match:
+                page_data['short_summary'] = match.group(1)
             
             raw.set(title, page_data)
             
-            page = []
             if i % 10000 == 0: print i
             
 
