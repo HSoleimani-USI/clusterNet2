@@ -22,7 +22,10 @@ funcs.ffill_matrix.restype = ct.POINTER(FloatMatrix)
 funcs.fto_host.restype = ct.c_void_p
 funcs.fto_gpu.restype = ct.c_void_p
 
-funcs.ffill_matrix.restype = ct.POINTER(FloatMatrix)
+
+funcs.frand.restype = ct.POINTER(FloatMatrix)
+funcs.frandn.restype = ct.POINTER(FloatMatrix)
+funcs.fsetRandomState.restype = ct.c_void_p
 
 funcs.fget_clusterNet.restype = ct.c_void_p
 

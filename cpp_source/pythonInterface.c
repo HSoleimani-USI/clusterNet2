@@ -16,4 +16,7 @@ extern "C"
 	void fto_gpu(float *cpu, FloatMatrix *gpu){ to_gpu(cpu, gpu); }
 	ClusterNet *fget_clusterNet(){ return get_clusterNet(); }
 	void *fdot(ClusterNet *gpu, FloatMatrix*A, FloatMatrix *B, FloatMatrix*C){ gpu->dot(A,B,C); }
+	void *frand(ClusterNet *gpu, int rows, int cols){ gpu->rand(rows, cols); }
+	void *frandn(ClusterNet *gpu, int rows, int cols){ gpu->randn(rows, cols); }
+	void *fsetRandomState(ClusterNet *gpu, int seed){ gpu->setRandomState(seed); }
 }

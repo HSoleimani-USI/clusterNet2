@@ -6,7 +6,6 @@
 
 #define TILE_DIM (32)
 #define BLOCK_ROWS (8)
-#define COPY_BLOCK_SIZE 16
 
 #define RDM_NUMBERS_PER_THREAD (1024)
 #define THREADS_PER_BLOCKS (512)
@@ -15,6 +14,10 @@
 #define DOT_BLOCKS (128)
 #define TILE_SIZE (32)
 #define DOT_REPS (4)
+
+#define NUM_RND_BLOCKS                      96
+#define NUM_RND_THREADS_PER_BLOCK           128
+#define NUM_RND_STREAMS                     (NUM_RND_BLOCKS * NUM_RND_THREADS_PER_BLOCK)
 
 
 #define CUDA_CHECK_RETURN(value) {                      \
@@ -40,6 +43,13 @@ template<typename T> Matrix<T> *fill_matrix(int rows, int cols, T fill_value);
 template<typename T> Matrix<T> *empty(int rows, int cols);
 template<typename T> void to_host(Matrix<T> *gpu, T *cpu);
 template<typename T> void to_gpu(T *cpu, Matrix<T> *gpu);
+
+
+template <typename T> void transpose(Matrix<T> *A, Matrix<T> *out, int rows, int cols);
+template <typename T> Matrix<T> *to_col_major(Matrix<T> *A);
+template <typename T> void to_col_major(Matrix<T> *A, Matrix<T> *out);
+template <typename T> Matrix<T> *to_row_major(Matrix<T> *A);
+template <typename T> Matrix<T> *transpose(Matrix<T> *A);
 
 
 #endif

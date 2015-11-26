@@ -1,4 +1,5 @@
 #include "clusterNet2.h"
+#include <stdlib.h>
 
 template ClusterNet2<float>::ClusterNet2();
 template<typename T>
@@ -7,74 +8,65 @@ ClusterNet2<T>::ClusterNet2()
 	cublasHandle_t handle;
 	cublasCreate_v2(&handle);
 	m_handle = handle;
+	setRandomState(time(0));
+
+	curandCreateGenerator(&m_generator, CURAND_RNG_PSEUDO_DEFAULT);
+	curandSetPseudoRandomGeneratorSeed(m_generator, time(0));
+	curandSetGeneratorOffset(m_generator, 100);
 }
 
-void workerFunc()
+
+
+template void ClusterNet2<float>::setRandomState(int seed);
+template<typename T> void ClusterNet2<T>::setRandomState(int seed)
 {
- 	boost::posix_time::seconds workTime(3);
-
-    std::cout << "Worker: running" << std::endl;
-
-    // Pretend to do something useful...
-    boost::this_thread::sleep(workTime);
-
-
-    Matrix<int> *A = empty<int>(10,10);
-
-
-    Matrix<int> *C =  fill_matrix<int>(10,10,13);
-
-
-    Matrix<int> *B = C->to_host();
-
-    for(int i =0; i < 100; i++)
-    {
-    	std::cout << B->data[i] << std::endl;
-    }
-    
-
-
-
-    std::cout << "Worker: finished" << std::endl;
+	curandCreateGenerator(&m_generator, CURAND_RNG_PSEUDO_DEFAULT);
+	curandSetPseudoRandomGeneratorSeed(m_generator, seed);
+	curandSetGeneratorOffset(m_generator, 100);
 }
-template<typename T>
-void ClusterNet2<T>::runThreads()
+
+template Matrix<float> *ClusterNet2<float>::rand(int rows, int cols);
+template <typename T> Matrix<T> *ClusterNet2<T>::rand(int rows, int cols)
 {
-	std::cout << "main: startup" << std::endl;
+	Matrix<T> *out = empty<T>(rows, cols);
+	curandGenerateUniform(m_generator, out->data, rows * cols);
 
-    boost::thread workerThread(workerFunc);
+	return out;
+}
 
-    std::cout << "main: waiting for thread" << std::endl;
+template Matrix<float> *ClusterNet2<float>::randn(int rows, int cols);
+template <typename T> Matrix<T> *ClusterNet2<T>::randn(int rows, int cols){ return normal(rows, cols, 0.0f, 1.0f); }
 
-    workerThread.join();
+template Matrix<float> *ClusterNet2<float>::normal(int rows, int cols, float mean, float std);
+template <typename T> Matrix<T> *ClusterNet2<T>::normal(int rows, int cols, float mean, float std)
+{
+	Matrix<T> *out = empty<T>(rows, cols);
+	curandGenerateNormal(m_generator, out->data, rows * cols, mean, std);
 
-    std::cout << "main: done" << std::endl;
+	return out;
 }
 
 template void ClusterNet2<float>::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
-template <typename T> void ClusterNet2<T>::dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out){ dot(A,B,out,CUBLAS_OP_T,CUBLAS_OP_T); }
+template <typename T> void ClusterNet2<T>::dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out){ dot(A,B,out,CUBLAS_OP_N,CUBLAS_OP_N); }
 
 template void ClusterNet2<float>::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, cublasOperation_t T1, cublasOperation_t T2);
 template <typename T> void ClusterNet2<T>::dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out, cublasOperation_t T1, cublasOperation_t T2)
 {
-		//if(checkMatrixOperation(A, B, out, T1, T2, 1) == 1){ throw "Matrix *size error:\n"; }
 		cublasStatus_t status;
 		const float alpha = 1.0f;
 		const float beta = 0.0f;
-		int A_rows = A->cols, A_cols = A->rows, B_cols = B->rows, B_rows = B->cols;
-		if (T1 == CUBLAS_OP_N)
+		int A_rows = A->rows, A_cols = A->cols, B_cols = B->cols;
+		if (T1 == CUBLAS_OP_T)
 		{
-			A_rows = A->rows;
-			A_cols = A->cols;
+			A_rows = A->cols;
+			A_cols = A->rows;
 		}
-		if (T2 == CUBLAS_OP_N)
-		{
-			B_cols = B->cols;
-			B_rows = B->rows;
-		}
+		if (T2 == CUBLAS_OP_T)
+			B_cols = B->rows;
+
 
 		status = cublasSgemm(m_handle, T1, T2, A_rows, B_cols,
-				A_cols, &alpha, B->data, A->rows, A->data, B->rows, &beta,
+				A_cols, &alpha, A->data, A->rows, B->data, B->rows, &beta,
 				out->data, out->rows);
 
 		if (status != CUBLAS_STATUS_SUCCESS)
