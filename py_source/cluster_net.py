@@ -33,6 +33,10 @@ def ones(shape, dtype=np.float32):
 	rows, cols = handle_shape(shape)
 	return array(None, lib.funcs.ffill_matrix(rows,cols,ct.c_float(1.0)), shape)
 
+def empty(shape, dtype=np.float32):
+	rows, cols = handle_shape(shape)
+	return array(None, lib.funcs.fempty(rows,cols), shape)
+
 
 def setRandomState(seed): lib.funcs.fsetRandomState(lib.pt_clusterNet, seed)
 def rand(rows, cols, dtype=np.float32):	return array(None, lib.funcs.frand(lib.pt_clusterNet,rows,cols),(rows, cols))
@@ -45,7 +49,27 @@ def handle_shape(shape):
 	else: return shape
 	
 def dot(A,B,out=None):
-	if not out: out = ones((A.shape[0],B.shape[1]))
-	print A.shape, B.shape, out.shape
+	if not out: out = empty((A.shape[0],B.shape[1]))
 	lib.funcs.fdot(lib.pt_clusterNet, A.pt, B.pt, out.pt)
+	return out
+
+
+def abs(A, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.ffabs(A.pt, out.pt)
+	return out
+
+def log(A, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.flog(A.pt, out.pt)
+	return out
+
+def sqrt(A, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fsqrt(A.pt, out.pt)
+	return out
+
+def pow(A, power, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fpow(A.pt, out.pt, ct.c_float(power))
 	return out

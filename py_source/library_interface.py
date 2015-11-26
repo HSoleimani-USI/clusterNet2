@@ -23,6 +23,11 @@ funcs.fto_host.restype = ct.c_void_p
 funcs.fto_gpu.restype = ct.c_void_p
 funcs.fT.restype = ct.POINTER(FloatMatrix)
 
+funcs.ffabs.restype = ct.c_void_p
+funcs.flog.restype = ct.c_void_p
+funcs.fsqrt.restype = ct.c_void_p
+funcs.fpow.restype = ct.c_void_p
+
 
 funcs.frand.restype = ct.POINTER(FloatMatrix)
 funcs.frandn.restype = ct.POINTER(FloatMatrix)

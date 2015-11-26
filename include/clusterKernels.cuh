@@ -12,8 +12,10 @@
 #define NUM_RND_THREADS_PER_BLOCK           128
 #define NUM_RND_STREAMS                     (NUM_RND_BLOCKS * NUM_RND_THREADS_PER_BLOCK)
 
+
 #ifndef clusterKernels
 #define clusterKernels
 template<typename T> __global__ void kFill_with(T *m, const T fill_value, int size);
 template<typename T> __global__ void kTranspose(const T *A, T *out, int width, int height);
+template<int operation> __global__ void kElementWise(const float *A, float *out, const float scalar, int size);
 #endif

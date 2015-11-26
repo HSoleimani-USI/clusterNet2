@@ -1,5 +1,9 @@
 #include <basicOps.cuh>
 #include <clusterKernels.cuh>
+#include <iostream>     // std::cout
+
+using std::cout;
+using std::endl;
 
 template Matrix<int> *Matrix<int>::to_host();
 template Matrix<float> *Matrix<float>::to_host();
@@ -140,5 +144,16 @@ template <typename T> Matrix<T> *transpose(Matrix<T> *A)
   out->rows = A->cols;
   out->cols = A->rows;
   return out;
+}
+
+
+template void elementWise<kabs>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void elementWise<klog>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void elementWise<ksqrt>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void elementWise<kpow>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template <int action> void elementWise(Matrix<float> *A, Matrix<float>*out, float scalar)
+{
+  kElementWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data,out->data,scalar, out->size);
+  CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 

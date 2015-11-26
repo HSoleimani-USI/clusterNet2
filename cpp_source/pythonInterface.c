@@ -20,4 +20,8 @@ extern "C"
 	void frandn(ClusterNet *gpu, int rows, int cols){ gpu->randn(rows, cols); }
 	void fsetRandomState(ClusterNet *gpu, int seed){ gpu->setRandomState(seed); }
 	FloatMatrix *fT(FloatMatrix * A){ return transpose(A); }
+	void ffabs(FloatMatrix * A, FloatMatrix *out){ return abs(A,out); }
+	void flog(FloatMatrix * A, FloatMatrix *out){ return log(A,out); }
+	void fsqrt(FloatMatrix * A, FloatMatrix *out){ return sqrt(A,out); }
+	void fpow(FloatMatrix * A, FloatMatrix *out, float scalar){ return pow(A,out, scalar); }
 }

@@ -28,6 +28,16 @@
     exit(1);                              \
   } }
 
+
+
+typedef enum Operations_t
+{
+	kabs = 0,
+	klog = 1,
+	ksqrt = 2,
+	kpow = 3,
+} Operations_t;
+
 template<typename T> struct Matrix
 {
   public:
@@ -50,6 +60,8 @@ template <typename T> Matrix<T> *to_col_major(Matrix<T> *A);
 template <typename T> void to_col_major(Matrix<T> *A, Matrix<T> *out);
 template <typename T> Matrix<T> *to_row_major(Matrix<T> *A);
 template <typename T> Matrix<T> *transpose(Matrix<T> *A);
+
+template <int action> void elementWise(Matrix<float> *A, Matrix<float>*out, float scalar);
 
 
 #endif

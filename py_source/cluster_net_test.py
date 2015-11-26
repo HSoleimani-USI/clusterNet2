@@ -80,5 +80,15 @@ def test_randn():
     B2 = A2.tocpu()
     
     t.assert_array_equal(B1, B2, "Seed not working!")  
+    
+    
+def test_elementwise():
+    A = np.float32(np.random.randn(100,100))
+    B = gpu.array(A)
+    
+    t.assert_almost_equal(gpu.abs(B).tocpu(), np.abs(A), 3, "Abs not working")
+    t.assert_almost_equal(gpu.log(B).tocpu(), np.log(A), 3, "Log not working")
+    t.assert_almost_equal(gpu.sqrt(B).tocpu(), np.sqrt(A), 3, "Sqrt not working")
+    t.assert_almost_equal(gpu.pow(B,2.0).tocpu(), np.power(A,2.0), 3, "Pow not working")
 
     
