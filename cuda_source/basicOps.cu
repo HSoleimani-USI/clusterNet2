@@ -111,7 +111,6 @@ template <typename T> Matrix<T> *to_col_major(Matrix<T> *A)
 {
   Matrix<T> *out = empty<T>(A->rows,A->cols);
   transpose<T>(A, out, A->cols,A->rows);
-  //cudaFree(A->data);
   return out;
 }
 

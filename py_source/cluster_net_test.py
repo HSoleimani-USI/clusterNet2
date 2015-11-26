@@ -37,8 +37,17 @@ def test_dot():
     B3 = gpu.dot(B1,B2)
     C = B3.tocpu()
     
-    t.assert_array_almost_equal(np.dot(A1,A2),C,4,"array.tocpu not equal to init array!")  
+    t.assert_array_almost_equal(np.dot(A1,A2),C,4,"array.tocpu not equal to init array!")     
     
+    
+def test_Transpose():
+    A = np.float32(np.random.rand(17,83))    
+    B = gpu.array(A.T)
+    
+    
+    C = B.tocpu()
+    
+    t.assert_array_equal(A.T,C,"Transpose error!")     
     
     
 def test_rand():

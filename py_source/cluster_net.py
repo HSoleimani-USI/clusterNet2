@@ -24,6 +24,9 @@ class array(object):
 		if self.cpu_arr == None: self.cpu_arr = np.empty(self.shape, dtype=np.float32)
 		lib.funcs.fto_host(self.pt,self.cpu_arr.ctypes.data_as(ct.POINTER(ct.c_float)))
 		return self.cpu_arr
+	
+	@property
+	def T(self): return array(None, self.fT(self.pt), self.shape[::-1])
 
 	
 def ones(shape, dtype=np.float32):
