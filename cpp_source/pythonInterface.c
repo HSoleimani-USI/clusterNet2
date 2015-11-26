@@ -24,4 +24,21 @@ extern "C"
 	void flog(FloatMatrix * A, FloatMatrix *out){ return log(A,out); }
 	void fsqrt(FloatMatrix * A, FloatMatrix *out){ return sqrt(A,out); }
 	void fpow(FloatMatrix * A, FloatMatrix *out, float scalar){ return pow(A,out, scalar); }
+	void flogistic(FloatMatrix * A, FloatMatrix *out, float scalar){ return logistic(A,out, scalar); }
+	void flogistic_grad(FloatMatrix * A, FloatMatrix *out, float scalar){ return logistic_grad(A,out, scalar); }
+	void frectified(FloatMatrix * A, FloatMatrix *out, float scalar){ return rectified(A,out, scalar); }
+	void frectified_grad(FloatMatrix * A, FloatMatrix *out, float scalar){ return rectified_grad(A,out, scalar); }
+
+	void fadd(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return add(A,B, out, scalar); }
+	void fsub(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return sub(A,B, out, scalar); }
+	void fmul(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return mul(A,B, out, scalar); }
+	void fdiv(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return div(A,B, out, scalar); }
+	void feq(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return eq(A,B, out, scalar); }
+	void flt(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return lt(A,B, out, scalar); }
+	void fgt(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return gt(A,B, out, scalar); }
+	void fge(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return ge(A,B, out, scalar); }
+	void fle(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return le(A,B, out, scalar); }
+	void fne(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return ne(A,B, out, scalar); }
+	void fsquared_diff(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return squared_diff(A,B, out, scalar); }
+
 }

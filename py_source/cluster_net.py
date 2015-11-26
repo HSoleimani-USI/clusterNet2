@@ -73,3 +73,78 @@ def pow(A, power, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
 	lib.funcs.fpow(A.pt, out.pt, ct.c_float(power))
 	return out
+
+def logistic(A, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.flogistic(A.pt, out.pt)
+	return out
+
+def rectified_linear(A, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.frectified(A.pt, out.pt)
+	return out
+
+def logistic_grad(A, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.flogistic_grad(A.pt, out.pt)
+	return out
+
+def rectified_linear_grad(A, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.frectified_grad(A.pt, out.pt)
+	return out
+
+def add(A, B, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fadd(A.pt, B.pt, out.pt)
+	return out
+
+def sub(A, B, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fsub(A.pt, B.pt, out.pt)
+	return out
+
+def div(A, B, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fdiv(A.pt, B.pt, out.pt)
+	return out
+
+def mul(A, B, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fmul(A.pt, B.pt, out.pt)
+	return out
+
+def equal(A, B, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.feq(A.pt, B.pt, out.pt)
+	return out
+
+def less(A, B, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.flt(A.pt, B.pt, out.pt)
+	return out
+
+def greater(A, B, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fgt(A.pt, B.pt, out.pt)
+	return out
+
+def less_equal(A, B, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fle(A.pt, B.pt, out.pt)
+	return out
+
+def greater_equal(A, B, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fge(A.pt, B.pt, out.pt)
+	return out
+
+def not_equal(A, B, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fne(A.pt, B.pt, out.pt)
+	return out
+
+def squared_difference(A, B, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fsquared_diff(A.pt, B.pt, out.pt)
+	return out

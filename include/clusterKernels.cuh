@@ -17,5 +17,5 @@
 #define clusterKernels
 template<typename T> __global__ void kFill_with(T *m, const T fill_value, int size);
 template<typename T> __global__ void kTranspose(const T *A, T *out, int width, int height);
-template<int operation> __global__ void kElementWise(const float *A, float *out, const float scalar, int size);
+template<int operation> __global__ void kElementWise(const float *A, const float *B, float *out, const float scalar, int size);
 #endif

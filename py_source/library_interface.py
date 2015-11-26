@@ -28,6 +28,25 @@ funcs.flog.restype = ct.c_void_p
 funcs.fsqrt.restype = ct.c_void_p
 funcs.fpow.restype = ct.c_void_p
 
+funcs.flogistic.restype = ct.c_void_p
+funcs.flogistic_grad.restype = ct.c_void_p
+funcs.frectified.restype = ct.c_void_p
+funcs.frectified_grad.restype = ct.c_void_p
+
+funcs.fadd.restype = ct.c_void_p
+funcs.fsub.restype = ct.c_void_p
+funcs.fmul.restype = ct.c_void_p
+funcs.fdiv.restype = ct.c_void_p
+
+funcs.feq.restype = ct.c_void_p
+funcs.flt.restype = ct.c_void_p
+funcs.fgt.restype = ct.c_void_p
+funcs.fle.restype = ct.c_void_p
+funcs.fge.restype = ct.c_void_p
+funcs.fne.restype = ct.c_void_p
+
+funcs.fsquared_diff.restype = ct.c_void_p
+
 
 funcs.frand.restype = ct.POINTER(FloatMatrix)
 funcs.frandn.restype = ct.POINTER(FloatMatrix)

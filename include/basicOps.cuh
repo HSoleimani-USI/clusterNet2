@@ -32,10 +32,26 @@
 
 typedef enum Operations_t
 {
-	kabs = 0,
-	klog = 1,
-	ksqrt = 2,
-	kpow = 3,
+	kabs,
+	klog,
+	ksqrt,
+	kpow,
+	kadd,
+	ksub,
+	kdiv,
+	kmul,
+	klogistic,
+	klogistic_grad,
+	krectified,
+	krectified_grad,
+	keq,
+	klt,
+	kgt,
+	kge,
+	kle,
+	kne,
+	ksquared_diff
+
 } Operations_t;
 
 template<typename T> struct Matrix
@@ -61,7 +77,8 @@ template <typename T> void to_col_major(Matrix<T> *A, Matrix<T> *out);
 template <typename T> Matrix<T> *to_row_major(Matrix<T> *A);
 template <typename T> Matrix<T> *transpose(Matrix<T> *A);
 
-template <int action> void elementWise(Matrix<float> *A, Matrix<float>*out, float scalar);
+template <int action> void elementWiseUnary(Matrix<float> *A, Matrix<float>*out, float scalar);
+template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
 
 
 #endif

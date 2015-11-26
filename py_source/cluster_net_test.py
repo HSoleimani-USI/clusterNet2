@@ -83,12 +83,31 @@ def test_randn():
     
     
 def test_elementwise():
-    A = np.float32(np.random.randn(100,100))
-    B = gpu.array(A)
+    A1 = np.float32(np.random.randn(100,100))
+    A2 = np.float32(np.random.randn(100,100))    
+    B1 = gpu.array(A1)
+    B2 = gpu.array(A2)
     
-    t.assert_almost_equal(gpu.abs(B).tocpu(), np.abs(A), 3, "Abs not working")
-    t.assert_almost_equal(gpu.log(B).tocpu(), np.log(A), 3, "Log not working")
-    t.assert_almost_equal(gpu.sqrt(B).tocpu(), np.sqrt(A), 3, "Sqrt not working")
-    t.assert_almost_equal(gpu.pow(B,2.0).tocpu(), np.power(A,2.0), 3, "Pow not working")
+    t.assert_almost_equal(gpu.abs(B1).tocpu(), np.abs(A1), 3, "Abs not working")
+    t.assert_almost_equal(gpu.log(B1).tocpu(), np.log(A1), 3, "Log not working")
+    t.assert_almost_equal(gpu.sqrt(B1).tocpu(), np.sqrt(A1), 3, "Sqrt not working")
+    t.assert_almost_equal(gpu.pow(B1,2.0).tocpu(), np.power(A1,2.0), 3, "Pow not working")
+    t.assert_almost_equal(gpu.logistic(B1).tocpu(), 1.0/(1.0+np.exp(A1)), 3, "Logistic not working")
+    t.assert_almost_equal(gpu.logistic_grad(B1).tocpu(), A1*(A1-1.0), 3, "Logistic grad not working")
+    t.assert_almost_equal(gpu.rectified_linear(B1).tocpu(), A1*(A1>0), 3, "Rectified not working")
+    t.assert_almost_equal(gpu.rectified_linear_grad(B1).tocpu(), (A1>0), 3, "Rectified grad not working")
+    
+    t.assert_almost_equal(gpu.add(B1,B2).tocpu(), A1+A2, 3, "Add not working")
+    t.assert_almost_equal(gpu.sub(B1,B2).tocpu(), A1-A2, 3, "Add not working")
+    t.assert_almost_equal(gpu.mul(B1,B2).tocpu(), A1*A2, 3, "Add not working")
+    t.assert_almost_equal(gpu.div(B1,B2).tocpu(), A1/A2, 3, "Add not working")
+    
+    t.assert_almost_equal(gpu.equal(B1,B2).tocpu(), np.equal(A1,A2), 3, "Add not working")
+    t.assert_almost_equal(gpu.less(B1,B2).tocpu(), np.less(A1,A2), 3, "Add not working")
+    t.assert_almost_equal(gpu.greater(B1,B2).tocpu(), np.greater(A1,A2), 3, "Add not working")
+    t.assert_almost_equal(gpu.greater_equal(B1,B2).tocpu(), np.greater_equal(A1,A2), 3, "Add not working")
+    t.assert_almost_equal(gpu.less_equal(B1,B2).tocpu(), np.less_equal(A1,A2), 3, "Add not working")
+    t.assert_almost_equal(gpu.not_equal(B1,B2).tocpu(), np.not_equal(A1,A2), 3, "Add not working")
+    t.assert_almost_equal(gpu.squared_difference(B1,B2).tocpu(), (A1-A2)**2, 3, "Add not working")
 
     
