@@ -41,4 +41,8 @@ extern "C"
 	void fne(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return ne(A,B, out, scalar); }
 	void fsquared_diff(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return squared_diff(A,B, out, scalar); }
 
+	void fvadd(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return vadd(A,v, out, 0.0f); }
+
+	void fslice(FloatMatrix *A, FloatMatrix *out, int rstart, int rend, int cstart, int cend){ slice(A, out, rstart, rend, cstart, cend); }
+
 }

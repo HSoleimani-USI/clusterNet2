@@ -43,11 +43,18 @@ def test_dot():
 def test_Transpose():
     A = np.float32(np.random.rand(17,83))    
     B = gpu.array(A.T)
+    C = B.tocpu()    
+    t.assert_array_equal(A.T,C,"Transpose error!")   
     
+    A = np.float32(np.random.rand(100,1))    
+    B = gpu.array(A.T)
+    C = B.tocpu()    
+    t.assert_array_equal(A.T,C,"Transpose error!")  
     
-    C = B.tocpu()
-    
-    t.assert_array_equal(A.T,C,"Transpose error!")     
+    A = np.float32(np.random.rand(1,100))    
+    B = gpu.array(A.T)
+    C = B.tocpu()    
+    t.assert_array_equal(A.T,C,"Transpose error!")        
     
     
 def test_rand():
@@ -111,3 +118,18 @@ def test_elementwise():
     t.assert_almost_equal(gpu.squared_difference(B1,B2).tocpu(), (A1-A2)**2, 3, "Add not working")
 
     
+def test_vectorwise():   
+    A = np.float32(np.random.randn(100,100))
+    v = np.float32(np.random.randn(1,100))    
+    B = gpu.array(A)
+    V = gpu.array(v)
+    
+    t.assert_almost_equal(gpu.vector_add(B, V).tocpu(), A+v, 3, "Vec add not working")
+    
+def slice_test():
+    A = np.float32(np.random.randn(100,100))
+    B = gpu.array(A)
+    C = gpu.slice(B,17,83,7,23).tocpu()
+    print A
+    
+    t.assert_almost_equal(C, A[17:83,7:23], 3, "Slicing not working")

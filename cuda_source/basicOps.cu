@@ -179,3 +179,16 @@ template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matri
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
+template void vectorWise<kvadd>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
+template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar)
+{
+  kVectorWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, v->data, out->data, scalar, out->rows, out->size);
+  CUDA_CHECK_RETURN(cudaPeekAtLastError());
+}
+
+void slice(Matrix<float> *A, Matrix<float>*out, int rstart, int rend, int cstart, int cend)
+{
+  kSlice<<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, out->data, A->rows, A->cols, rstart, rend, cstart, cend);
+  CUDA_CHECK_RETURN(cudaPeekAtLastError());
+  cudaDeviceSynchronize();
+}

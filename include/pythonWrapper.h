@@ -30,3 +30,6 @@ void ge(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
 void le(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
 void ne(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
 void squared_diff(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
+
+
+void vadd(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar);

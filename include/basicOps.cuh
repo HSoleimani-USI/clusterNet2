@@ -50,7 +50,8 @@ typedef enum Operations_t
 	kge,
 	kle,
 	kne,
-	ksquared_diff
+	ksquared_diff,
+	kvadd
 
 } Operations_t;
 
@@ -79,6 +80,8 @@ template <typename T> Matrix<T> *transpose(Matrix<T> *A);
 
 template <int action> void elementWiseUnary(Matrix<float> *A, Matrix<float>*out, float scalar);
 template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
+template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
+void slice(Matrix<float> *A, Matrix<float>*out, int rstart, int rend, int cstart, int cend);
 
 
 #endif

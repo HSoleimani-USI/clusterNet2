@@ -48,6 +48,9 @@ funcs.fne.restype = ct.c_void_p
 funcs.fsquared_diff.restype = ct.c_void_p
 
 
+funcs.fvadd.restype = ct.c_void_p
+
+
 funcs.frand.restype = ct.POINTER(FloatMatrix)
 funcs.frandn.restype = ct.POINTER(FloatMatrix)
 funcs.fsetRandomState.restype = ct.c_void_p
@@ -55,6 +58,8 @@ funcs.fsetRandomState.restype = ct.c_void_p
 funcs.fget_clusterNet.restype = ct.c_void_p
 
 funcs.fdot.restype = ct.c_void_p
+
+funcs.fslice.restype = ct.c_void_p
 
 
 pt_clusterNet = funcs.fget_clusterNet()
