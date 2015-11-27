@@ -138,5 +138,101 @@ __global__ void kSlice(float *A, float *out, int rows_A, int cols_A, int rstart,
   }
 }
 
+__global__ void kSoftMax(float* A, float* out, const unsigned int rows, const unsigned int cols)
+{
+	float col_value = 0.0f;
+	const unsigned int idx = threadIdx.x*threadIdx.y;
+
+	__shared__ float max_values[32][32];
+	__shared__ float row_sums[32][32];
+
+	for (unsigned int row = blockIdx.x; row < rows; row += gridDim.x)
+	{
+		//fill with min values
+		max_values[threadIdx.x][threadIdx.y] = -FLT_MAX;
+		row_sums[threadIdx.x][threadIdx.y] = 0.0f;
+
+		 //calc max value of the row
+		for (unsigned int i = idx; i < cols; i+=blockDim.x)
+		{
+			col_value = A[(i*rows) + row];
+			max_values[threadIdx.x][threadIdx.y] = fmaxf(max_values[threadIdx.x][threadIdx.y],col_value);
+			row_sums[threadIdx.x][threadIdx.y] += col_value;
+		}
+
+		reduce<0>(row_sums[threadIdx.x],idx,blockDim.x);
+		reduce<1>(max_values[threadIdx.x],idx,blockDim.x);
+
+
+		//calc the value of each element in the row
+		for (unsigned int i = idx; i < cols; i+=blockDim.x)
+		{
+			out[(i*rows) + row] = __expf(A[(i*rows) + row] - max_values[0][0])/row_sums[0][0];
+		}
+
+	}
+}
+
+template __device__ float reduction_action<0>(float a, float b);
+template __device__ float reduction_action<1>(float a, float b);
+template<int action> __device__ float reduction_action(float a, float b)
+{
+	switch(action)
+	{
+		case 0: return a+b;
+		case 1: return fmaxf(a,b);
+	}
+}
+
+template __device__ void reduce<0>(float* sdata, const unsigned int tid, const unsigned int threads);
+template __device__ void reduce<1>(float* sdata, const unsigned int tid, const unsigned int threads);
+template <int action> __device__ void reduce(float* sdata, const unsigned int tid, const unsigned int threads)
+{
+
+	  //Synchronize threads to share shared memory data
+	  __syncthreads();
+
+	  float agg = sdata[tid];
+
+	  // do reduction in shared mem
+	  if (threads >= 1024) { if (tid < 512) { sdata[tid] = agg = reduction_action<action>(agg, sdata[tid + 512]); } __syncthreads(); }
+	  if (threads >= 512) { if (tid < 256) { sdata[tid] = agg = reduction_action<action>(agg, sdata[tid + 256]); } __syncthreads(); }
+	  if (threads >= 256) { if (tid < 128) { sdata[tid] = agg = reduction_action<action>(agg, sdata[tid + 128]); } __syncthreads(); }
+	  if (threads >= 128) { if (tid <  64) { sdata[tid] = agg = reduction_action<action>(agg, sdata[tid + 64]);  } __syncthreads(); }
+
+	  if (threads == 32){
+	    if (tid < 16)
+	    {
+	      // now that we are using warp-synchronous programming (below)
+	      // we need to declare our shared memory volatile so that the compiler
+	      // doesn't reorder stores to it and induce incorrect behavior.
+	      volatile float* smem = sdata;
+	      if (threads >=  32) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 16]); }
+	      if (threads >=  16) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 8]); }
+	      if (threads >=   8) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 4]);; }
+	      if (threads >=   4) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 2]); }
+	      if (threads >=   2) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 1]); }
+	    }
+	  }
+	  else
+	  {
+	    if (tid < 32)
+	    {
+	      // now that we are using warp-synchronous programming (below)
+	      // we need to declare our shared memory volatile so that the compiler
+	      // doesn't reorder stores to it and induce incorrect behavior.
+	      volatile float* smem = sdata;
+	      if (threads >=  64) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 32]); }
+	      if (threads >=  32) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 16]); }
+	      if (threads >=  16) { smem[tid] = agg = agg = reduction_action<action>(agg, smem[tid + 8]); }
+	      if (threads >=   8) { smem[tid] = agg = agg = reduction_action<action>(agg, smem[tid + 4]); }
+	      if (threads >=   4) { smem[tid] = agg = agg = reduction_action<action>(agg, smem[tid + 2]); }
+	      if (threads >=   2) { smem[tid] = agg = agg = reduction_action<action>(agg, smem[tid + 1]); }
+	    }
+	  }
+
+	  __syncthreads();
+
+}
 
 
