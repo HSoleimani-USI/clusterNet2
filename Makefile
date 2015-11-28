@@ -3,8 +3,9 @@ ROOT_DIR_CU := $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/cuda_so
 ROOT_DIR:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))
 BUILD_DIR:= $(shell dirname $(realpath $(lastword $(MAKEFILE_LIST))))/build
 NERVANA_DIR := /home/tim/git/nervanagpu/nervanagpu/kernels/C_interface
-INCLUDE := -I /usr/local/cuda/include -I $(ROOT_DIR)/include -I $(NERVANA_DIR)
-LIB := -L /usr/local/cuda/lib64 -L $(NERVANA_DIR) -lnervana -lcudart -lcuda -lcublas -lcurand  
+LEVELDB_DIR := /home/tim/git/leveldb
+INCLUDE := -I /usr/local/cuda/include -I /home/tim/git/json/src/ -I $(ROOT_DIR)/include -I $(NERVANA_DIR) -I $(LEVELDB_DIR)/include
+LIB := -L /usr/local/cuda/lib64 -L $(NERVANA_DIR) -L $(LEVELDB_DIR) -lnervana -lcudart -lcuda -lcublas -lcurand -lleveldb  
 FILES := $(ROOT_DIR_CU)/basicOps.cu $(ROOT_DIR_CU)/clusterKernels.cu  
 FILES_CPP := $(ROOT_DIR_CCP)/clusterNet2.cpp $(ROOT_DIR_CCP)/pythonWrapper.c $(ROOT_DIR_CCP)/pythonInterface.c
 COMPUTE_CAPABILITY := arch=compute_35,code=sm_35 -gencode arch=compute_52,code=sm_52 

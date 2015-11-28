@@ -1,5 +1,14 @@
 #include "clusterNet2.h"
 #include <stdlib.h>
+#include "leveldb/db.h"
+#include <iostream>     // std::cout
+#include "json.hpp"
+
+// for convenience
+using json = nlohmann::json;
+
+using std::cout;
+using std::endl;
 
 template ClusterNet2<float>::ClusterNet2();
 template<typename T>
@@ -22,6 +31,28 @@ ClusterNet2<T>::ClusterNet2()
 	curandCreateGenerator(&m_generator, CURAND_RNG_PSEUDO_DEFAULT);
 	curandSetPseudoRandomGeneratorSeed(m_generator, time(0));
 	curandSetGeneratorOffset(m_generator, 100);
+
+
+	/*
+	leveldb::DB* db;
+	  leveldb::Options options;
+	  options.create_if_missing = true;
+	  leveldb::Status status = leveldb::DB::Open(options, "/home/tim/wiki/raw_pages", &db);
+
+	  std::string value;
+	  leveldb::Status s = db->Get(leveldb::ReadOptions(), "raw_pages/npydata", &value);
+
+	  cout << "print" << endl;
+	  cout << value << endl;
+	  auto j = json::parse(value);
+
+	  cout << j.is_array() << endl;
+
+	  float *data = (float*)j.get<double*>();
+
+	  for(int i = 0; i < 10; i ++)
+		  cout << data[i] << " ";
+	  */
 }
 
 

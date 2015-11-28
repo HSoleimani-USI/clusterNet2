@@ -6,6 +6,7 @@
 #include <curand.h>
 #include <cuda.h>
 #include "nervana_c_api.h"
+#include "leveldb/db.h"
 
 #ifndef __CLUSTERNET2_H__
 #define __CLUSTERNET2_H__
