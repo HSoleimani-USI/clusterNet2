@@ -27,4 +27,5 @@ __global__ void kSoftMax(float* A, float* out, unsigned int rows, unsigned int c
 
 template<int action> __device__ float reduction_action(float a, float b);
 template <int action> __device__ void reduce(float* sdata, const unsigned int tid, const unsigned int threads);
+__global__ void kSoftMax(float* A, float* out, const unsigned int rows, const unsigned int cols);
 #endif

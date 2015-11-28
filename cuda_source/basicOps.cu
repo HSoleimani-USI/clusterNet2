@@ -194,7 +194,7 @@ void slice(Matrix<float> *A, Matrix<float>*out, int rstart, int rend, int cstart
 
 void softmax(Matrix<float> *A, Matrix<float> *out)
 {
-    kSoftMax<<<A->rows > 1024 ? 1024 : A->rows, THREADS_PER_BLOCKS>>>(A->data, out->data, A->rows, A->cols);
+    kSoftMax<<<A->rows > 1024 ? 1024 : A->rows, 256>>>(A->data, out->data, A->rows, A->cols);
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 
 }

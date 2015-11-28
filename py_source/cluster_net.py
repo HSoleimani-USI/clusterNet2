@@ -158,3 +158,8 @@ def slice(A, rstart, rend, cstart, cend, out=None):
 	if not out: out = empty((rend-rstart,cend-cstart))
 	lib.funcs.fslice(A.pt, out.pt, rstart, rend, cstart, cend)
 	return out
+
+def softmax(A, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fsoftmax(A.pt, out.pt)
+	return out

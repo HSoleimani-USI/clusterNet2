@@ -44,5 +44,6 @@ extern "C"
 	void fvadd(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return vadd(A,v, out, 0.0f); }
 
 	void fslice(FloatMatrix *A, FloatMatrix *out, int rstart, int rend, int cstart, int cend){ slice(A, out, rstart, rend, cstart, cend); }
+	void fsoftmax(FloatMatrix *A, FloatMatrix *out){ softmax(A, out);}
 
 }

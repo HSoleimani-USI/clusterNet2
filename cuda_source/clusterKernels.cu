@@ -141,33 +141,39 @@ __global__ void kSlice(float *A, float *out, int rows_A, int cols_A, int rstart,
 __global__ void kSoftMax(float* A, float* out, const unsigned int rows, const unsigned int cols)
 {
 	float col_value = 0.0f;
-	const unsigned int idx = threadIdx.x*threadIdx.y;
+	int row_offset = 0;
 
-	__shared__ float max_values[32][32];
-	__shared__ float row_sums[32][32];
+	__shared__ float max_values[256];
+	__shared__ float row_sums[256];
 
 	for (unsigned int row = blockIdx.x; row < rows; row += gridDim.x)
 	{
 		//fill with min values
-		max_values[threadIdx.x][threadIdx.y] = -FLT_MAX;
-		row_sums[threadIdx.x][threadIdx.y] = 0.0f;
+		max_values[threadIdx.x] = -FLT_MAX;
+		row_sums[threadIdx.x] = 0.0f;
 
+		row_offset = row*cols;
 		 //calc max value of the row
-		for (unsigned int i = idx; i < cols; i+=blockDim.x)
+		for (unsigned int i = threadIdx.x; i < cols; i+=blockDim.x)
 		{
-			col_value = A[(i*rows) + row];
-			max_values[threadIdx.x][threadIdx.y] = fmaxf(max_values[threadIdx.x][threadIdx.y],col_value);
-			row_sums[threadIdx.x][threadIdx.y] += col_value;
+			col_value = A[i + row_offset];
+			max_values[threadIdx.x] = fmaxf(max_values[threadIdx.x],col_value);
 		}
 
-		reduce<0>(row_sums[threadIdx.x],idx,blockDim.x);
-		reduce<1>(max_values[threadIdx.x],idx,blockDim.x);
+		reduce<1>(max_values,threadIdx.x,blockDim.x);
 
+		for (unsigned int i = threadIdx.x; i < cols; i+=blockDim.x)
+		{
+			col_value = A[i + row_offset];
+			row_sums[threadIdx.x] += __expf(col_value-max_values[0]);
+		}
+
+		reduce<0>(row_sums,threadIdx.x,blockDim.x);
 
 		//calc the value of each element in the row
-		for (unsigned int i = idx; i < cols; i+=blockDim.x)
+		for (unsigned int i = threadIdx.x; i < cols; i+=blockDim.x)
 		{
-			out[(i*rows) + row] = __expf(A[(i*rows) + row] - max_values[0][0])/row_sums[0][0];
+			out[row_offset + i] = __expf(A[row_offset + i] - max_values[0])/row_sums[0];
 		}
 
 	}
@@ -181,6 +187,7 @@ template<int action> __device__ float reduction_action(float a, float b)
 	{
 		case 0: return a+b;
 		case 1: return fmaxf(a,b);
+		default: return 0.0f;
 	}
 }
 

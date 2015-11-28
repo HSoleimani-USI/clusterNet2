@@ -61,6 +61,8 @@ funcs.fdot.restype = ct.c_void_p
 
 funcs.fslice.restype = ct.c_void_p
 
+funcs.fsoftmax.restype = ct.c_void_p
+
 
 pt_clusterNet = funcs.fget_clusterNet()
 

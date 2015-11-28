@@ -104,17 +104,17 @@ def test_elementwise():
     t.assert_almost_equal(gpu.rectified_linear_grad(B1).tocpu(), (A1>0), 3, "Rectified grad not working")
     
     t.assert_almost_equal(gpu.add(B1,B2).tocpu(), A1+A2, 3, "Add not working")
-    t.assert_almost_equal(gpu.sub(B1,B2).tocpu(), A1-A2, 3, "Add not working")
-    t.assert_almost_equal(gpu.mul(B1,B2).tocpu(), A1*A2, 3, "Add not working")
-    t.assert_almost_equal(gpu.div(B1,B2).tocpu(), A1/A2, 3, "Add not working")
+    t.assert_almost_equal(gpu.sub(B1,B2).tocpu(), A1-A2, 3, "Sub not working")
+    t.assert_almost_equal(gpu.mul(B1,B2).tocpu(), A1*A2, 3, "Mul not working")
+    t.assert_almost_equal(gpu.div(B1,B2).tocpu(), A1/A2, 3, "Div not working")
     
-    t.assert_almost_equal(gpu.equal(B1,B2).tocpu(), np.equal(A1,A2), 3, "Add not working")
-    t.assert_almost_equal(gpu.less(B1,B2).tocpu(), np.less(A1,A2), 3, "Add not working")
-    t.assert_almost_equal(gpu.greater(B1,B2).tocpu(), np.greater(A1,A2), 3, "Add not working")
-    t.assert_almost_equal(gpu.greater_equal(B1,B2).tocpu(), np.greater_equal(A1,A2), 3, "Add not working")
-    t.assert_almost_equal(gpu.less_equal(B1,B2).tocpu(), np.less_equal(A1,A2), 3, "Add not working")
-    t.assert_almost_equal(gpu.not_equal(B1,B2).tocpu(), np.not_equal(A1,A2), 3, "Add not working")
-    t.assert_almost_equal(gpu.squared_difference(B1,B2).tocpu(), (A1-A2)**2, 3, "Add not working")
+    t.assert_almost_equal(gpu.equal(B1,B2).tocpu(), np.equal(A1,A2), 3, "Equal not working")
+    t.assert_almost_equal(gpu.less(B1,B2).tocpu(), np.less(A1,A2), 3, "Less not working")
+    t.assert_almost_equal(gpu.greater(B1,B2).tocpu(), np.greater(A1,A2), 3, "Greater not working")
+    t.assert_almost_equal(gpu.greater_equal(B1,B2).tocpu(), np.greater_equal(A1,A2), 3, "Greater equal not working")
+    t.assert_almost_equal(gpu.less_equal(B1,B2).tocpu(), np.less_equal(A1,A2), 3, "Less equal not working")
+    t.assert_almost_equal(gpu.not_equal(B1,B2).tocpu(), np.not_equal(A1,A2), 3, "Not equal not working")
+    t.assert_almost_equal(gpu.squared_difference(B1,B2).tocpu(), (A1-A2)**2, 3, "Squared difference not working")
 
 
     
@@ -133,3 +133,22 @@ def slice_test():
     print A
     
     t.assert_almost_equal(C, A[17:83,7:23], 3, "Slicing not working")
+    
+    
+def softmax_test():
+    
+    
+    def softmax(X):
+        '''numerically stable softmax function
+        '''
+        max_row_values = np.matrix(np.max(X,axis=1)).T
+        result = np.exp(X - max_row_values)
+        sums = np.matrix(np.sum(result,axis=1))        
+        return result/sums
+    
+    A = np.float32(np.random.randn(17,83))
+    B = gpu.array(A)
+    C = gpu.softmax(B).tocpu()
+    
+    t.assert_almost_equal(C, softmax(A), 3, "Softmax not working")
+    
