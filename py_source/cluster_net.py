@@ -163,3 +163,9 @@ def softmax(A, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
 	lib.funcs.fsoftmax(A.pt, out.pt)
 	return out
+
+def to_pinned(X):
+	pt = lib.funcs.fto_pinned(X.shape[0], X.shape[1],
+						X.ctypes.data_as(ct.POINTER(ct.c_float)))
+	buffer = np.core.multiarray.int_asbuffer(ct.addressof(pt.contents), 4*X.size)
+	return np.frombuffer(buffer, np.float32).reshape(X.shape)

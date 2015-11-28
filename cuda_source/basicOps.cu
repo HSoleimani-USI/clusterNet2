@@ -9,22 +9,16 @@ template Matrix<int> *Matrix<int>::to_host();
 template Matrix<float> *Matrix<float>::to_host();
 template <typename T> Matrix<T> *Matrix<T>::to_host()
 {
-	Matrix<T> *row_major;
-	row_major = to_row_major<T>(this);
-
 	Matrix<T> *out = (Matrix<T>*)malloc(sizeof(Matrix<T>));
 	T *cpu_data;
 
 	cpu_data = (T*)malloc(bytes);
-	CUDA_CHECK_RETURN(cudaMemcpy(cpu_data,row_major->data,row_major->bytes,cudaMemcpyDefault));
-	out->rows = row_major->rows;
-	out->cols = row_major->cols;
-	out->bytes = row_major->bytes;
-	out->size = row_major->size;
+	CUDA_CHECK_RETURN(cudaMemcpy(cpu_data,data,bytes,cudaMemcpyDefault));
+	out->rows = rows;
+	out->cols = cols;
+	out->bytes = bytes;
+	out->size = size;
 	out->data = cpu_data;
-
-	CUDA_CHECK_RETURN(cudaFree(row_major->data));
-	free(row_major);
   
   return out;
 }
@@ -33,12 +27,26 @@ template <typename T> Matrix<T> *Matrix<T>::to_host()
 template void to_host(Matrix<int> *gpu, int *cpu);
 template void to_host(Matrix<float> *gpu, float *cpu);
 template <typename T> void to_host(Matrix<T> *gpu, T *cpu)
-{  
-	//Matrix<T> *row_major;
-	//row_major = to_row_major<T>(gpu);
-	CUDA_CHECK_RETURN(cudaMemcpy(cpu,gpu->data,gpu->bytes,cudaMemcpyDefault));
-	//CUDA_CHECK_RETURN(cudaFree(row_major->data));
-	//free(row_major);
+{ CUDA_CHECK_RETURN(cudaMemcpy(cpu,gpu->data,gpu->bytes,cudaMemcpyDefault)); }
+
+template Matrix<int> *to_pinned(int rows, int cols, int *cpu);
+template Matrix<float> *to_pinned(int rows, int cols, float *cpu);
+template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu)
+{
+	int size = rows*cols;
+	size_t bytes = sizeof(T)*size;
+	Matrix<T> *out = (Matrix<T>*)malloc(sizeof(Matrix<T>));
+	T *pinned_ptr;
+	cudaHostAlloc(&pinned_ptr, bytes, cudaHostAllocPortable);
+	CUDA_CHECK_RETURN(cudaMemcpy(pinned_ptr,cpu,bytes,cudaMemcpyDefault));
+
+	out->bytes = bytes;
+	out->size = size;
+	out->rows = rows;
+	out->cols = cols;
+	out->data = pinned_ptr;
+
+	return out;
 }
 
 

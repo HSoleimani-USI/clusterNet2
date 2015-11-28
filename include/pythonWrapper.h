@@ -33,3 +33,4 @@ void squared_diff(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar
 
 
 void vadd(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar);
+

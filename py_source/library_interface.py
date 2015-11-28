@@ -21,6 +21,7 @@ funcs.fempty.restype = ct.POINTER(FloatMatrix)
 funcs.ffill_matrix.restype = ct.POINTER(FloatMatrix)
 funcs.fto_host.restype = ct.c_void_p
 funcs.fto_gpu.restype = ct.c_void_p
+funcs.fto_pinned.restype = ct.POINTER(ct.c_float)
 funcs.fT.restype = ct.POINTER(FloatMatrix)
 
 funcs.ffabs.restype = ct.c_void_p
