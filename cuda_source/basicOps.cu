@@ -34,11 +34,11 @@ template void to_host(Matrix<int> *gpu, int *cpu);
 template void to_host(Matrix<float> *gpu, float *cpu);
 template <typename T> void to_host(Matrix<T> *gpu, T *cpu)
 {  
-	Matrix<T> *row_major;
-	row_major = to_row_major<T>(gpu);
-	CUDA_CHECK_RETURN(cudaMemcpy(cpu,row_major->data,row_major->bytes,cudaMemcpyDefault));
-	CUDA_CHECK_RETURN(cudaFree(row_major->data));
-	free(row_major);
+	//Matrix<T> *row_major;
+	//row_major = to_row_major<T>(gpu);
+	CUDA_CHECK_RETURN(cudaMemcpy(cpu,gpu->data,gpu->bytes,cudaMemcpyDefault));
+	//CUDA_CHECK_RETURN(cudaFree(row_major->data));
+	//free(row_major);
 }
 
 
@@ -67,7 +67,7 @@ template void to_gpu(float *cpu, Matrix<float> *gpu);
 template<typename T> void to_gpu(T *cpu, Matrix<T> *gpu)
 {
     CUDA_CHECK_RETURN(cudaMemcpy(gpu->data,cpu,gpu->bytes,cudaMemcpyDefault));
-  	to_col_major<T>(gpu,gpu);
+  	//to_col_major<T>(gpu,gpu);
 }
 
 
@@ -182,7 +182,7 @@ template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matri
 template void vectorWise<kvadd>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
 template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar)
 {
-  kVectorWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, v->data, out->data, scalar, out->rows, out->size);
+  kVectorWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, v->data, out->data, scalar, out->cols, out->size);
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 

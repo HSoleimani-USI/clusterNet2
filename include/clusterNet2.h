@@ -4,6 +4,8 @@
 #include <basicOps.cuh>
 #include <cublas_v2.h>
 #include <curand.h>
+#include <cuda.h>
+#include "nervana_c_api.h"
 
 #ifndef __CLUSTERNET2_H__
 #define __CLUSTERNET2_H__
@@ -20,8 +22,7 @@ template<typename T> class ClusterNet2
   		Matrix<T> *randn(int rows, int cols);
   		Matrix<T> *normal(int rows, int cols, float mean, float std);
   		void dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out);
-  		void dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out, cublasOperation_t T1, cublasOperation_t T2);
-  		cublasHandle_t m_handle;
+  		void dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out, bool T1, bool T2);
   		curandGenerator_t m_generator;
   	    Matrix<unsigned int> *init_multiplier;
   	    Matrix<unsigned long long> *init_words;

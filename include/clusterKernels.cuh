@@ -18,7 +18,7 @@
 template<typename T> __global__ void kFill_with(T *m, const T fill_value, int size);
 template<typename T> __global__ void kTranspose(const T *A, T *out, int width, int height);
 template<int operation> __global__ void kElementWise(const float *A, const float *B, float *out, const float scalar, int size);
-template <int operation> __global__ void kVectorWise(float *A, float *v, float *out, const float scalar, int rows, int size);
+template <int operation> __global__ void kVectorWise(float *A, float *v, float *out, const float scalar, int cols, int size);
 
 
 __global__ void kSlice(float *A, float *out, int rows_A, int cols_A, int rstart, int rend, int cstart, int cend);

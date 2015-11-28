@@ -15,7 +15,7 @@ template<typename T> __global__ void kTranspose(const T *A, T *out, int width, i
 
     if((xIndex < width) && (yIndex < height))
     {
-        unsigned int index_in = yIndex * width + xIndex;
+        unsigned int index_in = xIndex * height + yIndex;
         block[threadIdx.y][threadIdx.x] = A[index_in];
     }
 
@@ -27,7 +27,7 @@ template<typename T> __global__ void kTranspose(const T *A, T *out, int width, i
 
     if((xIndex < height) && (yIndex < width))
     {
-        unsigned int index_out = yIndex * height + xIndex;
+        unsigned int index_out = xIndex*width + yIndex ;
         out[index_out] = block[threadIdx.x][threadIdx.y];
     }
 }
@@ -99,7 +99,7 @@ template<int operation> __global__ void kElementWise(const float *A, const float
 }
 
 template __global__ void kVectorWise<kvadd>(float *A, float *v, float *out, const float scalar, int rows, int size);
-template <int operation> __global__ void kVectorWise(float *A, float *v, float *out, const float scalar, int rows, int size)
+template <int operation> __global__ void kVectorWise(float *A, float *v, float *out, const float scalar, int cols, int size)
 {
 	const unsigned int numThreads = blockDim.x * gridDim.x;
 	const int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -107,7 +107,7 @@ template <int operation> __global__ void kVectorWise(float *A, float *v, float *
 	int offset = 0;
 	for (unsigned int i = idx;i < size; i += numThreads)
 	{
-		offset = (i / rows);
+		offset = (i / cols);
 		switch(operation)
 		{
 			case kvadd: out[i] =  A[i] + v[offset]; break;
@@ -130,10 +130,10 @@ __global__ void kSlice(float *A, float *out, int rows_A, int cols_A, int rstart,
   int current_row = 0;
   for (unsigned int i = idx;i < size; i += numThreads)
   {
-	  current_col = i / rows_out;
-	  current_row = i - (current_col*rows_out);
+	  current_row = i / cols_out;
+	  current_col = i - (current_row*cols_out);
 
-	  offset = (rows_A*(current_col+cstart)) + current_row + rstart;
+	  offset = (cols_A*(current_row+rstart)) + current_col + cstart;
 	  out[i] = A[offset];
   }
 }

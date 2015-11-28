@@ -30,8 +30,8 @@ def test_togpu():
     
     
 def test_dot():
-    A1 = np.float32(np.random.rand(2,3))
-    A2 = np.float32(np.random.rand(3,2))
+    A1 = np.float32(np.random.rand(2,4))
+    A2 = np.float32(np.random.rand(4,2))
     B1 = gpu.array(A1)
     B2 = gpu.array(A2)
     B3 = gpu.dot(B1,B2)
@@ -39,7 +39,7 @@ def test_dot():
     
     t.assert_array_almost_equal(np.dot(A1,A2),C,4,"array.tocpu not equal to init array!")     
     
-    
+
 def test_Transpose():
     A = np.float32(np.random.rand(17,83))    
     B = gpu.array(A.T)
@@ -56,7 +56,7 @@ def test_Transpose():
     C = B.tocpu()    
     t.assert_array_equal(A.T,C,"Transpose error!")        
     
-    
+
 def test_rand():
     A = gpu.rand(100,100)
     B = A.tocpu()
@@ -72,7 +72,7 @@ def test_rand():
     
     t.assert_array_equal(B1, B2, "Seed not working!")
     
-    
+  
 def test_randn():
     A = gpu.randn(100,100)
     B = A.tocpu()
@@ -87,8 +87,7 @@ def test_randn():
     B2 = A2.tocpu()
     
     t.assert_array_equal(B1, B2, "Seed not working!")  
-    
-    
+     
 def test_elementwise():
     A1 = np.float32(np.random.randn(100,100))
     A2 = np.float32(np.random.randn(100,100))    
@@ -117,15 +116,16 @@ def test_elementwise():
     t.assert_almost_equal(gpu.not_equal(B1,B2).tocpu(), np.not_equal(A1,A2), 3, "Add not working")
     t.assert_almost_equal(gpu.squared_difference(B1,B2).tocpu(), (A1-A2)**2, 3, "Add not working")
 
+
     
 def test_vectorwise():   
     A = np.float32(np.random.randn(100,100))
-    v = np.float32(np.random.randn(1,100))    
+    v = np.float32(np.random.randn(100,1))    
     B = gpu.array(A)
     V = gpu.array(v)
     
     t.assert_almost_equal(gpu.vector_add(B, V).tocpu(), A+v, 3, "Vec add not working")
-    
+
 def slice_test():
     A = np.float32(np.random.randn(100,100))
     B = gpu.array(A)
