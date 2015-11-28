@@ -48,4 +48,13 @@ extern "C"
 
 	float *fto_pinned(int rows, int cols, float *cpu){ return to_pinned<float>(rows, cols, cpu)->data; }
 
+
+	FloatBatchAllocator *fget_BatchAllocator(float *X, float *y, int rows, int colsX, int colsY, int batch_size)
+	{ return new FloatBatchAllocator(X, y, rows, colsX, colsY, batch_size); }
+	void falloc_next_batch(FloatBatchAllocator *alloc){ alloc->allocate_next_batch_async(); }
+	void freplace_current_with_next_batch(FloatBatchAllocator *alloc){ alloc->replace_current_with_next_batch(); }
+	FloatMatrix *fgetBatchX(FloatBatchAllocator *alloc){ return alloc->batchX; }
+	FloatMatrix *fgetBatchY(FloatBatchAllocator *alloc){ return alloc->batchY; }
+
+	int fgetBatchRows(FloatBatchAllocator *alloc){ return alloc->get_current_batch_size(); }
 }

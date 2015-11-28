@@ -1,8 +1,10 @@
 #include <basicOps.cuh>
 #include <clusterNet2.h>
+#include <BatchAllocator.h>
 
 typedef ClusterNet2<float> ClusterNet;
 typedef Matrix<float> FloatMatrix;
+typedef BatchAllocator FloatBatchAllocator;
 
 ClusterNet *get_clusterNet();
 

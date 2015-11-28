@@ -157,3 +157,24 @@ def test_to_pinned():
     
     t.assert_almost_equal(A,B , 3, "Pinned not working")
     
+    
+def test_batch_allocator():
+    X = np.float32(np.random.rand(11,2))
+    Y = np.float32(np.random.rand(1000,10))
+    batch_size = 2
+        
+    alloc = gpu.BatchAllocator(X,Y,batch_size)  
+    
+    print X   
+    
+    alloc.alloc_next_async()  
+    for i in range(0,11,batch_size):
+        batchX = X[i:i+batch_size]
+        batchY = Y[i:i+batch_size]
+                
+        alloc.replace_current_with_next_batch()
+        print alloc.X.tocpu()
+        t.assert_almost_equal(alloc.X.tocpu(),batchX , 3, "Batch allocator not working")        
+        alloc.alloc_next_async()   
+        
+    

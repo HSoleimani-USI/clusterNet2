@@ -1,9 +1,5 @@
 #include <basicOps.cuh>
 #include <clusterKernels.cuh>
-#include <iostream>     // std::cout
-
-using std::cout;
-using std::endl;
 
 template Matrix<int> *Matrix<int>::to_host();
 template Matrix<float> *Matrix<float>::to_host();

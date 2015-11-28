@@ -2,6 +2,32 @@ import library_interface as lib
 import numpy as np
 import ctypes as ct
 
+class BatchAllocator(object):
+	def __init__(self, X, y, batch_size):
+		self.pt = lib.funcs.fget_BatchAllocator(
+					X.ctypes.data_as(ct.POINTER(ct.c_float)),
+					y.ctypes.data_as(ct.POINTER(ct.c_float)),
+					int(X.shape[0]), int(X.shape[1]), int(y.shape[1]),
+					int(batch_size))
+	
+		self.batchX = array(None, lib.funcs.fgetBatchX(self.pt), (batch_size, X.shape[1]))
+		self.batchY = array(None, lib.funcs.fgetBatchX(self.pt), (batch_size, X.shape[0]))
+		
+	def alloc_next_async(self): lib.funcs.falloc_next_batch(self.pt)
+	def replace_current_with_next_batch(self): lib.funcs.freplace_current_with_next_batch(self.pt)
+	
+	@property
+	def X(self):		
+		pt =  lib.funcs.fgetBatchX(self.pt)
+		rows = lib.funcs.fgetBatchRows(self.pt)
+		self.batchX.pt = pt
+		self.batchX.shape = (rows, self.batchX.shape[1])
+		return self.batchX
+	
+		
+		
+		
+
 
 class array(object):
 	def __init__(self, numpy_array=None, pt=None, shape=None):
@@ -23,7 +49,8 @@ class array(object):
 	def tocpu(self):
 		if self.cpu_arr == None: self.cpu_arr = np.empty(self.shape, dtype=np.float32)
 		lib.funcs.fto_host(self.pt,self.cpu_arr.ctypes.data_as(ct.POINTER(ct.c_float)))
-		return self.cpu_arr
+		if self.shape != self.cpu_arr.shape: return self.cpu_arr[:self.shape[0]]
+		else: return self.cpu_arr
 	
 	@property
 	def T(self): return array(None, self.fT(self.pt), self.shape[::-1])

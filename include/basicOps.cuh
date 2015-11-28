@@ -1,4 +1,8 @@
 #include <stdio.h>
+#include <iostream>
+
+using std::cout;
+using std::endl;
 
 #ifndef basicOps_H
 #define basicOps_H
