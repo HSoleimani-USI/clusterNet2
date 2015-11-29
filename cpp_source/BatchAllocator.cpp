@@ -15,6 +15,7 @@ BatchAllocator::BatchAllocator(float *X, float *y, int rows, int colsX, int cols
 	BATCH_SIZE = batch_size;
 	BATCHES = (rows/batch_size) +1;
 	OFFBATCH_SIZE = rows - ((BATCHES-1)*BATCH_SIZE);
+	OFFBATCH_SIZE = OFFBATCH_SIZE == 0 ? BATCH_SIZE : OFFBATCH_SIZE;
 
 	CURRENT_BATCH = 0;
 	EPOCH = 0;
@@ -38,15 +39,25 @@ BatchAllocator::BatchAllocator(float *X, float *y, int rows, int colsX, int cols
 
 }
 
-int BatchAllocator::get_current_batch_size(){
-	cout << "a" << endl;
-	return CURRENT_BATCH == 0 && EPOCH > 0 ? OFFBATCH_SIZE : BATCH_SIZE; }
+Matrix<float> *BatchAllocator::get_current_batchX()
+{ return CURRENT_BATCH == 0 && EPOCH > 0 ? nextoffbatchX : batchX; }
+
+Matrix<float> *BatchAllocator::get_current_batchY()
+{ return CURRENT_BATCH == 0 && EPOCH > 0 ? nextoffbatchY : batchY; }
 
 void BatchAllocator::allocate_next_batch_async()
 {
-	cout << "copy to : " << nextbatchX->data << endl;
-	cudaMemcpyAsync(nextbatchX->data,&pinned_bufferX->data[BATCH_SIZE*pinned_bufferX->cols*CURRENT_BATCH], nextbatchX->bytes, cudaMemcpyHostToDevice,streamX);
-	cudaMemcpyAsync(nextbatchY->data,&pinned_bufferY->data[BATCH_SIZE*pinned_bufferY->cols*CURRENT_BATCH], nextbatchY->bytes, cudaMemcpyHostToDevice,streamY);
+	if(CURRENT_BATCH == BATCHES-1)
+	{
+		cudaMemcpyAsync(nextoffbatchX->data,&pinned_bufferX->data[BATCH_SIZE*pinned_bufferX->cols*CURRENT_BATCH], nextoffbatchX->bytes, cudaMemcpyHostToDevice,streamX);
+		cudaMemcpyAsync(nextoffbatchY->data,&pinned_bufferY->data[BATCH_SIZE*pinned_bufferY->cols*CURRENT_BATCH], nextoffbatchY->bytes, cudaMemcpyHostToDevice,streamY);
+
+	}
+	else
+	{
+		cudaMemcpyAsync(nextbatchX->data,&pinned_bufferX->data[BATCH_SIZE*pinned_bufferX->cols*CURRENT_BATCH], nextbatchX->bytes, cudaMemcpyHostToDevice,streamX);
+		cudaMemcpyAsync(nextbatchY->data,&pinned_bufferY->data[BATCH_SIZE*pinned_bufferY->cols*CURRENT_BATCH], nextbatchY->bytes, cudaMemcpyHostToDevice,streamY);
+	}
 }
 
 void BatchAllocator::replace_current_with_next_batch()
@@ -55,43 +66,18 @@ void BatchAllocator::replace_current_with_next_batch()
 	cudaStreamSynchronize(streamX);
 	cudaStreamSynchronize(streamY);
 
-
-
-	if(CURRENT_BATCH < BATCHES-2)
+	if(CURRENT_BATCH < BATCHES-1)
 	{
-
 		boost::swap(batchX,nextbatchX);
-		cout << CURRENT_BATCH << ": " << "swap normal" << " dim: " << batchX->rows << endl;
-		cout << "copy prepared for : " << nextbatchX->data << endl;
-		batchX->rows = BATCH_SIZE;
-
-		CURRENT_BATCH += 1;
-	}
-	else if(CURRENT_BATCH == BATCHES-2)
-	{
-
-		boost::swap(batchX,nextbatchX);
-		boost::swap(nextbatchX,nextoffbatchX);
-		cout << CURRENT_BATCH << ": " << "swap in" << " dim: " << batchX->rows << endl;
-		batchX->rows = BATCH_SIZE;
-		cout << "copy prepared for : " << nextbatchX->data << endl;
+		boost::swap(batchY,nextbatchY);
 
 		CURRENT_BATCH += 1;
 	}
 	else if(CURRENT_BATCH == BATCHES-1)
 	{
-		boost::swap(batchX,nextoffbatchX);
-		boost::swap(nextbatchX,nextoffbatchX);
-		batchX->rows = OFFBATCH_SIZE;
-		cout << CURRENT_BATCH << ": " << "swap out" << " dim: " << batchX->rows << endl;
-		cout << "copy prepared for : " << nextbatchX->data << endl;
-
 		CURRENT_BATCH = 0;
 		EPOCH += 1;
 	}
-
-	cout << CURRENT_BATCH << ": " << "swap end" << " dim: " << batchX->rows << endl;
-
 }
 
 

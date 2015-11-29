@@ -34,7 +34,8 @@ public:
 	cudaStream_t streamX;
 	cudaStream_t streamY;
 
-	int get_current_batch_size();
+	Matrix<float> *get_current_batchX();
+	Matrix<float> *get_current_batchY();
 	void allocate_next_batch_async();
 	void replace_current_with_next_batch();
 private:

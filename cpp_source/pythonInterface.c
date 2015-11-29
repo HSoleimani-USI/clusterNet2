@@ -53,8 +53,9 @@ extern "C"
 	{ return new FloatBatchAllocator(X, y, rows, colsX, colsY, batch_size); }
 	void falloc_next_batch(FloatBatchAllocator *alloc){ alloc->allocate_next_batch_async(); }
 	void freplace_current_with_next_batch(FloatBatchAllocator *alloc){ alloc->replace_current_with_next_batch(); }
-	FloatMatrix *fgetBatchX(FloatBatchAllocator *alloc){ return alloc->batchX; }
-	FloatMatrix *fgetBatchY(FloatBatchAllocator *alloc){ return alloc->batchY; }
+	FloatMatrix *fgetOffBatchX(FloatBatchAllocator *alloc){ return alloc->nextoffbatchX; }
+	FloatMatrix *fgetOffBatchY(FloatBatchAllocator *alloc){ return alloc->nextoffbatchY; }
 
-	int fgetBatchRows(FloatBatchAllocator *alloc){ return alloc->get_current_batch_size(); }
+	FloatMatrix *fgetBatchX(FloatBatchAllocator *alloc){ return alloc->get_current_batchX(); }
+	FloatMatrix *fgetBatchY(FloatBatchAllocator *alloc){ return alloc->get_current_batchY(); }
 }

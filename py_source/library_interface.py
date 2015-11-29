@@ -29,7 +29,8 @@ funcs.falloc_next_batch.restype = ct.c_void_p
 funcs.freplace_current_with_next_batch.restype = ct.c_void_p
 funcs.fgetBatchX.restype = ct.POINTER(FloatMatrix)
 funcs.fgetBatchY.restype = ct.POINTER(FloatMatrix)
-funcs.fgetBatchRows.restype = ct.c_int32
+funcs.fgetOffBatchX.restype = ct.POINTER(FloatMatrix)
+funcs.fgetOffBatchY.restype = ct.POINTER(FloatMatrix)
 
 funcs.ffabs.restype = ct.c_void_p
 funcs.flog.restype = ct.c_void_p
