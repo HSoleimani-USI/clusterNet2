@@ -40,10 +40,6 @@ public:
 	void replace_current_with_next_batch();
 private:
 	int OFFBATCH_SIZE;
-	size_t BYTES_X;
-	size_t OFFBYTES_X;
-	size_t BYTES_Y;
-	size_t OFFBYTES_Y;
 };
 
 #endif /* BATCHALLOCATOR_H_ */

@@ -1,5 +1,6 @@
 #include <pythonWrapper.h>
 
+//simple wrapper to remove templates for the python interface
 FloatMatrix *fill_matrix(int rows, int cols, float fill_value){	return fill_matrix<float>(rows, cols, fill_value); }
 FloatMatrix *empty(int rows, int cols){	return empty<float>(rows, cols); }
 void to_host(FloatMatrix *gpu, float *cpu){ to_host<float>(gpu, cpu); }

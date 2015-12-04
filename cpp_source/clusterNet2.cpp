@@ -29,8 +29,8 @@ ClusterNet2<T>::ClusterNet2()
 
 	setRandomState(time(0));
 	curandCreateGenerator(&m_generator, CURAND_RNG_PSEUDO_DEFAULT);
-	curandSetPseudoRandomGeneratorSeed(m_generator, time(0));
-	curandSetGeneratorOffset(m_generator, 100);
+	curandSetPseudoRandomGeneratorSeed(m_generator, time(0));//random seed
+	curandSetGeneratorOffset(m_generator, 100);//burn in the rdm generator
 
 
 	/*

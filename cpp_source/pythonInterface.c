@@ -7,7 +7,8 @@
 
 #include <pythonWrapper.h>
 
-
+//the extern C statement requires that we have no templates and overloaded methods, because
+//it cannot infer the signature of the method otherwise in our python library
 extern "C"
 {
 	FloatMatrix *fempty(int rows, int cols){ return empty(rows, cols);}

@@ -19,12 +19,15 @@ template <typename T> Matrix<T> *Matrix<T>::to_host()
   return out;
 }
 
-
+//to host where we already have created a gpu buffer
 template void to_host(Matrix<int> *gpu, int *cpu);
 template void to_host(Matrix<float> *gpu, float *cpu);
 template <typename T> void to_host(Matrix<T> *gpu, T *cpu)
 { CUDA_CHECK_RETURN(cudaMemcpy(cpu,gpu->data,gpu->bytes,cudaMemcpyDefault)); }
 
+//pinned memory needed for asynchronous copies between CPU and GPU
+//pinned memory makes sure that we do not have to allocate a page CPU buffer before the copy
+//this makes the copy faster and asynchronous with respect to the caller
 template Matrix<int> *to_pinned(int rows, int cols, int *cpu);
 template Matrix<float> *to_pinned(int rows, int cols, float *cpu);
 template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu)
@@ -71,7 +74,6 @@ template void to_gpu(float *cpu, Matrix<float> *gpu);
 template<typename T> void to_gpu(T *cpu, Matrix<T> *gpu)
 {
     CUDA_CHECK_RETURN(cudaMemcpy(gpu->data,cpu,gpu->bytes,cudaMemcpyDefault));
-  	//to_col_major<T>(gpu,gpu);
 }
 
 
@@ -114,6 +116,13 @@ template <typename T> void transpose(Matrix<T> *A, Matrix<T> *out, int rows, int
 
 }
 
+//the column major format has increasing indexes along its columns:
+/*
+ * 			[0 3 6]
+ * 			[1 4 7]
+ * 			[2 5 8]
+ */
+
 template Matrix<float> *to_col_major(Matrix<float> *A);
 template <typename T> Matrix<T> *to_col_major(Matrix<T> *A)
 {
@@ -129,6 +138,12 @@ template <typename T> void to_col_major(Matrix<T> *A, Matrix<T> *out)
 	transpose<T>(A, out, A->cols,A->rows);
 }
 
+//the row major format has increasing indexes along its rows:
+/*
+ * 			[0 1 2]
+ * 			[3 4 5]
+ * 			[6 7 8]
+ */
 template Matrix<float> *to_row_major(Matrix<float> *A);
 template <typename T> Matrix<T> *to_row_major(Matrix<T> *A)
 {
@@ -151,7 +166,7 @@ template <typename T> Matrix<T> *transpose(Matrix<T> *A)
 }
 
 
-
+//elementwise operation with a single matrix argument
 template void elementWiseUnary<kabs>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWiseUnary<klog>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWiseUnary<ksqrt>(Matrix<float> *A, Matrix<float>*out, float scalar);
@@ -166,6 +181,7 @@ template <int action> void elementWiseUnary(Matrix<float> *A, Matrix<float>*out,
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
+//elementwise operation with a two matrix arguments
 template void elementWise<kadd>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
 template void elementWise<ksub>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
 template void elementWise<kdiv>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
@@ -183,6 +199,8 @@ template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matri
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
+//vectorwise operation between matrix and vector
+//this is equivalent to broadcasting in numpy
 template void vectorWise<kvadd>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
 template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar)
 {
@@ -190,12 +208,15 @@ template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
+//slice rows and columns
+//equivalent to python slicing, e.h. X[3:4,6:9] is equivalent to slice(X,out, 3,4,6,9)
 void slice(Matrix<float> *A, Matrix<float>*out, int rstart, int rend, int cstart, int cend)
 {
   kSlice<<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, out->data, A->rows, A->cols, rstart, rend, cstart, cend);
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
+//this softmax is numerically stable
 void softmax(Matrix<float> *A, Matrix<float> *out)
 {
     kSoftMax<<<A->rows > 1024 ? 1024 : A->rows, 256>>>(A->data, out->data, A->rows, A->cols);

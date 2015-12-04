@@ -73,6 +73,7 @@ template<int operation> __global__ void kElementWise(const float *A, const float
 
   for (unsigned int i = idx;i < size; i += numThreads)
   {
+	  //this switch operation will be remove by the compiler upon instantiation of the template
        switch(operation)
 	   {
        	   case kabs: out[i] = fabsf(A[i]); break;
@@ -107,6 +108,7 @@ template <int operation> __global__ void kVectorWise(float *A, float *v, float *
 	int offset = 0;
 	for (unsigned int i = idx;i < size; i += numThreads)
 	{
+		//this switch operation will be remove by the compiler upon instantiation of the template
 		offset = (i / cols);
 		switch(operation)
 		{
@@ -173,6 +175,7 @@ __global__ void kSoftMax(float* A, float* out, const unsigned int rows, const un
 		//calc the value of each element in the row
 		for (unsigned int i = threadIdx.x; i < cols; i+=blockDim.x)
 		{
+			//subtraction by max exponential values makes this softmax numerically stable
 			out[row_offset + i] = __expf(A[row_offset + i] - max_values[0])/row_sums[0];
 		}
 
@@ -183,6 +186,7 @@ template __device__ float reduction_action<0>(float a, float b);
 template __device__ float reduction_action<1>(float a, float b);
 template<int action> __device__ float reduction_action(float a, float b)
 {
+	//this switch operation will be remove by the compiler upon instantiation of the template
 	switch(action)
 	{
 		case 0: return a+b;
@@ -191,6 +195,7 @@ template<int action> __device__ float reduction_action(float a, float b)
 	}
 }
 
+//reductions in shared memory. These are very fast, especially for 32 or less elements.
 template __device__ void reduce<0>(float* sdata, const unsigned int tid, const unsigned int threads);
 template __device__ void reduce<1>(float* sdata, const unsigned int tid, const unsigned int threads);
 template <int action> __device__ void reduce(float* sdata, const unsigned int tid, const unsigned int threads)

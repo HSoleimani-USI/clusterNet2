@@ -7,7 +7,7 @@ LEVELDB_DIR := /home/tim/git/leveldb
 INCLUDE := -I /usr/local/cuda/include -I /home/tim/git/json/src/ -I $(ROOT_DIR)/include -I $(NERVANA_DIR) -I $(LEVELDB_DIR)/include
 LIB := -L /usr/local/cuda/lib64 -L $(NERVANA_DIR) -L $(LEVELDB_DIR) -lnervana -lcudart -lcuda -lcublas -lcurand -lleveldb -lboost_system -lboost_date_time -lboost_thread -lboost_system  
 FILES := $(ROOT_DIR_CU)/basicOps.cu $(ROOT_DIR_CU)/clusterKernels.cu  
-FILES_CPP := $(ROOT_DIR_CCP)/clusterNet2.cpp $(ROOT_DIR_CCP)/pythonWrapper.c $(ROOT_DIR_CCP)/pythonInterface.c $(ROOT_DIR_CCP)/BatchAllocator.cpp
+FILES_CPP := $(ROOT_DIR_CCP)/clusterNet2.cpp $(ROOT_DIR_CCP)/pythonWrapper.c $(ROOT_DIR_CCP)/pythonInterface.c $(ROOT_DIR_CCP)/BatchAllocator.cpp $(ROOT_DIR_CCP)/Layer.cpp
 COMPUTE_CAPABILITY := arch=compute_35,code=sm_35 -gencode arch=compute_52,code=sm_52 
 
 all:	
