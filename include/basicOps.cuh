@@ -55,7 +55,10 @@ typedef enum Operations_t
 	kle,
 	kne,
 	ksquared_diff,
-	kvadd
+	kvadd,
+
+	ksmul,
+	kdropout
 
 } Operations_t;
 
@@ -72,6 +75,8 @@ template<typename T> struct Matrix
 
 template<typename T> Matrix<T> *fill_matrix(int rows, int cols, T fill_value);
 template<typename T> Matrix<T> *empty(int rows, int cols);
+template<typename T> Matrix<T> *zeros(int rows, int cols);
+template<typename T> Matrix<T> *ones(int rows, int cols);
 template<typename T> void to_host(Matrix<T> *gpu, T *cpu);
 template<typename T> void to_gpu(T *cpu, Matrix<T> *gpu);
 template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu);

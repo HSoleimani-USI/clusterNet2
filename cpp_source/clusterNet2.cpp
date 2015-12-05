@@ -81,7 +81,7 @@ template Matrix<float> *ClusterNet2<float>::normal(int rows, int cols, float mea
 template <typename T> Matrix<T> *ClusterNet2<T>::normal(int rows, int cols, float mean, float std)
 {
 	Matrix<T> *out = empty<T>(rows, cols);
-	curandGenerateNormal(m_generator, out->data, rows * cols, mean, std);
+	curandGenerateNormal(m_generator, out->data, out->size, mean, std);
 
 	return out;
 }
@@ -106,4 +106,12 @@ template <typename T> void ClusterNet2<T>::dot(Matrix<T> *A, Matrix<T> *B, Matri
 
 
 		if (!success){ throw "NERVANA ERROR"; }
+}
+
+
+template void ClusterNet2<float>::dropout(Matrix<float> *A, Matrix <float> *out, const float dropout);
+template <typename T> void ClusterNet2<T>::dropout(Matrix<T> *A, Matrix <T> *out, const float dropout)
+{
+	curandGenerateUniform(m_generator, out->data, out->size);
+	elementWise<kdropout>(A, out, out, dropout);
 }

@@ -48,6 +48,18 @@ template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu)
 	return out;
 }
 
+template Matrix<float> *zeros<float>(int rows, int cols);
+template <typename T> Matrix<T> *zeros(int rows, int cols)
+{
+	return fill_matrix<T>(rows, cols, (T)0.0f);
+}
+
+
+template Matrix<float> *ones<float>(int rows, int cols);
+template <typename T> Matrix<T> *ones(int rows, int cols)
+{
+	return fill_matrix<T>(rows, cols, (T)1.0f);
+}
 
 template Matrix<int> *empty<int>(int rows, int cols);
 template Matrix<float> *empty<float>(int rows, int cols);
@@ -175,6 +187,7 @@ template void elementWiseUnary<klogistic>(Matrix<float> *A, Matrix<float>*out, f
 template void elementWiseUnary<klogistic_grad>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWiseUnary<krectified>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWiseUnary<krectified_grad>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void elementWiseUnary<ksmul>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template <int action> void elementWiseUnary(Matrix<float> *A, Matrix<float>*out, float scalar)
 {
   kElementWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, NULL, out->data,scalar, out->size);
@@ -193,6 +206,7 @@ template void elementWise<kge>(Matrix<float> *A, Matrix<float> *B, Matrix<float>
 template void elementWise<kle>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
 template void elementWise<kne>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
 template void elementWise<ksquared_diff>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
+template void elementWise<kdropout>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
 template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar)
 {
   kElementWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, B->data, out->data,scalar, out->size);

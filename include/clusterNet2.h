@@ -11,7 +11,37 @@
 #ifndef __CLUSTERNET2_H__
 #define __CLUSTERNET2_H__
 
+typedef enum Unittype_t
+{
+	Logistic = 0,
+	Rectified_Linear = 1,
+	Softmax = 2,
+	Linear = 4,
+	Input = 8
+} Unittype_t;
 
+typedef enum DataPropagationType_t
+{
+	Training = 0,
+	Trainerror = 1,
+	CVerror = 2
+} DataPropagationType_t;
+
+
+typedef enum WeightUpdateType_t
+{
+	RMSProp = 0,
+	Momentum = 1,
+	PlainSGD = 2
+} WeightUpdateType_t;
+
+typedef enum Costfunction_t
+{
+	Cross_Entropy = 0,
+	Squared_Error = 1,
+	Root_Squared_Error = 2,
+	Misclassification = 4
+} Costfunction_t;
 
 
 template<typename T> class ClusterNet2
@@ -25,8 +55,7 @@ template<typename T> class ClusterNet2
   		void dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out);
   		void dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out, bool T1, bool T2);
   		curandGenerator_t m_generator;
-  	    Matrix<unsigned int> *init_multiplier;
-  	    Matrix<unsigned long long> *init_words;
+  	    void dropout(Matrix<T> *A, Matrix <T> *out, const float dropout);
 
 };
 
