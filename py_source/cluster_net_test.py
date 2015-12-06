@@ -161,6 +161,13 @@ def softmax_test():
     
     t.assert_almost_equal(C, softmax(A), 3, "Softmax not working")
     
+def argmax_test():       
+    A = np.float32(np.random.randn(123,83))
+    B = gpu.array(A)
+    C = gpu.argmax(B).tocpu()
+    
+    t.assert_almost_equal(C, np.argmax(A,1), 3, "Softmax not working")
+    
     
 def test_to_pinned():
     A = np.float32(np.random.rand(10,10))
@@ -204,6 +211,6 @@ def test_matrix_reductions():
     B = gpu.array(A)
     
     C = gpu.sum(B)    
-    t.assert_almost_equal(C, np.sum(A), 3, "Sum not working")
+    t.assert_almost_equal(C, np.sum(A), 2, "Sum not working")
     C = gpu.max(B)    
     t.assert_almost_equal(C, np.max(A), 3, "Max not working")

@@ -31,4 +31,5 @@ template<int action> __device__ float reduction_action(float a, float b);
 template <int action> __device__ void reduceByValue(float* sdata, const unsigned int tid, const unsigned int threads);
 __device__ void reduceToArgmax(float *skeys, float* svalues, const unsigned int tid, const unsigned int threads);
 __global__ void kSoftMax(float* A, float* out, const unsigned int rows, const unsigned int cols);
+__global__ void kArgmax(float* A, float* vout, const unsigned int rows, const unsigned int cols);
 #endif

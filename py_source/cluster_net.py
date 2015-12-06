@@ -223,6 +223,11 @@ def softmax(A, out=None):
 	lib.funcs.fsoftmax(A.pt, out.pt)
 	return out
 
+def argmax(A, out=None):
+	if not out: out = empty((A.shape[0],1))
+	lib.funcs.fargmax(A.pt, out.pt)
+	return out
+
 def to_pinned(X):
 	pt = lib.funcs.fto_pinned(X.shape[0], X.shape[1],
 						X.ctypes.data_as(ct.POINTER(ct.c_float)))

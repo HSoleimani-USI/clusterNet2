@@ -47,6 +47,7 @@ extern "C"
 
 	void fslice(FloatMatrix *A, FloatMatrix *out, int rstart, int rend, int cstart, int cend){ slice(A, out, rstart, rend, cstart, cend); }
 	void fsoftmax(FloatMatrix *A, FloatMatrix *out){ softmax(A, out);}
+	void fargmax(FloatMatrix *A, FloatMatrix *out){ argmax(A, out);}
 
 	float *fto_pinned(int rows, int cols, float *cpu){ return to_pinned<float>(rows, cols, cpu)->data; }
 

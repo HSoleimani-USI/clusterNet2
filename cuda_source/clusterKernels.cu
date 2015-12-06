@@ -296,7 +296,29 @@ __device__ void reduceToArgmax(float* svalues, float* skeys,const  unsigned int 
 	//Synchronize threads to share shared memory data
 	__syncthreads();
 
-  	float mySum = svalues[tid];
+  	float maxValue = svalues[tid];
+
+	if (threads >= 1024)
+	{
+		if (tid < 512){ if(maxValue < svalues[tid + 512]){svalues[tid] = maxValue = svalues[tid + 512];  skeys[tid] = skeys[tid + 512]; }}
+		__syncthreads();
+	}
+	if (threads >= 512)
+	{
+		if (tid < 256){ if(maxValue < svalues[tid + 256]){svalues[tid] = maxValue = svalues[tid + 256];  skeys[tid] = skeys[tid + 256]; }}
+		__syncthreads();
+	}
+	if (threads >= 256)
+	{
+		if (tid < 128){ if(maxValue < svalues[tid + 128]){svalues[tid] = maxValue = svalues[tid + 128];  skeys[tid] = skeys[tid + 128]; }}
+		__syncthreads();
+	}
+	if (threads >= 128)
+	{
+		if (tid < 64){ if(maxValue < svalues[tid + 64]){svalues[tid] = maxValue = svalues[tid + 64];  skeys[tid] = skeys[tid + 64]; }}
+		__syncthreads();
+	}
+
   	if(threads == 32)
   	{
 		if (tid < 16)
@@ -306,11 +328,11 @@ __device__ void reduceToArgmax(float* svalues, float* skeys,const  unsigned int 
 			// doesn't reorder stores to it and induce incorrect behavior.
 			volatile float* smemMax = svalues;
 			volatile float* smemArgMax = skeys;
-			if (threads >=  32) if(mySum < smemMax[tid + 16]){smemMax[tid] = mySum = smemMax[tid + 16];  smemArgMax[tid] = smemArgMax[tid + 16]; }
-			if (threads >=  16) if(mySum < smemMax[tid +  8]){smemMax[tid] = mySum = smemMax[tid +  8];  smemArgMax[tid] = smemArgMax[tid +  8]; }
-			if (threads >=   8) if(mySum < smemMax[tid +  4]){smemMax[tid] = mySum = smemMax[tid +  4];  smemArgMax[tid] = smemArgMax[tid +  4]; }
-			if (threads >=   4) if(mySum < smemMax[tid +  2]){smemMax[tid] = mySum = smemMax[tid +  2];  smemArgMax[tid] = smemArgMax[tid +  2]; }
-			if (threads >=   2) if(mySum < smemMax[tid +  1]){smemMax[tid] = mySum = smemMax[tid +  1];  smemArgMax[tid] = smemArgMax[tid +  1]; }
+			if (threads >=  32) if(maxValue < smemMax[tid + 16]){smemMax[tid] = maxValue = smemMax[tid + 16];  smemArgMax[tid] = smemArgMax[tid + 16]; }
+			if (threads >=  16) if(maxValue < smemMax[tid +  8]){smemMax[tid] = maxValue = smemMax[tid +  8];  smemArgMax[tid] = smemArgMax[tid +  8]; }
+			if (threads >=   8) if(maxValue < smemMax[tid +  4]){smemMax[tid] = maxValue = smemMax[tid +  4];  smemArgMax[tid] = smemArgMax[tid +  4]; }
+			if (threads >=   4) if(maxValue < smemMax[tid +  2]){smemMax[tid] = maxValue = smemMax[tid +  2];  smemArgMax[tid] = smemArgMax[tid +  2]; }
+			if (threads >=   2) if(maxValue < smemMax[tid +  1]){smemMax[tid] = maxValue = smemMax[tid +  1];  smemArgMax[tid] = smemArgMax[tid +  1]; }
 		}
   	}
 	else
@@ -322,12 +344,12 @@ __device__ void reduceToArgmax(float* svalues, float* skeys,const  unsigned int 
 			// doesn't reorder stores to it and induce incorrect behavior.
 			volatile float* smemMax = svalues;
 			volatile float* smemArgMax = skeys;
-			if (threads >=  64) if(mySum < smemMax[tid + 32]){smemMax[tid] = mySum = smemMax[tid + 32];  smemArgMax[tid] = smemArgMax[tid + 32]; }
-			if (threads >=  32) if(mySum < smemMax[tid + 16]){smemMax[tid] = mySum = smemMax[tid + 16];  smemArgMax[tid] = smemArgMax[tid + 16]; }
-			if (threads >=  16) if(mySum < smemMax[tid +  8]){smemMax[tid] = mySum = smemMax[tid +  8];  smemArgMax[tid] = smemArgMax[tid +  8]; }
-			if (threads >=   8) if(mySum < smemMax[tid +  4]){smemMax[tid] = mySum = smemMax[tid +  4];  smemArgMax[tid] = smemArgMax[tid +  4]; }
-			if (threads >=   4) if(mySum < smemMax[tid +  2]){smemMax[tid] = mySum = smemMax[tid +  2];  smemArgMax[tid] = smemArgMax[tid +  2]; }
-			if (threads >=   2) if(mySum < smemMax[tid +  1]){smemMax[tid] = mySum = smemMax[tid +  1];  smemArgMax[tid] = smemArgMax[tid +  1]; }
+			if (threads >=  64) if(maxValue < smemMax[tid + 32]){smemMax[tid] = maxValue = smemMax[tid + 32];  smemArgMax[tid] = smemArgMax[tid + 32]; }
+			if (threads >=  32) if(maxValue < smemMax[tid + 16]){smemMax[tid] = maxValue = smemMax[tid + 16];  smemArgMax[tid] = smemArgMax[tid + 16]; }
+			if (threads >=  16) if(maxValue < smemMax[tid +  8]){smemMax[tid] = maxValue = smemMax[tid +  8];  smemArgMax[tid] = smemArgMax[tid +  8]; }
+			if (threads >=   8) if(maxValue < smemMax[tid +  4]){smemMax[tid] = maxValue = smemMax[tid +  4];  smemArgMax[tid] = smemArgMax[tid +  4]; }
+			if (threads >=   4) if(maxValue < smemMax[tid +  2]){smemMax[tid] = maxValue = smemMax[tid +  2];  smemArgMax[tid] = smemArgMax[tid +  2]; }
+			if (threads >=   2) if(maxValue < smemMax[tid +  1]){smemMax[tid] = maxValue = smemMax[tid +  1];  smemArgMax[tid] = smemArgMax[tid +  1]; }
 		}
 
 	}
@@ -335,4 +357,38 @@ __device__ void reduceToArgmax(float* svalues, float* skeys,const  unsigned int 
 	__syncthreads();
 }
 
+__global__ void kArgmax(float* A, float* vout, const unsigned int rows, const unsigned int cols)
+{
+	float col_value = 0.0f;
+	int row_offset = 0;
 
+	__shared__ float max_values[256];
+	__shared__ float max_ids[256];
+
+	for (unsigned int row = blockIdx.x; row < rows; row += gridDim.x)
+	{
+		//fill with min values
+		max_values[threadIdx.x] = -FLT_MAX;
+		max_ids[threadIdx.x] = -1.0f;
+
+		row_offset = row*cols;
+		 //calc max value of the row
+		for (unsigned int i = threadIdx.x; i < cols; i+=blockDim.x)
+		{
+			col_value = A[i + row_offset];
+			if(col_value > max_values[threadIdx.x])
+			{
+				max_values[threadIdx.x] = col_value;
+				max_ids[threadIdx.x] = i;
+			}
+		}
+
+		reduceToArgmax(max_values, max_ids, threadIdx.x, blockDim.x);
+
+		if(threadIdx.x == 0)
+			vout[row] = max_ids[0];
+
+	}
+
+
+}
