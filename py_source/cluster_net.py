@@ -55,7 +55,10 @@ class BatchAllocator(object):
 class array(object):
 	def __init__(self, numpy_array=None, pt=None, shape=None):
 		if pt != None: self.pt = pt
-		if shape != None: self.shape = shape		
+		if shape != None: 
+			self.shape = shape
+			if self.shape[1] == 1:
+				self.shape = (shape[0],)		
 		if numpy_array != None:
 			if len(numpy_array.shape) > 2: raise Exception("Array must be one or two dimensional!")
 			self.shape = numpy_array.shape
@@ -76,6 +79,8 @@ class array(object):
 	
 	@property
 	def T(self): return array(None, self.fT(self.pt), self.shape[::-1])
+
+	
 
 	
 def ones(shape, dtype=np.float32):
@@ -203,6 +208,11 @@ def vector_add(A, v, out=None):
 	lib.funcs.fvadd(A.pt, v.pt, out.pt)
 	return out
 
+def create_t_matrix(v, max_value, out=None):		
+	if not out: out = empty((v.shape[0],max_value+1))
+	lib.funcs.ftmatrix(out.pt, v.pt, out.pt)
+	return out
+
 def slice(A, rstart, rend, cstart, cend, out=None):
 	if not out: out = empty((rend-rstart,cend-cstart))
 	lib.funcs.fslice(A.pt, out.pt, rstart, rend, cstart, cend)
@@ -218,3 +228,8 @@ def to_pinned(X):
 						X.ctypes.data_as(ct.POINTER(ct.c_float)))
 	buffer = np.core.multiarray.int_asbuffer(ct.addressof(pt.contents), 4*X.size)
 	return np.frombuffer(buffer, np.float32).reshape(X.shape)
+
+def row_sum(A, out=None):
+	if not out: out = empty((A.shape[0],1))
+	lib.funcs.frowSum(A.pt, out.pt)
+	return out

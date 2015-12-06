@@ -216,6 +216,7 @@ template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matri
 //vectorwise operation between matrix and vector
 //this is equivalent to broadcasting in numpy
 template void vectorWise<kvadd>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
+template void vectorWise<ktmatrix>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
 template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar)
 {
   kVectorWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, v->data, out->data, scalar, out->cols, out->size);
@@ -228,6 +229,31 @@ void slice(Matrix<float> *A, Matrix<float>*out, int rstart, int rend, int cstart
 {
   kSlice<<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, out->data, A->rows, A->cols, rstart, rend, cstart, cend);
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
+}
+
+template void reduceToRows<rmax>(Matrix<float> *A, Matrix<float> *vout);
+template void reduceToRows<rsum>(Matrix<float> *A, Matrix<float> *vout);
+template <int reduction> void reduceToRows(Matrix<float> *A, Matrix<float> *vout)
+{
+    kReduceToRows<reduction><<<A->rows > 1024 ? 1024 : A->rows, 256>>>(A->data, vout->data, A->rows, A->cols);
+    CUDA_CHECK_RETURN(cudaPeekAtLastError());
+}
+
+template float reduceToValue<rsum>(Matrix<float> *A);
+template float reduceToValue<rmax>(Matrix<float> *A);
+template <int reduction> float reduceToValue(Matrix<float> *A) { Matrix<float> *vout = empty<float>(A->rows, 1); return reduceToValue<reduction>(A, vout);  }
+
+template float reduceToValue<rsum>(Matrix<float> *A, Matrix<float> *vout_rows);
+template float reduceToValue<rmax>(Matrix<float> *A, Matrix<float> *vout_rows);
+template <int reduction> float reduceToValue(Matrix<float> *A, Matrix<float> *vout_rows)
+{
+	reduceToRows<reduction>(A, vout_rows);
+	float value[1] = {0.0f};
+	Matrix<float> *pinned_value = to_pinned<float>(1,1,value);
+    kReduceToRows<reduction><<<1, 256>>>(vout_rows->data, pinned_value->data, 1, A->rows);
+    CUDA_CHECK_RETURN(cudaPeekAtLastError());
+
+    return pinned_value->data[0];
 }
 
 //this softmax is numerically stable

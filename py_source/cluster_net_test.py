@@ -118,13 +118,24 @@ def test_elementwise():
 
 
     
-def test_vectorwise():   
+def test_vectorwise(): 
+    def create_t_matrix(y, classes):        
+        t = np.zeros((y.shape[0], classes+1))
+        for i in range(y.shape[0]):
+            t[np.int32(i), np.int32(y[i])] = 1.0
+           
+        return t
+    
     A = np.float32(np.random.randn(100,100))
     v = np.float32(np.random.randn(100,1))    
+    
+    labels = np.float32(np.random.randint(0,10,100))
     B = gpu.array(A)
     V = gpu.array(v)
+    Y = gpu.array(labels)
     
     t.assert_almost_equal(gpu.vector_add(B, V).tocpu(), A+v, 3, "Vec add not working")
+    t.assert_almost_equal(gpu.create_t_matrix(Y, 9).tocpu(), create_t_matrix(labels,9), 3, "Tmatrix not working")
 
 def slice_test():
     A = np.float32(np.random.randn(100,100))
@@ -178,3 +189,9 @@ def test_batch_allocator():
             alloc.alloc_next_async()   
         
     
+def test_row_reductions():
+    A = np.float32(np.random.randn(5,10))
+    B = gpu.array(A)
+    C = gpu.row_sum(B).tocpu()
+    
+    t.assert_almost_equal(C, np.sum(A,1), 3, "Rowsum not working")

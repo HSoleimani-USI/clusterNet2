@@ -43,6 +43,7 @@ extern "C"
 	void fsquared_diff(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return squared_diff(A,B, out, scalar); }
 
 	void fvadd(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return vadd(A,v, out, 0.0f); }
+	void ftmatrix(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return tmatrix(A,v, out, 0.0f); }
 
 	void fslice(FloatMatrix *A, FloatMatrix *out, int rstart, int rend, int cstart, int cend){ slice(A, out, rstart, rend, cstart, cend); }
 	void fsoftmax(FloatMatrix *A, FloatMatrix *out){ softmax(A, out);}
@@ -59,4 +60,8 @@ extern "C"
 
 	FloatMatrix *fgetBatchX(FloatBatchAllocator *alloc){ return alloc->get_current_batchX(); }
 	FloatMatrix *fgetBatchY(FloatBatchAllocator *alloc){ return alloc->get_current_batchY(); }
+
+
+	void frowMax(FloatMatrix *A, FloatMatrix *vout){ rowMax(A, vout); }
+	void frowSum(FloatMatrix *A, FloatMatrix *vout){ rowSum(A, vout); }
 }

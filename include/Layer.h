@@ -17,11 +17,6 @@ public:
 
 	std::vector<Matrix<T>* > vec_w_grad_next;
 	std::vector<Matrix<T>* > vec_w_grad_next_8bit;
-	Matrix<T> *b_next_sync;
-	Matrix<T> *w_next_sync_recv;
-	Matrix<T> *b_next_sync_recv;
-	Matrix<T> *w_next_sync_send;
-	Matrix<T> *b_next_sync_send;
 
 	Matrix<T> *w_rms_next;
 	Matrix<T> *b_rms_next;

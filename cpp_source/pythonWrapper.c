@@ -28,3 +28,9 @@ void ge(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ element
 void ne(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kne>(A, B, out, scalar); }
 void squared_diff(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<ksquared_diff>(A, B, out, scalar); }
 void vadd(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar){ vectorWise<kvadd>(A, v, out, scalar); }
+void tmatrix(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar){ vectorWise<ktmatrix>(A, v, out, scalar); }
+
+
+void rowMax(FloatMatrix *A, FloatMatrix *vout){ reduceToRows<rmax>(A, vout); }
+void rowSum(FloatMatrix *A, FloatMatrix *vout){ reduceToRows<rsum>(A, vout); }
+

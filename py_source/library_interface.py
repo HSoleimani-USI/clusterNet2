@@ -58,6 +58,7 @@ funcs.fsquared_diff.restype = ct.c_void_p
 
 
 funcs.fvadd.restype = ct.c_void_p
+funcs.ftmatrix.restype = ct.c_void_p
 
 
 funcs.frand.restype = ct.POINTER(FloatMatrix)
@@ -75,6 +76,9 @@ funcs.fsoftmax.restype = ct.c_void_p
 
 pt_clusterNet = funcs.fget_clusterNet()
 
+
+funcs.frowMax.restype = ct.c_void_p
+funcs.frowSum.restype = ct.c_void_p
 
 
 

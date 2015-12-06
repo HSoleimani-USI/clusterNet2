@@ -75,7 +75,7 @@ template<int operation> __global__ void kElementWise(const float *A, const float
 
   for (unsigned int i = idx;i < size; i += numThreads)
   {
-	  //this switch operation will be remove by the compiler upon instantiation of the template
+	  //this switch operation will be removed by the compiler upon instantiation of the template
        switch(operation)
 	   {
        	   case kabs: out[i] = fabsf(A[i]); break;
@@ -105,19 +105,21 @@ template<int operation> __global__ void kElementWise(const float *A, const float
 }
 
 template __global__ void kVectorWise<kvadd>(float *A, float *v, float *out, const float scalar, int rows, int size);
+template __global__ void kVectorWise<ktmatrix>(float *A, float *v, float *out, const float scalar, int rows, int size);
 template <int operation> __global__ void kVectorWise(float *A, float *v, float *out, const float scalar, int cols, int size)
 {
 	const unsigned int numThreads = blockDim.x * gridDim.x;
 	const int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
 
-	int offset = 0;
+	int row = 0;
 	for (unsigned int i = idx;i < size; i += numThreads)
 	{
-		//this switch operation will be remove by the compiler upon instantiation of the template
-		offset = (i / cols);
+		//this switch operation will be removed by the compiler upon instantiation of the template
+		row = (i / cols);
 		switch(operation)
 		{
-			case kvadd: out[i] =  A[i] + v[offset]; break;
+			case kvadd: out[i] =  A[i] + v[row]; break;
+			case ktmatrix: out[i] = i-(row*cols) == (int)v[row] ? 1.0f : 0.0f;
 		}
 	}
 }
@@ -145,6 +147,7 @@ __global__ void kSlice(float *A, float *out, int rows_A, int cols_A, int rstart,
   }
 }
 
+
 __global__ void kSoftMax(float* A, float* out, const unsigned int rows, const unsigned int cols)
 {
 	float col_value = 0.0f;
@@ -167,7 +170,7 @@ __global__ void kSoftMax(float* A, float* out, const unsigned int rows, const un
 			max_values[threadIdx.x] = fmaxf(max_values[threadIdx.x],col_value);
 		}
 
-		reduce<1>(max_values,threadIdx.x,blockDim.x);
+		reduceByValue<rmax>(max_values,threadIdx.x,blockDim.x);
 
 		for (unsigned int i = threadIdx.x; i < cols; i+=blockDim.x)
 		{
@@ -175,7 +178,7 @@ __global__ void kSoftMax(float* A, float* out, const unsigned int rows, const un
 			row_sums[threadIdx.x] += __expf(col_value-max_values[0]);
 		}
 
-		reduce<0>(row_sums,threadIdx.x,blockDim.x);
+		reduceByValue<rsum>(row_sums,threadIdx.x,blockDim.x);
 
 		//calc the value of each element in the row
 		for (unsigned int i = threadIdx.x; i < cols; i+=blockDim.x)
@@ -187,23 +190,58 @@ __global__ void kSoftMax(float* A, float* out, const unsigned int rows, const un
 	}
 }
 
+template __global__ void kReduceToRows<rsum>(float* A, float* out, const unsigned int rows, const unsigned int cols);
+template __global__ void kReduceToRows<rmax>(float* A, float* out, const unsigned int rows, const unsigned int cols);
+template <int reduction>__global__ void kReduceToRows(float* A, float* out, const unsigned int rows, const unsigned int cols)
+{
+	float col_value = 0.0f;
+	int row_offset = 0;
+	__shared__ float col_reductions[256];
+
+	for (unsigned int row = blockIdx.x; row < rows; row += gridDim.x)
+	{
+		switch(reduction)
+		{
+			case rmax: col_reductions[threadIdx.x] = -FLT_MAX; break;
+			case rsum: col_reductions[threadIdx.x] = 0.0f; break;
+		}
+
+		row_offset = row*cols;
+		for (unsigned int i = threadIdx.x; i < cols; i+=blockDim.x)
+		{
+			col_value = A[i + row_offset];
+			switch(reduction)
+			{
+				case rmax: col_reductions[threadIdx.x] = fmaxf(col_reductions[threadIdx.x],col_value); break;
+				case rsum: col_reductions[threadIdx.x] = col_reductions[threadIdx.x]+col_value; break;
+			}
+		}
+
+		reduceByValue<reduction>(col_reductions,threadIdx.x,blockDim.x);
+
+		if(threadIdx.x == 0)
+			out[row] = col_reductions[0];
+
+	}
+}
+
 template __device__ float reduction_action<0>(float a, float b);
 template __device__ float reduction_action<1>(float a, float b);
 template<int action> __device__ float reduction_action(float a, float b)
 {
-	//this switch operation will be remove by the compiler upon instantiation of the template
+	//this switch operation will be removed by the compiler upon instantiation of the template
 	switch(action)
 	{
-		case 0: return a+b;
-		case 1: return fmaxf(a,b);
+		case rsum: return a+b;
+		case rmax: return fmaxf(a,b);
 		default: return 0.0f;
 	}
 }
 
 //reductions in shared memory. These are very fast, especially for 32 or less elements.
-template __device__ void reduce<0>(float* sdata, const unsigned int tid, const unsigned int threads);
-template __device__ void reduce<1>(float* sdata, const unsigned int tid, const unsigned int threads);
-template <int action> __device__ void reduce(float* sdata, const unsigned int tid, const unsigned int threads)
+template __device__ void reduceByValue<rsum>(float* sdata, const unsigned int tid, const unsigned int threads);
+template __device__ void reduceByValue<rmax>(float* sdata, const unsigned int tid, const unsigned int threads);
+template <int action> __device__ void reduceByValue(float* sdata, const unsigned int tid, const unsigned int threads)
 {
 
 	  //Synchronize threads to share shared memory data
@@ -241,15 +279,60 @@ template <int action> __device__ void reduce(float* sdata, const unsigned int ti
 	      volatile float* smem = sdata;
 	      if (threads >=  64) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 32]); }
 	      if (threads >=  32) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 16]); }
-	      if (threads >=  16) { smem[tid] = agg = agg = reduction_action<action>(agg, smem[tid + 8]); }
-	      if (threads >=   8) { smem[tid] = agg = agg = reduction_action<action>(agg, smem[tid + 4]); }
-	      if (threads >=   4) { smem[tid] = agg = agg = reduction_action<action>(agg, smem[tid + 2]); }
-	      if (threads >=   2) { smem[tid] = agg = agg = reduction_action<action>(agg, smem[tid + 1]); }
+	      if (threads >=  16) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 8]); }
+	      if (threads >=   8) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 4]); }
+	      if (threads >=   4) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 2]); }
+	      if (threads >=   2) { smem[tid] = agg = reduction_action<action>(agg, smem[tid + 1]); }
 	    }
 	  }
 
 	  __syncthreads();
 
+}
+
+__device__ void reduceToArgmax(float* svalues, float* skeys,const  unsigned int tid, const unsigned int threads)
+{
+
+	//Synchronize threads to share shared memory data
+	__syncthreads();
+
+  	float mySum = svalues[tid];
+  	if(threads == 32)
+  	{
+		if (tid < 16)
+		{
+			// now that we are using warp-synchronous programming (below)
+			// we need to declare our shared memory volatile so that the compiler
+			// doesn't reorder stores to it and induce incorrect behavior.
+			volatile float* smemMax = svalues;
+			volatile float* smemArgMax = skeys;
+			if (threads >=  32) if(mySum < smemMax[tid + 16]){smemMax[tid] = mySum = smemMax[tid + 16];  smemArgMax[tid] = smemArgMax[tid + 16]; }
+			if (threads >=  16) if(mySum < smemMax[tid +  8]){smemMax[tid] = mySum = smemMax[tid +  8];  smemArgMax[tid] = smemArgMax[tid +  8]; }
+			if (threads >=   8) if(mySum < smemMax[tid +  4]){smemMax[tid] = mySum = smemMax[tid +  4];  smemArgMax[tid] = smemArgMax[tid +  4]; }
+			if (threads >=   4) if(mySum < smemMax[tid +  2]){smemMax[tid] = mySum = smemMax[tid +  2];  smemArgMax[tid] = smemArgMax[tid +  2]; }
+			if (threads >=   2) if(mySum < smemMax[tid +  1]){smemMax[tid] = mySum = smemMax[tid +  1];  smemArgMax[tid] = smemArgMax[tid +  1]; }
+		}
+  	}
+	else
+	{
+		if (tid < 32)
+		{
+			// now that we are using warp-synchronous programming (below)
+			// we need to declare our shared memory volatile so that the compiler
+			// doesn't reorder stores to it and induce incorrect behavior.
+			volatile float* smemMax = svalues;
+			volatile float* smemArgMax = skeys;
+			if (threads >=  64) if(mySum < smemMax[tid + 32]){smemMax[tid] = mySum = smemMax[tid + 32];  smemArgMax[tid] = smemArgMax[tid + 32]; }
+			if (threads >=  32) if(mySum < smemMax[tid + 16]){smemMax[tid] = mySum = smemMax[tid + 16];  smemArgMax[tid] = smemArgMax[tid + 16]; }
+			if (threads >=  16) if(mySum < smemMax[tid +  8]){smemMax[tid] = mySum = smemMax[tid +  8];  smemArgMax[tid] = smemArgMax[tid +  8]; }
+			if (threads >=   8) if(mySum < smemMax[tid +  4]){smemMax[tid] = mySum = smemMax[tid +  4];  smemArgMax[tid] = smemArgMax[tid +  4]; }
+			if (threads >=   4) if(mySum < smemMax[tid +  2]){smemMax[tid] = mySum = smemMax[tid +  2];  smemArgMax[tid] = smemArgMax[tid +  2]; }
+			if (threads >=   2) if(mySum < smemMax[tid +  1]){smemMax[tid] = mySum = smemMax[tid +  1];  smemArgMax[tid] = smemArgMax[tid +  1]; }
+		}
+
+	}
+
+	__syncthreads();
 }
 
 

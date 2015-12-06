@@ -21,15 +21,9 @@ template <typename T> void Layer<T>::init(int unitcount, int start_batch_size, U
 	prev = NULL;
 	w_next = NULL;
 	b_next = NULL;
-	b_next_sync = NULL;
 	w_rms_next = NULL;
 	b_rms_next = NULL;
 	b_grad_next = NULL;
-
-	w_next_sync_send = NULL;
-	b_next_sync_send = NULL;
-	w_next_sync_recv = NULL;
-	b_next_sync_recv = NULL;
 
 	target = NULL;
 	target_matrix = NULL;
@@ -79,14 +73,12 @@ template <typename T> void Layer<T>::link_with_next_layer(Layer<T> *next_layer)
 	if(next->BATCH_SIZE == 0){ next->BATCH_SIZE = BATCH_SIZE; }
 	if(!next->GPU){next->GPU = GPU;}
 
-	Matrix<T> *w = GPU->uniformSqrtWeight(UNITCOUNT,next_layer->UNITCOUNT);
-	//Matrix<T> *w = GPU->randn(UNITCOUNT,next_layer->UNITCOUNT,0,0.001);
-	w_next = w;
+
+	w_next = GPU->randn(UNITCOUNT,next_layer->UNITCOUNT,0,0.01);;
 	w_rms_next = zeros<T>(UNITCOUNT,next_layer->UNITCOUNT);
 	for(int i = 0; i < GPU->MPI_SIZE; i++) vec_w_grad_next.push_back(zeros<T>(UNITCOUNT,next_layer->UNITCOUNT));
 
-	Matrix<T> *b = zeros<T>(1,next_layer->UNITCOUNT);
-	b_next = b;
+	b_next = zeros<T>(1,next_layer->UNITCOUNT);
 	b_grad_next = zeros<T>(1,next_layer->UNITCOUNT);
 	b_rms_next = zeros<T>(1,next_layer->UNITCOUNT);
 

@@ -35,4 +35,9 @@ void squared_diff(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar
 
 
 void vadd(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar);
+void tmatrix(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar);
+
+
+void rowMax(FloatMatrix *A, FloatMatrix *vout);
+void rowSum(FloatMatrix *A, FloatMatrix *vout);
 

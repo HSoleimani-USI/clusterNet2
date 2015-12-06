@@ -24,8 +24,11 @@ template <int operation> __global__ void kVectorWise(float *A, float *v, float *
 __global__ void kSlice(float *A, float *out, int rows_A, int cols_A, int rstart, int rend, int cstart, int cend);
 __global__ void kSoftMax(float* A, float* out, unsigned int rows, unsigned int cols);
 
+template <int reduction>__global__ void kReduceToRows(float* A, float* out, const unsigned int rows, const unsigned int cols);
+
 
 template<int action> __device__ float reduction_action(float a, float b);
-template <int action> __device__ void reduce(float* sdata, const unsigned int tid, const unsigned int threads);
+template <int action> __device__ void reduceByValue(float* sdata, const unsigned int tid, const unsigned int threads);
+__device__ void reduceToArgmax(float *skeys, float* svalues, const unsigned int tid, const unsigned int threads);
 __global__ void kSoftMax(float* A, float* out, const unsigned int rows, const unsigned int cols);
 #endif
