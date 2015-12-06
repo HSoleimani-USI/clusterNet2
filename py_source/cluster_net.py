@@ -233,3 +233,11 @@ def row_sum(A, out=None):
 	if not out: out = empty((A.shape[0],1))
 	lib.funcs.frowSum(A.pt, out.pt)
 	return out
+
+def row_max(A, out=None):
+	if not out: out = empty((A.shape[0],1))
+	lib.funcs.frowMax(A.pt, out.pt)
+	return out
+
+def max(A): return lib.funcs.ffmax(A.pt)
+def sum(A): return lib.funcs.ffsum(A.pt)

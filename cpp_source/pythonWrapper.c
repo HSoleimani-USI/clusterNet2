@@ -34,3 +34,6 @@ void tmatrix(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar){ ve
 void rowMax(FloatMatrix *A, FloatMatrix *vout){ reduceToRows<rmax>(A, vout); }
 void rowSum(FloatMatrix *A, FloatMatrix *vout){ reduceToRows<rsum>(A, vout); }
 
+float wMax(FloatMatrix *A){ return reduceToValue<rmax>(A); }
+float wSum(FloatMatrix *A){ return reduceToValue<rsum>(A); }
+

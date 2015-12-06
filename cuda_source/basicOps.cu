@@ -241,19 +241,32 @@ template <int reduction> void reduceToRows(Matrix<float> *A, Matrix<float> *vout
 
 template float reduceToValue<rsum>(Matrix<float> *A);
 template float reduceToValue<rmax>(Matrix<float> *A);
-template <int reduction> float reduceToValue(Matrix<float> *A) { Matrix<float> *vout = empty<float>(A->rows, 1); return reduceToValue<reduction>(A, vout);  }
+template <int reduction> float reduceToValue(Matrix<float> *A)
+{
+	Matrix<float> *vout = empty<float>(A->rows, 1);
+	float retValue = reduceToValue<reduction>(A, vout);
+	cudaFree(vout->data);
+	free(vout);
+	return retValue;
+}
 
 template float reduceToValue<rsum>(Matrix<float> *A, Matrix<float> *vout_rows);
 template float reduceToValue<rmax>(Matrix<float> *A, Matrix<float> *vout_rows);
 template <int reduction> float reduceToValue(Matrix<float> *A, Matrix<float> *vout_rows)
 {
 	reduceToRows<reduction>(A, vout_rows);
-	float value[1] = {0.0f};
-	Matrix<float> *pinned_value = to_pinned<float>(1,1,value);
-    kReduceToRows<reduction><<<1, 256>>>(vout_rows->data, pinned_value->data, 1, A->rows);
+	Matrix<float> *value = empty<float>(1,1);
+    kReduceToRows<reduction><<<1, 256>>>(vout_rows->data, value->data, 1, A->rows);
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 
-    return pinned_value->data[0];
+    float retValue = 0.0f;
+
+	CUDA_CHECK_RETURN(cudaMemcpy(&retValue,value->data,value->bytes,cudaMemcpyDefault));
+
+	cudaFree(value->data);
+	free(value);
+
+    return retValue;
 }
 
 //this softmax is numerically stable

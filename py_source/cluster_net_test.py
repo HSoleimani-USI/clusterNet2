@@ -190,8 +190,20 @@ def test_batch_allocator():
         
     
 def test_row_reductions():
-    A = np.float32(np.random.randn(5,10))
+    A = np.float32(np.random.randn(100,100))
     B = gpu.array(A)
-    C = gpu.row_sum(B).tocpu()
     
+    C = gpu.row_sum(B).tocpu()    
     t.assert_almost_equal(C, np.sum(A,1), 3, "Rowsum not working")
+    
+    C = gpu.row_max(B).tocpu()    
+    t.assert_almost_equal(C, np.max(A,1), 3, "Rowmax not working")
+    
+def test_matrix_reductions():
+    A = np.float32(np.random.randn(100,100))
+    B = gpu.array(A)
+    
+    C = gpu.sum(B)    
+    t.assert_almost_equal(C, np.sum(A), 3, "Sum not working")
+    C = gpu.max(B)    
+    t.assert_almost_equal(C, np.max(A), 3, "Max not working")

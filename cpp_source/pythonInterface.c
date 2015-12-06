@@ -64,4 +64,7 @@ extern "C"
 
 	void frowMax(FloatMatrix *A, FloatMatrix *vout){ rowMax(A, vout); }
 	void frowSum(FloatMatrix *A, FloatMatrix *vout){ rowSum(A, vout); }
+
+	float ffmax(FloatMatrix *A){ return wMax(A); }
+	float ffsum(FloatMatrix *A){ return wSum(A); }
 }
