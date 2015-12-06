@@ -148,6 +148,11 @@ def rectified_linear_grad(A, out=None):
 	lib.funcs.frectified_grad(A.pt, out.pt)
 	return out
 
+def copy(A, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fcopy(A.pt, out.pt)
+	return out
+
 def add(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
 	lib.funcs.fadd(A.pt, B.pt, out.pt)

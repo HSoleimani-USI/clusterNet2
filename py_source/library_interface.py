@@ -42,6 +42,8 @@ funcs.flogistic_grad.restype = ct.c_void_p
 funcs.frectified.restype = ct.c_void_p
 funcs.frectified_grad.restype = ct.c_void_p
 
+funcs.fcopy.restype = ct.c_void_p
+
 funcs.fadd.restype = ct.c_void_p
 funcs.fsub.restype = ct.c_void_p
 funcs.fmul.restype = ct.c_void_p

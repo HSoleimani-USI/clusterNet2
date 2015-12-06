@@ -68,6 +68,7 @@ template __global__ void kElementWise<kne>(const float *A, const float *B, float
 template __global__ void kElementWise<ksquared_diff>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<kdropout>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<ksmul>(const float *A, const float *B, float *out, const float scalar, int size);
+template __global__ void kElementWise<kcopy>(const float *A, const float *B, float *out, const float scalar, int size);
 template<int operation> __global__ void kElementWise(const float *A, const float *B, float *out, const float scalar, int size)
 {
   const unsigned int numThreads = blockDim.x * gridDim.x;
@@ -100,6 +101,8 @@ template<int operation> __global__ void kElementWise(const float *A, const float
 
        	   case ksmul: out[i] = A[i] * scalar; break;
        	   case kdropout: out[i] = B[i] > scalar ? A[i] : 0.0f;
+
+       	   case kcopy: out[i] = A[i];
 	   }
   }
 }

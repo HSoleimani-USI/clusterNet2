@@ -29,6 +29,7 @@ extern "C"
 	void flogistic_grad(FloatMatrix * A, FloatMatrix *out, float scalar){ return logistic_grad(A,out, scalar); }
 	void frectified(FloatMatrix * A, FloatMatrix *out, float scalar){ return rectified(A,out, scalar); }
 	void frectified_grad(FloatMatrix * A, FloatMatrix *out, float scalar){ return rectified_grad(A,out, scalar); }
+	void fcopy(FloatMatrix * A, FloatMatrix *out){ return wcopy(A,out, 0.0f); }
 
 	void fadd(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return add(A,B, out, scalar); }
 	void fsub(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return sub(A,B, out, scalar); }

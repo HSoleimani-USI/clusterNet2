@@ -20,6 +20,7 @@ void logistic(FloatMatrix *A, FloatMatrix *out, float scalar);
 void logistic_grad(FloatMatrix *A, FloatMatrix *out, float scalar);
 void rectified(FloatMatrix *A, FloatMatrix *out, float scalar);
 void rectified_grad(FloatMatrix *A, FloatMatrix *out, float scalar);
+void wcopy(FloatMatrix *A, FloatMatrix *out, float scalar);
 
 void add(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
 void sub(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);

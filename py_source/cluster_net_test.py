@@ -115,6 +115,8 @@ def test_elementwise():
     t.assert_almost_equal(gpu.less_equal(B1,B2).tocpu(), np.less_equal(A1,A2), 3, "Less equal not working")
     t.assert_almost_equal(gpu.not_equal(B1,B2).tocpu(), np.not_equal(A1,A2), 3, "Not equal not working")
     t.assert_almost_equal(gpu.squared_difference(B1,B2).tocpu(), (A1-A2)**2, 3, "Squared difference not working")
+    
+    t.assert_almost_equal(gpu.copy(B1).tocpu(), A1.copy(), 3, "Squared difference not working")
 
 
     

@@ -14,6 +14,7 @@ void logistic(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<
 void logistic_grad(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<klogistic_grad>(A, out, scalar); }
 void rectified(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<krectified>(A, out, scalar); }
 void rectified_grad(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<krectified_grad>(A, out, scalar); }
+void wcopy(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<kcopy>(A, out, scalar); }
 
 
 void add(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kadd>(A, B, out, scalar); }

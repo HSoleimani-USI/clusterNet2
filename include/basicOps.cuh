@@ -60,7 +60,9 @@ typedef enum Operations_t
 	ktmatrix,
 
 	ksmul,
-	kdropout
+	kdropout,
+
+	kcopy
 
 } Operations_t;
 
