@@ -25,6 +25,9 @@ raw = db.get_table('raw_pages')
 rTitle = re.compile(".*<title>(.*?)</title>")
 rshortSummary = re.compile("(?:''')(.*)")
 
+
+rSummary = re.compile("(?:''')(.*)(?:={2,5})")
+
 rHeaders = re.compile("(?:={2,4})(\w*?)(={2,4}\s)")
 
 pages = []
@@ -50,7 +53,9 @@ with open(wiki_xml_path,'r') as f:
             title =  rTitle.search(page[1]).group(1)            
             page = "".join(page)
             if len(page) < 1000: 
-                continue            
+                continue      
+            
+                  
             matches = rHeaders.findall(page)            
             if matches:
                 for match in matches:
@@ -62,13 +67,31 @@ with open(wiki_xml_path,'r') as f:
             #if match: print match.group(1)
             
             
+            print page[0:20000]
+            
             match = rshortSummary.search(page)
             
             page_data = {'raw' : page, 'headers' : headers}
             if match:
                 page_data['short_summary'] = match.group(1)
+                #print match.group(1)
+                
+                
+            page2 = page.replace('\n',' ')
+            match = rSummary.search(page2)
+            
+            print '+'*1000
+            
+            if match:
+                print match.group(1)[0:2000]
+                pass
+                
+                
+            print '-'*1000
+            if i >100: break
             
             raw.set(title, page_data)
+            i+=1
             
             if i % 10000 == 0: print i
             
