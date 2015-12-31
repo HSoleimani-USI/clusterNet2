@@ -216,3 +216,37 @@ def test_matrix_reductions():
     t.assert_almost_equal(C, np.sum(A), 2, "Sum not working")
     C = gpu.max(B)    
     t.assert_almost_equal(C, np.max(A), 3, "Max not working")
+    
+def test_timer():
+    t = gpu.Timer()
+    A = gpu.rand(100,100)
+    B = gpu.rand(100,100)
+    C = gpu.rand(100,100)
+    time = 0
+    
+    t.tick()
+    for i in range(10000):
+        gpu.dot(A,B,C)    
+    time = t.tock()
+    print time
+    assert time > 0
+    
+    time = 0
+    t.tick("Timer test")
+    gpu.dot(A,B,C)    
+    time = t.tock("Timer test")
+    assert time > 0
+    
+    accumulative_time = 0
+    for i in range(10000):
+        t.tick('cumulative')
+        gpu.dot(A,B,C)
+        t.tick('cumulative')
+    accumulative_time = t.tock('cumulative')
+    
+    assert accumulative_time > 50*time
+    
+    
+    
+    
+    

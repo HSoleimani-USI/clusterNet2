@@ -6,6 +6,7 @@ FloatMatrix *empty(int rows, int cols){	return empty<float>(rows, cols); }
 void to_host(FloatMatrix *gpu, float *cpu){ to_host<float>(gpu, cpu); }
 void to_gpu(float *cpu, FloatMatrix *gpu){ to_gpu<float>(cpu, gpu); }
 ClusterNet *get_clusterNet(){ return new ClusterNet2<float>(); }
+
 void abs(FloatMatrix *A, FloatMatrix *out){ elementWiseUnary<kabs>(A, out, 0.0f); }
 void log(FloatMatrix *A, FloatMatrix *out){ elementWiseUnary<klog>(A, out, 0.0f); }
 void sqrt(FloatMatrix *A, FloatMatrix *out){ elementWiseUnary<ksqrt>(A, out, 0.0f); }

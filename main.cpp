@@ -3,8 +3,24 @@
 
 using namespace std;
 
+
+void test_timer()
+{
+	ClusterNet2<float> gpu = ClusterNet2<float>();
+	Matrix<float> *A = gpu.rand(100,100);
+	Matrix<float> *B = gpu.rand(100,100);
+	Matrix<float> *C = gpu.rand(100,100);
+
+	Timer t = Timer();
+
+	t.tick();
+	for(int i = 0; i < 10000; i++)
+		gpu.dot(A,B,C);
+	t.tock();
+}
+
 int main(int argc, char const *argv[]) {
-	ClusterNet2<float>* fooClass = new ClusterNet2<float>();
+
 
 	Matrix<float> *A = empty<float>(10, 10);
 
@@ -15,9 +31,8 @@ int main(int argc, char const *argv[]) {
 	Timer *t = new Timer();
 
 
-	t->tick();
-	elementWise<kadd>(A,A,A,0.0f);
-	t->tock();
+	test_timer();
+
 
 
 	return 0;

@@ -87,6 +87,7 @@ template<typename T> struct Matrix
     Matrix<T> *to_host();
 };
 
+
 template<typename T> Matrix<T> *fill_matrix(int rows, int cols, T fill_value);
 template<typename T> Matrix<T> *empty(int rows, int cols);
 template<typename T> Matrix<T> *zeros(int rows, int cols);
@@ -114,4 +115,5 @@ template <int reduction> float reduceToValue(Matrix<float> *A);
 template <int reduction> float reduceToValue(Matrix<float> *A, Matrix<float> *vout_rows);
 
 
+#define _add elementWise<kadd>
 #endif

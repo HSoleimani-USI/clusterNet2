@@ -2,6 +2,16 @@ import library_interface as lib
 import numpy as np
 import ctypes as ct
 
+class Timer(object):
+	def __init__(self):
+		self.pt = lib.funcs.fget_Timer()
+		
+	def tick(self, name='default'):
+		lib.funcs.ftick(self.pt, ct.c_char_p(name))
+		
+	def tock(self, name='default'):		
+		return lib.funcs.ftock(self.pt, ct.c_char_p(name))
+
 class BatchAllocator(object):
 	def __init__(self, X, y, batch_size):
 		self.current_batch = 0

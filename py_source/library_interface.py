@@ -87,6 +87,9 @@ funcs.ffmax.restype = ct.c_float
 funcs.ffsum.restype = ct.c_float
 
 
+funcs.fget_Timer.restype = ct.c_void_p
+funcs.ftick.restype = ct.c_void_p
+funcs.ftock.restype = ct.c_float
 
 
 

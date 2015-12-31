@@ -6,6 +6,7 @@
  */
 
 #include <pythonWrapper.h>
+#include <Timer.cuh>
 
 //the extern C statement requires that we have no templates and overloaded methods, because
 //it cannot infer the signature of the method otherwise in our python library
@@ -69,4 +70,9 @@ extern "C"
 
 	float ffmax(FloatMatrix *A){ return wMax(A); }
 	float ffsum(FloatMatrix *A){ return wSum(A); }
+
+
+	Timer *fget_Timer(){ return new Timer(); }
+	void ftick(Timer *t, char *name){ t->tick(std::string(name));}
+	float ftock(Timer *t, char *name){ return t->tock(std::string(name));}
 }
