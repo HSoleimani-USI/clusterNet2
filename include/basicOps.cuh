@@ -1,5 +1,7 @@
 #include <stdio.h>
 #include <iostream>
+#include <cuda.h>
+
 
 using std::cout;
 using std::endl;

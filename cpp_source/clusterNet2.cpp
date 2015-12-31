@@ -4,6 +4,10 @@
 #include <iostream>     // std::cout
 #include "json.hpp"
 
+
+#include <unistd.h>
+
+
 // for convenience
 using json = nlohmann::json;
 
@@ -21,7 +25,7 @@ ClusterNet2<T>::ClusterNet2()
         exit(1);
     }
 
-    if (!nervana_loadKernels("../cubin/"))
+    if (!nervana_loadKernels("/usr/local/cuda/cubin/"))
     {
         std::cerr << "Couldn't load all kernels" << std::endl;
         exit(1);
@@ -115,3 +119,5 @@ template <typename T> void ClusterNet2<T>::dropout(Matrix<T> *A, Matrix <T> *out
 	curandGenerateUniform(m_generator, out->data, out->size);
 	elementWise<kdropout>(A, out, out, dropout);
 }
+
+

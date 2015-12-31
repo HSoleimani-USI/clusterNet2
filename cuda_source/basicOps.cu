@@ -283,3 +283,6 @@ void argmax(Matrix<float> *A, Matrix<float> *out)
     kArgmax<<<A->rows > 1024 ? 1024 : A->rows, 256>>>(A->data, out->data, A->rows, A->cols);
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
+
+
+
