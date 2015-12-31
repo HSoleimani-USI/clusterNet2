@@ -75,4 +75,6 @@ extern "C"
 	Timer *fget_Timer(){ return new Timer(); }
 	void ftick(Timer *t, char *name){ t->tick(std::string(name));}
 	float ftock(Timer *t, char *name){ return t->tock(std::string(name));}
+
+	void ffree(FloatMatrix *A){ freemat(A); }
 }

@@ -38,4 +38,5 @@ void rowSum(FloatMatrix *A, FloatMatrix *vout){ reduceToRows<rsum>(A, vout); }
 
 float wMax(FloatMatrix *A){ return reduceToValue<rmax>(A); }
 float wSum(FloatMatrix *A){ return reduceToValue<rsum>(A); }
+void freemat(FloatMatrix *A){ cudaFree(A->data); free(A); }
 

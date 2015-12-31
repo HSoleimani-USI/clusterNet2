@@ -225,7 +225,7 @@ def test_timer():
     time = 0
     
     t.tick()
-    for i in range(10000):
+    for i in range(10):
         gpu.dot(A,B,C)    
     time = t.tock()
     print time
@@ -238,13 +238,26 @@ def test_timer():
     assert time > 0
     
     accumulative_time = 0
-    for i in range(10000):
+    for i in range(100):
         t.tick('cumulative')
         gpu.dot(A,B,C)
         t.tick('cumulative')
     accumulative_time = t.tock('cumulative')
     
-    assert accumulative_time > 50*time
+    assert accumulative_time > 5*time
+    
+def test_free():
+    #needs at least 3GB ram
+    dim = 1
+    for i in range(14):
+        dim*=2
+        print dim
+        A = gpu.rand(dim,dim)
+        B = gpu.rand(dim,dim)
+        C = gpu.rand(dim,dim)
+        gpu.dot(A,B,C)
+        del A, B, C
+         
     
     
     

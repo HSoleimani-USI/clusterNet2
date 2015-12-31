@@ -43,4 +43,5 @@ void rowSum(FloatMatrix *A, FloatMatrix *vout);
 
 float wMax(FloatMatrix *A);
 float wSum(FloatMatrix *A);
+void freemat(FloatMatrix *A);
 

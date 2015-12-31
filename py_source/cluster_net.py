@@ -89,6 +89,8 @@ class array(object):
 	
 	@property
 	def T(self): return array(None, self.fT(self.pt), self.shape[::-1])
+	
+	def __del__(self): lib.funcs.ffree(self.pt)
 
 	
 
