@@ -36,6 +36,7 @@ void squared_diff(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar
 
 
 void vadd(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar);
+void vsub(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar);
 void tmatrix(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar);
 
 void rowMax(FloatMatrix *A, FloatMatrix *vout);
@@ -44,4 +45,6 @@ void rowSum(FloatMatrix *A, FloatMatrix *vout);
 float wMax(FloatMatrix *A);
 float wSum(FloatMatrix *A);
 void freemat(FloatMatrix *A);
+
+void wsortbykey(FloatMatrix *keys, FloatMatrix *values);
 

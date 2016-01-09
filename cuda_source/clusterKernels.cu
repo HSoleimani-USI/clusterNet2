@@ -100,14 +100,14 @@ template<int operation> __global__ void kElementWise(const float *A, const float
        	   case ksquared_diff: out[i] = powf(A[i]-B[i],2.0f); break;
 
        	   case ksmul: out[i] = A[i] * scalar; break;
-       	   case kdropout: out[i] = B[i] > scalar ? A[i] : 0.0f;
-
-       	   case kcopy: out[i] = A[i];
+       	   case kdropout: out[i] = B[i] > scalar ? A[i] : 0.0f; break;
+       	   case kcopy: out[i] = A[i]; break;
 	   }
   }
 }
 
 template __global__ void kVectorWise<kvadd>(float *A, float *v, float *out, const float scalar, int rows, int size);
+template __global__ void kVectorWise<kvsub>(float *A, float *v, float *out, const float scalar, int rows, int size);
 template __global__ void kVectorWise<ktmatrix>(float *A, float *v, float *out, const float scalar, int rows, int size);
 template <int operation> __global__ void kVectorWise(float *A, float *v, float *out, const float scalar, int cols, int size)
 {
@@ -122,6 +122,7 @@ template <int operation> __global__ void kVectorWise(float *A, float *v, float *
 		switch(operation)
 		{
 			case kvadd: out[i] =  A[i] + v[row]; break;
+			case kvsub: out[i] =  A[i] - v[row]; break;
 			case ktmatrix: out[i] = i-(row*cols) == (int)v[row] ? 1.0f : 0.0f;
 		}
 	}

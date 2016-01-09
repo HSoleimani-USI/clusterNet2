@@ -30,6 +30,7 @@ void ge(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ element
 void ne(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kne>(A, B, out, scalar); }
 void squared_diff(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<ksquared_diff>(A, B, out, scalar); }
 void vadd(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar){ vectorWise<kvadd>(A, v, out, scalar); }
+void vsub(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar){ vectorWise<kvsub>(A, v, out, scalar); }
 void tmatrix(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar){ vectorWise<ktmatrix>(A, v, out, scalar); }
 
 
@@ -39,4 +40,6 @@ void rowSum(FloatMatrix *A, FloatMatrix *vout){ reduceToRows<rsum>(A, vout); }
 float wMax(FloatMatrix *A){ return reduceToValue<rmax>(A); }
 float wSum(FloatMatrix *A){ return reduceToValue<rsum>(A); }
 void freemat(FloatMatrix *A){ cudaFree(A->data); free(A); }
+
+void wsortbykey(FloatMatrix *keys, FloatMatrix *values){ sortbykey<float>(keys, values); }
 

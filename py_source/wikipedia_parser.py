@@ -9,6 +9,16 @@ import mistune
 import re
 import leveldbX
 import sys
+import lucene
+import cPickle as pickle
+
+from java.io import File
+from org.apache.lucene.analysis.standard import StandardAnalyzer
+from org.apache.lucene.document import Document, Field
+from org.apache.lucene.index import IndexWriter, IndexWriterConfig
+from org.apache.lucene.store import SimpleFSDirectory
+from org.apache.lucene.util import Version
+
 
 
 DBpath = sys.argv[1]
@@ -16,8 +26,19 @@ wiki_xml_path = sys.argv[2]
 
 
 
+lucene.initVM()
+indexDir = SimpleFSDirectory(File(DBpath+"/lucene/index/"))
+writerConfig = IndexWriterConfig(Version.LUCENE_CURRENT, StandardAnalyzer(Version.LUCENE_CURRENT))
+writer = IndexWriter(indexDir, writerConfig)
 
-db = leveldbX.LevelDBX(DBpath)
+print "%d docs in index" % writer.numDocs()
+print "Reading lines from sys.stdin..."
+
+
+
+print DBpath
+
+db = leveldbX.LevelDBX(path=DBpath)
 
 raw = db.get_table('raw_pages')
 
@@ -30,9 +51,14 @@ rSummary = re.compile("(?:''')(.*)(?:={2,5})")
 
 rHeaders = re.compile("(?:={2,4})(\w*?)(={2,4}\s)")
 
+rLinks = re.compile("(?:\[\[)(.*?)(?:]])")
+
 pages = []
 i = 0
 titels = []
+
+graph = {}
+
 
 
 with open(wiki_xml_path,'r') as f:
@@ -56,6 +82,7 @@ with open(wiki_xml_path,'r') as f:
                 continue      
             
                   
+            
             matches = rHeaders.findall(page)            
             if matches:
                 for match in matches:
@@ -67,38 +94,43 @@ with open(wiki_xml_path,'r') as f:
             #if match: print match.group(1)
             
             
-            print page[0:20000]
+            #print page          
+            graph[title] = {}  
+            matches = rLinks.findall(page)
+            if matches:
+                for match in matches:                                        
+                    link = match.split('|')
+                    if len(link) > 1:
+                        article = link[0]
+                        link = link[1]
+                        graph[title][article] = 1
+                    
+            
+            
             
             match = rshortSummary.search(page)
             
             page_data = {'raw' : page, 'headers' : headers}
             if match:
                 page_data['short_summary'] = match.group(1)
-                #print match.group(1)
-                
-                
-            page2 = page.replace('\n',' ')
-            match = rSummary.search(page2)
-            
-            print '+'*1000
-            
-            if match:
-                print match.group(1)[0:2000]
-                pass
-                
-                
-            print '-'*1000
-            if i >100: break
-            
+                            
             raw.set(title, page_data)
             i+=1
             
-            if i % 10000 == 0: print i
+            
+            doc = Document()
+            doc.add(Field("page", page, Field.Store.YES, Field.Index.ANALYZED))
+            writer.addDocument(doc)
+            
+            if i % 10000 == 0: 
+                print i
+                pickle.dump(graph, open(DBpath + "/graph.p", 'wb'))
+                print "%d docs in index" % writer.numDocs()
             
 
 
         
-
+writer.close()
 
 
 

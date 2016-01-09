@@ -88,7 +88,7 @@ class array(object):
 		return self.cpu_arr
 	
 	@property
-	def T(self): return array(None, self.fT(self.pt), self.shape[::-1])
+	def T(self): return array(None, lib.funcs.fT(self.pt), self.shape[::-1])
 	
 	def __del__(self): lib.funcs.ffree(self.pt)
 
@@ -225,6 +225,11 @@ def vector_add(A, v, out=None):
 	lib.funcs.fvadd(A.pt, v.pt, out.pt)
 	return out
 
+def vector_sub(A, v, out=None):	
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fvsub(A.pt, v.pt, out.pt)
+	return out
+
 def create_t_matrix(v, max_value, out=None):		
 	if not out: out = empty((v.shape[0],max_value+1))
 	lib.funcs.ftmatrix(out.pt, v.pt, out.pt)
@@ -261,5 +266,13 @@ def row_max(A, out=None):
 	lib.funcs.frowMax(A.pt, out.pt)
 	return out
 
+def transpose(A, out=None):
+	if not out: out = empty((A.shape[1],A.shape[0]))
+	lib.funcs.ftranspose(A.pt, out.pt)
+	return out
+
 def max(A): return lib.funcs.ffmax(A.pt)
 def sum(A): return lib.funcs.ffsum(A.pt)
+
+def sortbykey(keys, values):
+	lib.funcs.fsortbykey(keys.pt, values.pt)

@@ -22,6 +22,7 @@ extern "C"
 	void frandn(ClusterNet *gpu, int rows, int cols){ gpu->randn(rows, cols); }
 	void fsetRandomState(ClusterNet *gpu, int seed){ gpu->setRandomState(seed); }
 	FloatMatrix *fT(FloatMatrix * A){ return transpose(A); }
+	void *ftranspose(FloatMatrix *A, FloatMatrix *out){ transpose(A, out, out->cols, out->rows); }
 	void ffabs(FloatMatrix * A, FloatMatrix *out){ return abs(A,out); }
 	void flog(FloatMatrix * A, FloatMatrix *out){ return log(A,out); }
 	void fsqrt(FloatMatrix * A, FloatMatrix *out){ return sqrt(A,out); }
@@ -45,6 +46,7 @@ extern "C"
 	void fsquared_diff(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return squared_diff(A,B, out, scalar); }
 
 	void fvadd(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return vadd(A,v, out, 0.0f); }
+	void fvsub(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return vsub(A,v, out, 0.0f); }
 	void ftmatrix(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return tmatrix(A,v, out, 0.0f); }
 
 	void fslice(FloatMatrix *A, FloatMatrix *out, int rstart, int rend, int cstart, int cend){ slice(A, out, rstart, rend, cstart, cend); }
@@ -77,4 +79,6 @@ extern "C"
 	float ftock(Timer *t, char *name){ return t->tock(std::string(name));}
 
 	void ffree(FloatMatrix *A){ freemat(A); }
+
+	void fsortbykey(FloatMatrix *keys, FloatMatrix *values){ wsortbykey(keys, values); }
 }

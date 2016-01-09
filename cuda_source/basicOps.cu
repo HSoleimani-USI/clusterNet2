@@ -108,6 +108,15 @@ template <typename T> Matrix<T> *fill_matrix(int rows, int cols, T fill_value)
   return out;
 }
 
+template void sortbykey(Matrix<float> *keys, Matrix<float> *values);
+template <typename T> void sortbykey(Matrix<T> *keys, Matrix<T> *values)
+{
+	thrust::device_ptr<T> d_values(values->data);
+	thrust::device_ptr<T> d_keys(keys->data);
+
+	thrust::sort_by_key(d_keys, d_keys + keys->size, d_values);
+}
+
 
 template void transpose(Matrix<float> *A, Matrix<float> *out, int rows, int cols);
 template <typename T> void transpose(Matrix<T> *A, Matrix<T> *out, int rows, int cols)
@@ -217,6 +226,7 @@ template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matri
 //vectorwise operation between matrix and vector
 //this is equivalent to broadcasting in numpy
 template void vectorWise<kvadd>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
+template void vectorWise<kvsub>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
 template void vectorWise<ktmatrix>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
 template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar)
 {

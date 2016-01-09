@@ -1,6 +1,8 @@
 #include <stdio.h>
 #include <iostream>
 #include <cuda.h>
+#include <thrust/device_ptr.h>
+#include <thrust/sort.h>
 
 
 using std::cout;
@@ -59,6 +61,7 @@ typedef enum Operations_t
 	ksquared_diff,
 
 	kvadd,
+	kvsub,
 	ktmatrix,
 
 	ksmul,
@@ -96,6 +99,8 @@ template<typename T> void to_host(Matrix<T> *gpu, T *cpu);
 template<typename T> void to_gpu(T *cpu, Matrix<T> *gpu);
 template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu);
 
+
+template <typename T> void sortbykey(Matrix<T> *keys, Matrix<T> *values);
 
 template <typename T> void transpose(Matrix<T> *A, Matrix<T> *out, int rows, int cols);
 template <typename T> Matrix<T> *to_col_major(Matrix<T> *A);

@@ -258,6 +258,49 @@ def test_free():
         gpu.dot(A,B,C)
         del A, B, C
          
+'''
+# not working on Maxwell right now   
+def test_sortbykey():
+    
+    for i in range(1000):
+        dim = np.random.randint(10,1000)
+        keys = np.float32(np.random.rand(dim))
+        values = np.float32(np.random.rand(dim))
+        
+        Keys = gpu.array(keys)
+        Values = gpu.array(values)
+        gpu.sortbykey(Keys, Values)
+        order = np.argsort(keys)
+        
+        result = Values.tocpu()
+        print dim, i
+        print np.sum(np.abs((result-values[order])))
+        t.assert_equal(values[order], result)
+'''  
+        
+def test_euclidean_distance():
+    rows = 10
+    dim = 100
+    x = np.float32(np.random.rand(dim,rows))    
+    X = gpu.array(x)
+    x = x.T
+    vec = gpu.empty((dim,1))
+    buffer = gpu.empty((dim,rows))
+    bufferT = gpu.empty((rows,dim))
+    distances = gpu.empty((rows,1))
+    for i in range(X.shape[1]):
+        gpu.slice(X, 0, dim, i, i+1, vec)
+                        
+        gpu.vector_sub(X, vec, buffer)
+                
+        gpu.pow(buffer, 2.0, buffer)
+        
+        gpu.transpose(buffer, bufferT)
+        gpu.row_sum(bufferT, distances)
+        
+        gpu.sqrt(distances, distances)
+        
+        t.assert_allclose(np.sqrt(np.sum((x-x[i])**2,1)), distances.tocpu(), rtol=0.01) 
     
     
     
