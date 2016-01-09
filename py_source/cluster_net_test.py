@@ -2,6 +2,7 @@ import cluster_net as gpu
 import nose
 import numpy as np
 import numpy.testing as t
+from scipy.spatial.distance import cdist
 
 
 
@@ -279,15 +280,19 @@ def test_sortbykey():
 '''  
         
 def test_euclidean_distance():
-    rows = 10
-    dim = 100
-    x = np.float32(np.random.rand(dim,rows))    
+    x = np.float32(np.random.rand(100,10))
+    
+    t.assert_equal(x.T,np.transpose(x))
+    rows = x.shape[1]
+    dim = x.shape[0]
     X = gpu.array(x)
     x = x.T
     vec = gpu.empty((dim,1))
     buffer = gpu.empty((dim,rows))
     bufferT = gpu.empty((rows,dim))
     distances = gpu.empty((rows,1))
+    
+    dist = cdist(x,x,'euclidean')
     for i in range(X.shape[1]):
         gpu.slice(X, 0, dim, i, i+1, vec)
                         
@@ -301,6 +306,23 @@ def test_euclidean_distance():
         gpu.sqrt(distances, distances)
         
         t.assert_allclose(np.sqrt(np.sum((x-x[i])**2,1)), distances.tocpu(), rtol=0.01) 
+        t.assert_allclose(np.sqrt(np.sum((x-x[i])**2,1)), dist[i], rtol=0.01) 
+    
+    
+def test_get_closest_index():
+    X = np.float32(np.random.rand(10,100))
+    results_gpu = gpu.get_closest_index(X,5)
+    
+    dist = cdist(X,X,'euclidean')
+    results = []
+    for i in range(10):
+        results.append(np.argsort(dist[i,:])[::-1][0:5])
+        
+    
+    
+    
+    t.assert_equal(np.array(results), results_gpu)
+    
     
     
     

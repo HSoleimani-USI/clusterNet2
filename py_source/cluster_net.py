@@ -276,3 +276,26 @@ def sum(A): return lib.funcs.ffsum(A.pt)
 
 def sortbykey(keys, values):
 	lib.funcs.fsortbykey(keys.pt, values.pt)
+	
+	
+def get_closest_index(A, top=50):
+	x = np.array(np.transpose(A).tolist(), dtype=np.float32)
+	rows = x.shape[1]
+	dim = x.shape[0] 
+	print rows, dim
+	X = array(x)
+	vec = empty((dim,1))
+	buffer = empty((dim,rows))
+	bufferT = empty((rows,dim))
+	distances = empty((rows,1))
+	row_indexes = []
+	for i in range(X.shape[1]):
+		slice(X, 0, dim, i, i+1, vec)
+		vector_sub(X, vec, buffer)
+		pow(buffer, 2.0, buffer)
+		transpose(buffer, bufferT)
+		row_sum(bufferT, distances)
+		sqrt(distances, distances)
+		print distances.tocpu()
+		row_indexes.append(np.argsort(distances.tocpu())[::-1][0:top])
+	return np.array(row_indexes)
