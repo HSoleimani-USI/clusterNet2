@@ -39,14 +39,21 @@ class VectorSpace(object):
 		word_count = 0
 		for word in strValue.strip().lower().split(' '):
 			if word in self.vocab2idx:
+				print "contained: ", word
 				word_count +=1
 				idx = self.vocab2idx[word]
-				slice(self.bufferT, idx,idx+1,0,self.dim, slice_buffer)
+				slice(self.X,0,self.dim,idx,idx+1,slice_buffer)
 				add(vec,slice_buffer,vec)
+				
+				print sum(slice_buffer), slice_buffer.shape
+				
 				
 		if word_count == 0: word_count = 1
 		
 		scalar_mul(vec,1.0/word_count,vec)		
+		
+		
+		
 		vector_sub(self.X, vec, self.buffer)
 		pow(self.buffer, 2.0, self.buffer)
 		transpose(self.buffer, self.bufferT)
