@@ -82,7 +82,7 @@ class array(object):
 		
 
 
-	def tocpu(self):
+	def tocpu(self):		
 		if self.cpu_arr == None: self.cpu_arr = np.empty(self.shape, dtype=np.float32)
 		lib.funcs.fto_host(self.pt,self.cpu_arr.ctypes.data_as(ct.POINTER(ct.c_float)))
 		return self.cpu_arr
@@ -287,12 +287,20 @@ def get_closest_index(x, top=50):
 	X = bufferT.T	
 	distances = empty((rows,1))
 	row_indexes = []
+	print X.shape[1]
+	distances_cpu = np.empty((rows,),dtype=np.float32)
 	for i in range(X.shape[1]):
+		if i % 100 == 0: print i
 		slice(X, 0, dim, i, i+1, vec)
 		vector_sub(X, vec, buffer)
 		pow(buffer, 2.0, buffer)
 		transpose(buffer, bufferT)
 		row_sum(bufferT, distances)
-		sqrt(distances, distances)
-		row_indexes.append(np.argsort(distances.tocpu())[::-1][0:top])
+		sqrt(distances, distances)	
+		
+		tocpu(distances, distances_cpu)
+		row_indexes.append(np.int32(np.argsort(distances_cpu)[:-top-1:-1]))
 	return np.array(row_indexes)
+
+def tocpu(A, out):
+	lib.funcs.fto_host(A.pt,out.ctypes.data_as(ct.POINTER(ct.c_float)))
