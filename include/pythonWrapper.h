@@ -26,6 +26,7 @@ void add(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
 void sub(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
 void div(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
 void mul(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
+void scalar_mul(FloatMatrix *A, FloatMatrix *out, float scalar);
 void eq(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
 void lt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
 void gt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);

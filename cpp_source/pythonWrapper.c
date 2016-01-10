@@ -22,6 +22,7 @@ void add(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elemen
 void sub(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<ksub>(A, B, out, scalar); }
 void div(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kdiv>(A, B, out, scalar); }
 void mul(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kmul>(A, B, out, scalar); }
+void scalar_mul(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<ksmul>(A, out, scalar); }
 void eq(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<keq>(A, B, out, scalar); }
 void lt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<klt>(A, B, out, scalar); }
 void gt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kgt>(A, B, out, scalar); }

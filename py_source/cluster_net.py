@@ -11,6 +11,60 @@ class Timer(object):
 		
 	def tock(self, name='default'):		
 		return lib.funcs.ftock(self.pt, ct.c_char_p(name))
+	
+class VectorSpace(object):
+	def __init__(self, x, vocabulary=None):
+		self.rows = x.shape[0]
+		self.dim = x.shape[1] 
+		self.bufferT = array(x)
+		self.vec = empty((self.dim,1))
+		self.buffer = empty((self.dim,self.rows))
+		self.X = self.bufferT.T	
+		self.distances = empty((self.rows,1))
+		self.distances_cpu = np.empty((self.rows,),dtype=np.float32)
+		
+		self.vocab2idx = {}
+		self.idx2vocab = {}
+		
+		for i, word in enumerate(vocabulary):
+			word = word.strip().lower()
+			self.vocab2idx[word] = i
+			self.idx2vocab[i] = word
+		
+		
+	def find_nearest(self, strValue, split=True, top=50):				
+		vec = zeros((self.vec.shape[0], 1))
+		slice_buffer = zeros((self.vec.shape[0], 1))
+		
+		word_count = 0
+		for word in strValue.strip().lower().split(' '):
+			if word in self.vocab2idx:
+				word_count +=1
+				idx = self.vocab2idx[word]
+				slice(self.bufferT, idx,idx+1,0,self.dim, slice_buffer)
+				add(vec,slice_buffer,vec)
+				
+		if word_count == 0: word_count = 1
+		
+		scalar_mul(vec,1.0/word_count,vec)		
+		vector_sub(self.X, vec, self.buffer)
+		pow(self.buffer, 2.0, self.buffer)
+		transpose(self.buffer, self.bufferT)
+		row_sum(self.bufferT, self.distances)
+		sqrt(self.distances, self.distances)	
+			
+		tocpu(self.distances, self.distances_cpu)
+		closest_idx = np.int32(np.argsort(self.distances_cpu)[0:top])
+		
+		closest_words = []
+		for idx in closest_idx:
+			closest_words.append(self.idx2vocab[idx])
+			
+		
+		return [closest_idx, closest_words]
+		
+	
+		
 
 class BatchAllocator(object):
 	def __init__(self, X, y, batch_size):
@@ -91,9 +145,10 @@ class array(object):
 	def T(self): return array(None, lib.funcs.fT(self.pt), self.shape[::-1])
 	
 	def __del__(self): lib.funcs.ffree(self.pt)
-
 	
-
+def zeros(shape, dtype=np.float32):
+	rows, cols = handle_shape(shape)
+	return array(None, lib.funcs.ffill_matrix(rows,cols,ct.c_float(0.0)), shape)
 	
 def ones(shape, dtype=np.float32):
 	rows, cols = handle_shape(shape)
@@ -183,6 +238,11 @@ def div(A, B, out=None):
 def mul(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
 	lib.funcs.fmul(A.pt, B.pt, out.pt)
+	return out
+
+def scalar_mul(A, scalar, out=None):
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fscalar_mul(A.pt, out.pt, ct.c_float(scalar))
 	return out
 
 def equal(A, B, out=None):

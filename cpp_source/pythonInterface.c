@@ -45,6 +45,8 @@ extern "C"
 	void fne(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return ne(A,B, out, scalar); }
 	void fsquared_diff(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return squared_diff(A,B, out, scalar); }
 
+	void fscalar_mul(FloatMatrix * A, FloatMatrix *out, float scalar){ scalar_mul(A,out, scalar); }
+
 	void fvadd(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return vadd(A,v, out, 0.0f); }
 	void fvsub(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return vsub(A,v, out, 0.0f); }
 	void ftmatrix(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return tmatrix(A,v, out, 0.0f); }

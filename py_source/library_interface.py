@@ -97,6 +97,8 @@ funcs.ffree.restype = ct.c_void_p
 
 funcs.fsortbykey.restype = ct.c_void_p
 
+funcs.fscalar_mul.restype = ct.c_void_p
+
 
 
 
