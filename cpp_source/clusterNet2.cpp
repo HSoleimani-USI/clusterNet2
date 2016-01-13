@@ -90,6 +90,13 @@ template <typename T> Matrix<T> *ClusterNet2<T>::normal(int rows, int cols, floa
 	return out;
 }
 
+
+template void ClusterNet2<float>::Tdot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template <typename T> void ClusterNet2<T>::Tdot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out){ dot(A,B,out,true,false); }
+
+template void ClusterNet2<float>::dotT(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template <typename T> void ClusterNet2<T>::dotT(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out){ dot(A,B,out,false,true); }
+
 template void ClusterNet2<float>::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
 template <typename T> void ClusterNet2<T>::dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out){ dot(A,B,out,false,false); }
 

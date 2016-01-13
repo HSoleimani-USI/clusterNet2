@@ -13,7 +13,7 @@ class Timer(object):
 		return lib.funcs.ftock(self.pt, ct.c_char_p(name))
 	
 class VectorSpace(object):
-	def __init__(self, x, vocabulary=None):
+	def __init__(self, x, vocabulary=None, stopwords=None):
 		self.rows = x.shape[0]
 		self.dim = x.shape[1] 
 		self.bufferT = array(x)
@@ -24,31 +24,39 @@ class VectorSpace(object):
 		self.distances_cpu = np.empty((self.rows,),dtype=np.float32)
 		
 		self.vocab2idx = {}
-		self.idx2vocab = {}
+		self.idx2vocab = {}		
+		self.stopdict = {}
+		
+		if stopwords != None:
+			if isinstance(stopwords, dict): self.stopdict = stopwords
+			else:
+				for word in stopwords:
+					self.stopdict[word] = 1
 		
 		for i, word in enumerate(vocabulary):
 			word = word.strip().lower()
 			self.vocab2idx[word] = i
 			self.idx2vocab[i] = word
+			
+		
 		
 		
 	def find_nearest(self, strValue, split=True, top=50):				
 		vec = zeros((self.vec.shape[0], 1))
-		slice_buffer = zeros((self.vec.shape[0], 1))
+		slice_buffer = zeros((self.vec.shape[0], 1))	
+			
 		
 		word_count = 0
 		for word in strValue.strip().lower().split(' '):
-			if word in self.vocab2idx:
-				print "contained: ", word
+			if word in self.vocab2idx and word not in self.stopdict:
 				word_count +=1
 				idx = self.vocab2idx[word]
 				slice(self.X,0,self.dim,idx,idx+1,slice_buffer)
 				add(vec,slice_buffer,vec)
 				
-				print sum(slice_buffer), slice_buffer.shape
 				
-				
-		if word_count == 0: word_count = 1
+		if word_count == 0:
+			return [None, None]
 		
 		scalar_mul(vec,1.0/word_count,vec)		
 		

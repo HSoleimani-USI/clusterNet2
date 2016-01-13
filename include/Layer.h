@@ -6,36 +6,36 @@
 #include <basicOps.cuh>
 #include <clusterNet2.h>
 
-template <typename T> class Layer
+class Layer
 {
 public:
-	Matrix<T> *b_grad_next;
+	Matrix<float> *b_grad_next;
 	Layer *next;
 	Layer *prev;
-	Matrix<T> *w_next;
-	Matrix<T> *b_next;
+	Matrix<float> *w_next;
+	Matrix<float> *b_next;
 
-	std::vector<Matrix<T>* > vec_w_grad_next;
-	std::vector<Matrix<T>* > vec_w_grad_next_8bit;
+	std::vector<Matrix<float>* > vec_w_grad_next;
+	std::vector<Matrix<float>* > vec_w_grad_next_8bit;
 
-	Matrix<T> *w_rms_next;
-	Matrix<T> *b_rms_next;
+	Matrix<float> *w_rms_next;
+	Matrix<float> *b_rms_next;
 
-	Matrix<T> *bias_activations;
-	Matrix<T> *out;
-	Matrix<T> *error;
-	Matrix<T> *activation;
+	Matrix<float> *bias_activations;
+	Matrix<float> *out;
+	Matrix<float> *error;
+	Matrix<float> *activation;
 
-	Matrix<T> *out_offsize;
-	Matrix<T> *activation_offsize;
-	Matrix<T> *error_offsize;
-	Matrix<T> *bias_activations_offsize;
-	Matrix<T> *target_matrix_offsize;
+	Matrix<float> *out_offsize;
+	Matrix<float> *activation_offsize;
+	Matrix<float> *error_offsize;
+	Matrix<float> *bias_activations_offsize;
+	Matrix<float> *target_matrix_offsize;
 
-	Matrix<T> *target;
-	Matrix<T> *target_matrix;
+	Matrix<float> *target;
+	Matrix<float> *target_matrix;
 
-	ClusterNet2<T> *GPU;
+	ClusterNet2<float> *GPU;
 
 	int count;
 	int count2;
@@ -58,13 +58,13 @@ public:
 	WeightUpdateType_t UPDATE_TYPE;
 
 	virtual ~Layer();
-	Layer(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet2<T> *gpu);
+	Layer(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet2<float> *gpu);
 	Layer(int unitcount, Unittype_t unit);
 	Layer(int unitcount);
 
-	Layer(int unitcount, int start_batch_size, Unittype_t unit, Layer<T> *prev, ClusterNet2<T> *gpu);
-	Layer(int unitcount, Unittype_t unit, Layer<T> *prev);
-	Layer(int unitcount, Layer<T> *prev);
+	Layer(int unitcount, int start_batch_size, Unittype_t unit, Layer *prev, ClusterNet2<float> *gpu);
+	Layer(int unitcount, Unittype_t unit, Layer *prev);
+	Layer(int unitcount, Layer *prev);
 
 	virtual void forward();
 	virtual void forward(bool useDropout);
@@ -74,20 +74,15 @@ public:
 	virtual void print_error(std::string message);
 	virtual void weight_update();
 
-	virtual void MPI_synchronization_async();
-	virtual void wait_for_synchronization();
-
-	virtual void limit_magnitude();
-
-	virtual void link_with_next_layer(Layer<T> *next_layer);
-	virtual void init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet2<T> *gpu);
+	virtual void link_with_next_layer(Layer *next_layer);
+	virtual void init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet2<float> *gpu);
 
 	virtual void set_hidden_dropout(float dropout);
 
 	virtual void dropout_decay();
 	virtual void learning_rate_decay(float decay_rate);
 
-	virtual Layer<T> *get_root();
+	virtual Layer *get_root();
 
 
 

@@ -294,5 +294,10 @@ void argmax(Matrix<float> *A, Matrix<float> *out)
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
+void RMSprop_with_weight_update(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate)
+{
 
+	int blocks = (RMS->size/THREADS_PER_BLOCKS) + 1;
+	kRMSprop_with_weight_update<<<blocks,THREADS_PER_BLOCKS>>>(RMS->data, grad->data, w->data, RMS_multiplier, learning_rate, RMS->size);
+}
 

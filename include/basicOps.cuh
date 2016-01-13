@@ -115,6 +115,8 @@ void slice(Matrix<float> *A, Matrix<float>*out, int rstart, int rend, int cstart
 void softmax(Matrix<float> *A, Matrix<float> *out);
 void argmax(Matrix<float> *A, Matrix<float> *out);
 
+void RMSprop_with_weight_update(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
+
 template <int reduction> void reduceToRows(Matrix<float> *A, Matrix<float> *vout);
 template <int reduction> float reduceToValue(Matrix<float> *A);
 template <int reduction> float reduceToValue(Matrix<float> *A, Matrix<float> *vout_rows);

@@ -11,13 +11,8 @@ import leveldbX
 import sys
 import lucene
 import cPickle as pickle
-
-from java.io import File
-from org.apache.lucene.analysis.standard import StandardAnalyzer
-from org.apache.lucene.document import Document, Field
-from org.apache.lucene.index import IndexWriter, IndexWriterConfig
-from org.apache.lucene.store import SimpleFSDirectory
-from org.apache.lucene.util import Version
+import time
+import numpy as np
 
 
 
@@ -25,7 +20,7 @@ DBpath = sys.argv[1]
 wiki_xml_path = sys.argv[2]
 
 
-
+'''
 lucene.initVM()
 indexDir = SimpleFSDirectory(File(DBpath+"/lucene/index/"))
 writerConfig = IndexWriterConfig(Version.LUCENE_CURRENT, StandardAnalyzer(Version.LUCENE_CURRENT))
@@ -33,7 +28,7 @@ writer = IndexWriter(indexDir, writerConfig)
 
 print "%d docs in index" % writer.numDocs()
 print "Reading lines from sys.stdin..."
-
+'''
 
 
 print DBpath
@@ -60,21 +55,31 @@ titels = []
 graph = {}
 
 
+'''
+with open(wiki_xml_path,'r') as f:
+    for i, line in enumerate(f):
+        pass
+    print "total lines: ", i
+'''
+total_lines = 833379424
 
+
+t0 = time.time()
 with open(wiki_xml_path,'r') as f:
     
     page = []
     headers = []
     start = False
     end = False
-    for line in f:
-        if '<page>' in line: 
+    for lineno, line in enumerate(f):
+        if '<page>' in line:
             start = True        
             page = []
             headers = []
+            links = []
         
         if start: page.append(line)
-        if '</page>' in line:   
+        if '</page>' in line:
             i+=1       
             title =  rTitle.search(page[1]).group(1)            
             page = "".join(page)
@@ -101,41 +106,42 @@ with open(wiki_xml_path,'r') as f:
                 for match in matches:                                        
                     link = match.split('|')
                     if len(link) > 1:
-                        article = link[0]
-                        link = link[1]
+                        article = link[1]
+                        link = link[0]
                         graph[title][article] = 1
+                    else:
+                        link = link[0]
+                    links.append(link.lower().replace('[','').replace(']',''))
                     
             
             
             
             match = rshortSummary.search(page)
             
-            page_data = {'raw' : page, 'headers' : headers}
+            #print page
+            page_data = {'raw' : page, 'headers' : headers, 'links' : links}
             if match:
                 page_data['short_summary'] = match.group(1)
                             
-            raw.set(title, page_data)
+            raw.set(title.lower(), page_data)
             i+=1
             
-            
+            '''            
             doc = Document()
             doc.add(Field("page", page, Field.Store.YES, Field.Index.ANALYZED))
             writer.addDocument(doc)
-            
+            '''
             if i % 10000 == 0: 
                 print i
-                pickle.dump(graph, open(DBpath + "/graph.p", 'wb'))
-                print "%d docs in index" % writer.numDocs()
+                #print "%d docs in index" % writer.numDocs()
+                
+        
+        if lineno % 1000000 == 0: 
+            lines_per_sec = (lineno+1)/(time.time()-t0)
+            print "{0} lines per second; ETA: {1}h".format(int(lines_per_sec), np.round(((total_lines-lineno)/lines_per_sec)/60./60.,2))
+                #print "%d docs in index" % writer.numDocs()
             
 
 
         
-writer.close()
-
-
-
-
-
-
-#
-
+#writer.close()

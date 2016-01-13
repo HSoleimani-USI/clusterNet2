@@ -106,16 +106,17 @@ template<int operation> __global__ void kElementWise(const float *A, const float
   }
 }
 
+
 template __global__ void kVectorWise<kvadd>(float *A, float *v, float *out, const float scalar, int rows, int size);
 template __global__ void kVectorWise<kvsub>(float *A, float *v, float *out, const float scalar, int rows, int size);
 template __global__ void kVectorWise<ktmatrix>(float *A, float *v, float *out, const float scalar, int rows, int size);
-template <int operation> __global__ void kVectorWise(float *A, float *v, float *out, const float scalar, int cols, int size)
+template <int operation > __global__ void kVectorWise(float *A, float *v, float *out, const float scalar, int cols, int size)
 {
 	const unsigned int numThreads = blockDim.x * gridDim.x;
 	const int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
 
 	int row = 0;
-	for (unsigned int i = idx;i < size; i += numThreads)
+	for (unsigned int i = idx; i < size; i += numThreads)
 	{
 		//this switch operation will be removed by the compiler upon instantiation of the template
 		row = (i / cols);
@@ -123,11 +124,10 @@ template <int operation> __global__ void kVectorWise(float *A, float *v, float *
 		{
 			case kvadd: out[i] =  A[i] + v[row]; break;
 			case kvsub: out[i] =  A[i] - v[row]; break;
-			case ktmatrix: out[i] = i-(row*cols) == (int)v[row] ? 1.0f : 0.0f;
+			case ktmatrix: out[i] = i-(row*cols) == (int)v[row] ? 1.0f : 0.0f; break;
 		}
 	}
 }
-
 
 //for column major data
 __global__ void kSlice(float *A, float *out, int rows_A, int cols_A, int rstart, int rend, int cstart, int cend)
@@ -393,6 +393,27 @@ __global__ void kArgmax(float* A, float* vout, const unsigned int rows, const un
 			vout[row] = max_ids[0];
 
 	}
-
-
 }
+
+__global__ void kRMSprop_with_weight_update(float *RMS, float *grad, float *w, float RMS_multiplier, float learning_rate, int size)
+{
+	  const unsigned int numThreads = blockDim.x * gridDim.x;
+	  const int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
+	  float grad_value = 0.0f;
+	  float RMS_value = 0.0f;
+	  float rms_reciprocal = 1.0f - RMS_multiplier;
+
+	  for (unsigned int i = idx;i < size; i += numThreads)
+	  {
+		  grad_value = grad[i];
+
+		  RMS_value = (RMS_multiplier*RMS[i]) + (powf(grad_value,2.0f)*rms_reciprocal);
+		  grad_value = learning_rate*fdividef(grad_value,(sqrtf(RMS_value)+1.0e-08f));
+
+		  RMS[i] = RMS_value;
+		  w[i] -= grad_value;
+
+	  }
+}
+
+

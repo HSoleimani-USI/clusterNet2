@@ -52,6 +52,9 @@ template<typename T> class ClusterNet2
   		Matrix<T> *rand(int rows, int cols);
   		Matrix<T> *randn(int rows, int cols);
   		Matrix<T> *normal(int rows, int cols, float mean, float std);
+
+  		void Tdot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out);
+  		void dotT(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out);
   		void dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out);
   		void dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out, bool T1, bool T2);
   		curandGenerator_t m_generator;
