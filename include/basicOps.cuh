@@ -60,12 +60,18 @@ typedef enum Operations_t
 	kne,
 	ksquared_diff,
 
+
+
 	kvadd,
 	kvsub,
 	ktmatrix,
 
 	ksmul,
+	ksgt,
+
 	kdropout,
+
+	kprint,
 
 	kcopy
 

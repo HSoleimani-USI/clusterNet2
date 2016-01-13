@@ -7,6 +7,8 @@
 
 #include "BatchAllocator.h"
 
+
+BatchAllocator::BatchAllocator(){}
 BatchAllocator::BatchAllocator(float *X, float *y, int rows, int colsX, int colsY, int batch_size)
 {
 	pinned_bufferX = to_pinned<float>(rows,colsX, X);

@@ -31,7 +31,7 @@ void Layer::init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNe
 	target_matrix = NULL;
 	error = NULL;
 
-	LEARNING_RATE = 0.003f;
+	LEARNING_RATE = 0.001f;
 	RMSPROP_MOMENTUM = 0.9f;
 	UNIT_TYPE = unit;
 	DROPOUT = 0.5f;
@@ -88,6 +88,7 @@ void Layer::link_with_next_layer(Layer *next_layer)
 	next->out = zeros<float>(BATCH_SIZE, next->UNITCOUNT);
 	next->activation = zeros<float>(BATCH_SIZE, next->UNITCOUNT);
 	next->error = zeros<float>(BATCH_SIZE, next->UNITCOUNT);
+
 	next->bias_activations = ones<float>(1, BATCH_SIZE);
 	next->prev = this;
 }
@@ -130,9 +131,9 @@ void Layer::unit_activation(bool useDropout)
 void Layer::apply_dropout()
 {
 	if(UNIT_TYPE != Softmax)
-		{
-			GPU->dropout(activation,out,DROPOUT);
-		}
+	{
+		GPU->dropout(activation,out,DROPOUT);
+	}
 }
 
 void Layer::activation_gradient()
@@ -208,7 +209,6 @@ void Layer::forward(bool useDropout)
 {
 	handle_offsize();
 	if(!prev){  unit_activation(useDropout); if(useDropout){apply_dropout(); } next->forward(useDropout); return; }
-	if(useDropout){  prev->weight_update(); }
 
 
 
@@ -260,14 +260,20 @@ void Layer::backward_errors()
 	if(target)
 	{
 		if(out->cols != target->cols && !target_matrix){ target_matrix = zeros<float>(BATCH_SIZE,out->cols); }
-		if(out->cols != target->cols){ vectorWise<ktmatrix>(NULL,target, target_matrix,0.0f); elementWise<ksub>(out,target_matrix,error,0.0f); return; }
+		if(out->cols != target->cols)
+		{
+			vectorWise<ktmatrix>(target,target, target_matrix,0.0f);
+			elementWise<ksub>(out,target_matrix,error,0.0f); return;
+		}
 		else{ elementWise<ksub>(activation,target,error,0.0f);  return;}
+
+
+		elementWiseUnary<ksmul>(out,out,1.0f/error->rows); return;
 	}
 
 	if(UNIT_TYPE == Input){ backward_grads(); return; }
 
 	activation_gradient();
-
 	GPU->dotT(next->error, w_next,error);
 	elementWise<kmul>(error, out, error,0.0f);
 
@@ -278,7 +284,6 @@ void Layer::backward_grads()
 	GPU->Tdot(activation, next->error, vec_w_grad_next[0]);
 	if(!next->target){ next->backward_grads(); }
 	GPU->dot(next->bias_activations, next->error,b_grad_next);
-
 }
 
 
@@ -286,7 +291,7 @@ void Layer::weight_update()
 {
 	if(target){ return; }
 
-	//next->weight_update();
+	next->weight_update();
 
 	switch(UPDATE_TYPE)
 	{

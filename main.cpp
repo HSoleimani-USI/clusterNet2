@@ -1,5 +1,6 @@
 #include "clusterNet2.h"
 #include "Timer.cuh"
+#include "NeuralNetwork.h"
 
 using namespace std;
 
@@ -19,8 +20,32 @@ void test_timer()
 	t.tock();
 }
 
+void test_neural_network()
+{
+
+	ClusterNet2<float> *gpu = new ClusterNet2<float>();
+
+	Matrix<float> *X_train = gpu->rand(1000,10);
+	Matrix<float> *y_train = gpu->rand(1000,1);
+	elementWiseUnary<kprint>(y_train,y_train,0.0f);
+	elementWiseUnary<ksgt>(y_train, y_train, 0.5f);
+
+	elementWiseUnary<kprint>(y_train,y_train,0.0f);
+
+	Matrix<float> *X_cv = gpu->rand(200,10);
+	Matrix<float> *y_cv = gpu->rand(200,1);
+	elementWiseUnary<ksgt>(y_cv, y_cv, 0.5f);
+
+	BatchAllocator b_train = BatchAllocator(X_train->to_host()->data, y_train->to_host()->data, X_train->rows, X_train->cols,y_train->cols,128);
+	BatchAllocator b_cv = BatchAllocator(X_cv->to_host()->data, y_cv->to_host()->data, X_cv->rows, X_cv->cols,y_cv->cols,128);
+	NeuralNetwork net = NeuralNetwork(gpu, b_train, b_cv);
+
+	net.run();
+}
+
 int main(int argc, char const *argv[]) {
 
+	test_neural_network();
 
 	Matrix<float> *A = empty<float>(10, 10);
 

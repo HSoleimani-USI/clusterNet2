@@ -15,6 +15,7 @@
 
 class BatchAllocator {
 public:
+	BatchAllocator();
 	BatchAllocator(float *X, float *y, int rows, int colsX, int colsY, int batch_size);
 	Matrix<float> *pinned_bufferX;
 	Matrix<float> *pinned_bufferY;

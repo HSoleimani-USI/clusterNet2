@@ -14,10 +14,12 @@
 class NeuralNetwork
 {
 public:
-	NeuralNetwork(BatchAllocator b);
-	void add(Layer layer);
+	NeuralNetwork(ClusterNet2<float> *gpu, BatchAllocator b_train, BatchAllocator b_cv);
+	void run();
 private:
-	std::vector<Layer> _layers;
+	BatchAllocator _b_train;
+	BatchAllocator _b_cv;
+	ClusterNet2<float> *_gpu;
 };
 
 #endif /* NEURALNETWORK_H_ */

@@ -197,11 +197,15 @@ template void elementWiseUnary<klogistic_grad>(Matrix<float> *A, Matrix<float>*o
 template void elementWiseUnary<krectified>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWiseUnary<krectified_grad>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWiseUnary<ksmul>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void elementWiseUnary<ksgt>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWiseUnary<kcopy>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void elementWiseUnary<kprint>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template <int action> void elementWiseUnary(Matrix<float> *A, Matrix<float>*out, float scalar)
 {
   kElementWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, NULL, out->data,scalar, out->size);
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
+
+  if(action == kprint){ cudaDeviceSynchronize(); }
 }
 
 //elementwise operation with a two matrix arguments
