@@ -4,6 +4,7 @@ import numpy as np
 import numpy.testing as t
 from scipy.spatial.distance import cdist
 from cluster_net import NeuralNetwork
+import time
 
 
 
@@ -314,10 +315,16 @@ def test_get_closest_index():
     
 def test_neural_net():
     X = np.float32(np.load('train_small_X.npy'))
-    y = np.float32(np.load('train_small_y.npy')).reshape(1000,1)    
+    y = np.float32(np.load('train_small_y.npy'))  
+    t0 = time.time()
+    #X = np.float32(np.load('/home/tim/data/mnist/train_X.npy'))
+    #y = np.float32(np.load('/home/tim/data/mnist/train_y.npy'))  
     net = NeuralNetwork(X, y)
     
     net.fit()
+    print time.time()-t0
+    #assert False
+    
     
     
     

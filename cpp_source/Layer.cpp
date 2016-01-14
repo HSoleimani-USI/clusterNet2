@@ -26,6 +26,8 @@ void Layer::init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNe
 	w_rms_next = NULL;
 	b_rms_next = NULL;
 	b_grad_next = NULL;
+	eq = NULL;
+	result = NULL;
 
 	target = NULL;
 	target_matrix = NULL;
@@ -79,7 +81,8 @@ void Layer::link_with_next_layer(Layer *next_layer)
 
 	w_next = GPU->normal(UNITCOUNT,next_layer->UNITCOUNT,0.0f,0.01f);;
 	w_rms_next = zeros<float>(UNITCOUNT,next_layer->UNITCOUNT);
-	for(int i = 0; i < 1; i++) vec_w_grad_next.push_back(zeros<float>(UNITCOUNT,next_layer->UNITCOUNT));
+
+	w_grad_next = zeros<float>(UNITCOUNT,next_layer->UNITCOUNT);
 
 	b_next = zeros<float>(1,next_layer->UNITCOUNT);
 	b_grad_next = zeros<float>(1,next_layer->UNITCOUNT);
@@ -156,58 +159,9 @@ void Layer::activation_gradient()
 
 }
 
-void Layer::handle_offsize()
-{
-	if(!prev)
-	{
-		if(!out){ out = empty<float>(activation->rows, activation->cols); }
-		else if(out->rows != activation->rows)
-		{
-			cudaFree(out->data);
-			free(out);
-			out = empty<float>(activation->rows, activation->cols);
-		}
-	}
-	else
-	{
-		if(prev->out->rows != out->rows && (!out_offsize || out_offsize->rows != prev->out->rows))
-		{
-			if(out_offsize)
-			{
-				cudaFree(out_offsize->data);
-				cudaFree(activation_offsize->data);
-				cudaFree(error_offsize->data);
-				cudaFree(bias_activations_offsize->data);
-				cudaFree(target_matrix_offsize->data);
-			}
-
-			out_offsize = empty<float>(prev->out->rows, UNITCOUNT);
-			activation_offsize = empty<float>(prev->out->rows, UNITCOUNT);
-			error_offsize = empty<float>(prev->out->rows, UNITCOUNT);
-			bias_activations_offsize = empty<float>(1,prev->out->rows);
-			target_matrix_offsize = zeros<float>(prev->out->rows, UNITCOUNT);
-		}
-
-
-		if(prev->out->rows != out->rows)
-		{
-
-			Matrix<float> *swap;
-			swap = out; out = out_offsize; out_offsize = swap;
-			swap = activation; activation = activation_offsize; activation_offsize = swap;
-			swap = error; error = error_offsize; error_offsize = swap;
-			swap = bias_activations; bias_activations = bias_activations_offsize; bias_activations_offsize = swap;
-			swap = target_matrix; target_matrix = target_matrix_offsize; target_matrix_offsize = swap;
-
-		}
-	}
-
-}
-
 void Layer::forward(){ forward(true); }
 void Layer::forward(bool useDropout)
 {
-	handle_offsize();
 	if(!prev){  unit_activation(useDropout); if(useDropout){apply_dropout(); } next->forward(useDropout); return; }
 
 
@@ -229,21 +183,20 @@ void Layer::running_error()
 
 	string text = "";
 
-	Matrix<float> *result = empty<float>(target->rows,1);
-	Matrix<float> *eq = empty<float>(target->rows, target->cols);
+	if(!result)
+	{
+		result = empty<float>(target->rows,target->cols);
+		eq = empty<float>(target->rows, target->cols);
+	}
 
 	float sum_value = 0.0f;
 
 	switch(COST)
 	{
 		case Misclassification:
-			//elementWiseUnary<kprint>(out, out, 0.0f);
 			argmax(out, result);
 			elementWise<keq>(result,target,eq,0.0f);
-			//elementWiseUnary<kprint>(eq, eq, 0.0f);
 			sum_value = reduceToValue<rsum>(eq);
-			//cout << sum_value << endl;
-			//cout << out->rows << endl;
 			RUNNING_ERROR += (out->rows  - sum_value);
 			RUNNING_SAMPLE_SIZE += out->rows;
 			break;
@@ -251,9 +204,6 @@ void Layer::running_error()
 			throw "Unknown cost function!";
 			break;
 	}
-
-	cudaFree(result->data);
-	cudaFree(eq->data);
 }
 
 
@@ -285,7 +235,7 @@ void Layer::backward_errors()
 
 void Layer::backward_grads()
 {
-	GPU->Tdot(activation, next->error, vec_w_grad_next[0]);
+	GPU->Tdot(activation, next->error, w_grad_next);
 	if(!next->target){ next->backward_grads(); }
 	GPU->dot(next->bias_activations, next->error,b_grad_next);
 }
@@ -300,12 +250,12 @@ void Layer::weight_update()
 	switch(UPDATE_TYPE)
 	{
 		case RMSProp:
-			RMSprop_with_weight_update(w_rms_next,vec_w_grad_next[0],w_next,RMSPROP_MOMENTUM,LEARNING_RATE);
+			RMSprop_with_weight_update(w_rms_next,w_grad_next,w_next,RMSPROP_MOMENTUM,LEARNING_RATE);
 			RMSprop_with_weight_update(b_rms_next,b_grad_next,b_next,RMSPROP_MOMENTUM,LEARNING_RATE/100.0f);
 			break;
 		case PlainSGD:
-			elementWiseUnary<ksmul>(vec_w_grad_next[0],vec_w_grad_next[0],LEARNING_RATE);
-			elementWise<ksub>(w_next,vec_w_grad_next[0],w_next,0.0f);
+			elementWiseUnary<ksmul>(w_grad_next,w_grad_next,LEARNING_RATE);
+			elementWise<ksub>(w_next,w_grad_next,w_next,0.0f);
 			break;
 		default:
 			throw "Unknown update type!";

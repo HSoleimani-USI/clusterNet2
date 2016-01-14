@@ -15,8 +15,7 @@ public:
 	Matrix<float> *w_next;
 	Matrix<float> *b_next;
 
-	std::vector<Matrix<float>* > vec_w_grad_next;
-	std::vector<Matrix<float>* > vec_w_grad_next_8bit;
+	Matrix<float>* w_grad_next;
 
 	Matrix<float> *w_rms_next;
 	Matrix<float> *b_rms_next;
@@ -26,14 +25,11 @@ public:
 	Matrix<float> *error;
 	Matrix<float> *activation;
 
-	Matrix<float> *out_offsize;
-	Matrix<float> *activation_offsize;
-	Matrix<float> *error_offsize;
-	Matrix<float> *bias_activations_offsize;
-	Matrix<float> *target_matrix_offsize;
-
 	Matrix<float> *target;
 	Matrix<float> *target_matrix;
+
+	Matrix<float> *result;
+	Matrix<float> *eq;
 
 	ClusterNet2<float> *GPU;
 
