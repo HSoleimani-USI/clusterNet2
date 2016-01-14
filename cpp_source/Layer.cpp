@@ -309,9 +309,3 @@ Layer *Layer::get_root()
 }
 
 
-Layer::~Layer()
-{
-	cout << "destruct" << endl;
-}
-
-

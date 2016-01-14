@@ -53,7 +53,6 @@ public:
 
 	WeightUpdateType_t UPDATE_TYPE;
 
-	virtual ~Layer();
 	Layer(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet2<float> *gpu);
 	Layer(int unitcount, Unittype_t unit);
 	Layer(int unitcount);

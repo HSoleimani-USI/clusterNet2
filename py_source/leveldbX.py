@@ -26,7 +26,7 @@ class Table(object):
     def get(self, key):
         ret = None
         try:
-            ret = self.db.Get(join(self.name, key))
+            ret = simplejson.load(self.db.Get(join(self.name, key)))
         except KeyError:
             ret = None
             
