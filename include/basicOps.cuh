@@ -40,40 +40,40 @@ using std::endl;
 
 typedef enum Operations_t
 {
-	kabs,
-	klog,
-	ksqrt,
-	kpow,
-	kadd,
-	ksub,
-	kdiv,
-	kmul,
-	klogistic,
-	klogistic_grad,
-	krectified,
-	krectified_grad,
-	keq,
-	klt,
-	kgt,
-	kge,
-	kle,
-	kne,
-	ksquared_diff,
+	kabs = 0,
+	klog = 1,
+	ksqrt = 2,
+	kpow = 3,
+	kadd = 4,
+	ksub = 5,
+	kdiv = 6,
+	kmul = 7,
+	klogistic = 8,
+	klogistic_grad = 9,
+	krectified = 10,
+	krectified_grad = 11,
+	keq = 12,
+	klt = 13,
+	kgt = 14,
+	kge = 15,
+	kle = 16,
+	kne = 17,
+	ksquared_diff = 18,
 
 
 
-	kvadd,
-	kvsub,
-	ktmatrix,
+	kvadd = 19,
+	kvsub = 20,
+	ktmatrix = 21,
 
-	ksmul,
-	ksgt,
+	ksmul = 22,
+	ksgt = 23,
 
-	kdropout,
+	kdropout = 24,
 
-	kprint,
+	kprint = 25,
 
-	kcopy
+	kcopy = 26
 
 } Operations_t;
 

@@ -3,6 +3,7 @@ import nose
 import numpy as np
 import numpy.testing as t
 from scipy.spatial.distance import cdist
+from cluster_net import NeuralNetwork
 
 
 
@@ -322,6 +323,16 @@ def test_get_closest_index():
     
     
     t.assert_equal(np.array(results), results_gpu)
+    
+    
+def test_neural_net():
+    X = np.float32(np.load('train_small_X.npy'))
+    y = np.float32(np.load('train_small_y.npy')).reshape(1000,1)    
+    net = NeuralNetwork(X, y)
+    
+    net.fit()
+    
+    
     
     
     

@@ -237,9 +237,13 @@ void Layer::running_error()
 	switch(COST)
 	{
 		case Misclassification:
+			//elementWiseUnary<kprint>(out, out, 0.0f);
 			argmax(out, result);
 			elementWise<keq>(result,target,eq,0.0f);
+			//elementWiseUnary<kprint>(eq, eq, 0.0f);
 			sum_value = reduceToValue<rsum>(eq);
+			//cout << sum_value << endl;
+			//cout << out->rows << endl;
 			RUNNING_ERROR += (out->rows  - sum_value);
 			RUNNING_SAMPLE_SIZE += out->rows;
 			break;

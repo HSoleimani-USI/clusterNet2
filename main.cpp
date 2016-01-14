@@ -27,20 +27,21 @@ void test_neural_network()
 
 	Matrix<float> *X_train = gpu->rand(1000,10);
 	Matrix<float> *y_train = gpu->rand(1000,1);
-	elementWiseUnary<kprint>(y_train,y_train,0.0f);
 	elementWiseUnary<ksgt>(y_train, y_train, 0.5f);
-
-	elementWiseUnary<kprint>(y_train,y_train,0.0f);
 
 	Matrix<float> *X_cv = gpu->rand(200,10);
 	Matrix<float> *y_cv = gpu->rand(200,1);
 	elementWiseUnary<ksgt>(y_cv, y_cv, 0.5f);
 
-	BatchAllocator b_train = BatchAllocator(X_train->to_host()->data, y_train->to_host()->data, X_train->rows, X_train->cols,y_train->cols,128);
-	BatchAllocator b_cv = BatchAllocator(X_cv->to_host()->data, y_cv->to_host()->data, X_cv->rows, X_cv->cols,y_cv->cols,128);
-	NeuralNetwork net = NeuralNetwork(gpu, b_train, b_cv);
+	BatchAllocator *b_train = new BatchAllocator(X_train->to_host()->data, y_train->to_host()->data, X_train->rows, X_train->cols,y_train->cols,128);
+	BatchAllocator *b_cv = new BatchAllocator(X_cv->to_host()->data, y_cv->to_host()->data, X_cv->rows, X_cv->cols,y_cv->cols,128);
 
-	net.run();
+	std::vector<int> layers = std::vector<int>();
+	layers.push_back(1024);
+	layers.push_back(1024);
+	NeuralNetwork net = NeuralNetwork(gpu, b_train, b_cv, layers, Rectified_Linear, 2);
+
+	net.fit();
 }
 
 int main(int argc, char const *argv[]) {

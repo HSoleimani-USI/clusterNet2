@@ -33,6 +33,9 @@ funcs.fgetBatchY.restype = ct.POINTER(FloatMatrix)
 funcs.fgetOffBatchX.restype = ct.POINTER(FloatMatrix)
 funcs.fgetOffBatchY.restype = ct.POINTER(FloatMatrix)
 
+funcs.fget_neural_net.restype = ct.c_void_p
+funcs.ffit_neural_net.restype = ct.c_void_p
+
 funcs.ffabs.restype = ct.c_void_p
 funcs.flog.restype = ct.c_void_p
 funcs.fsqrt.restype = ct.c_void_p
