@@ -28,16 +28,22 @@ template <typename T> void to_host(Matrix<T> *gpu, T *cpu)
 //pinned memory needed for asynchronous copies between CPU and GPU
 //pinned memory makes sure that we do not have to allocate a page CPU buffer before the copy
 //this makes the copy faster and asynchronous with respect to the caller
+
 template Matrix<int> *to_pinned(int rows, int cols, int *cpu);
 template Matrix<float> *to_pinned(int rows, int cols, float *cpu);
-template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu)
+template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu){ return to_pinned<T>(rows, cols, cpu,sizeof(T)*rows*cols); }
+
+template Matrix<int> *to_pinned(int rows, int cols, int *cpu, size_t bytes_to_copy);
+template Matrix<float> *to_pinned(int rows, int cols, float *cpu, size_t bytes_to_copy);
+template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu, size_t bytes_to_copy)
 {
 	int size = rows*cols;
 	size_t bytes = sizeof(T)*size;
 	Matrix<T> *out = (Matrix<T>*)malloc(sizeof(Matrix<T>));
 	T *pinned_ptr;
-	cudaHostAlloc(&pinned_ptr, bytes, cudaHostAllocPortable);
-	CUDA_CHECK_RETURN(cudaMemcpy(pinned_ptr,cpu,bytes,cudaMemcpyDefault));
+	CUDA_CHECK_RETURN(cudaHostAlloc(&pinned_ptr, bytes, cudaHostAllocPortable));
+	for(int i = 0; i < rows*cols; i++){ pinned_ptr[i] = 0.0f;}
+	CUDA_CHECK_RETURN(cudaMemcpy(pinned_ptr,cpu,bytes_to_copy,cudaMemcpyDefault));
 
 	out->bytes = bytes;
 	out->size = size;

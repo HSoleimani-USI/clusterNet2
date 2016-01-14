@@ -11,13 +11,13 @@
 BatchAllocator::BatchAllocator(){}
 BatchAllocator::BatchAllocator(float *X, float *y, int rows, int colsX, int colsY, int batch_size)
 {
-	pinned_bufferX = to_pinned<float>(rows,colsX, X);
-	pinned_bufferY = to_pinned<float>(rows,colsY, y);
+
+	int offsize = rows % batch_size > 0 ? batch_size-(rows % batch_size) : 0;
+	pinned_bufferX = to_pinned<float>(rows + offsize,colsX, X, sizeof(float)*rows*colsX);
+	pinned_bufferY = to_pinned<float>(rows + offsize,colsY, y,sizeof(float)*rows*colsY);
 
 	BATCH_SIZE = batch_size;
-	BATCHES = (rows/batch_size) +1;
-	OFFBATCH_SIZE = rows - ((BATCHES-1)*BATCH_SIZE);
-	OFFBATCH_SIZE = OFFBATCH_SIZE == 0 ? BATCH_SIZE : OFFBATCH_SIZE;
+	BATCHES = (rows + offsize)/batch_size;
 
 	CURRENT_BATCH = 0;
 	EPOCH = 0;
@@ -27,9 +27,6 @@ BatchAllocator::BatchAllocator(float *X, float *y, int rows, int colsX, int cols
 
 	nextbatchX = empty<float>(BATCH_SIZE, colsX);
 	nextbatchY = empty<float>(BATCH_SIZE, colsY);
-	//offbatch buffer is needed for the last batch: e.g. 1000/128 -> last batch is of size 108
-	nextoffbatchX = empty<float>(OFFBATCH_SIZE, colsX);
-	nextoffbatchY = empty<float>(OFFBATCH_SIZE, colsY);
 
 	cudaStreamCreate(&streamX);
 	cudaStreamCreate(&streamY);
@@ -38,26 +35,15 @@ BatchAllocator::BatchAllocator(float *X, float *y, int rows, int colsX, int cols
 
 //we need to fetch the current batch in python, because the struct values with the dimensions does not update automatically
 Matrix<float> *BatchAllocator::get_current_batchX()
-{ return CURRENT_BATCH == 0 && EPOCH > 0 ? nextoffbatchX : batchX; }
+{ return batchX; }
 
 Matrix<float> *BatchAllocator::get_current_batchY()
-{ return CURRENT_BATCH == 0 && EPOCH > 0 ? nextoffbatchY : batchY; }
+{ return batchY; }
 
 void BatchAllocator::allocate_next_batch_async()
 {
-
-	if(CURRENT_BATCH == BATCHES-1)
-	{
-		//this is only asynchronous for pinned memory
-		cudaMemcpyAsync(nextoffbatchX->data,&pinned_bufferX->data[BATCH_SIZE*pinned_bufferX->cols*CURRENT_BATCH], nextoffbatchX->bytes, cudaMemcpyHostToDevice,streamX);
-		cudaMemcpyAsync(nextoffbatchY->data,&pinned_bufferY->data[BATCH_SIZE*pinned_bufferY->cols*CURRENT_BATCH], nextoffbatchY->bytes, cudaMemcpyHostToDevice,streamY);
-
-	}
-	else
-	{
 		cudaMemcpyAsync(nextbatchX->data,&pinned_bufferX->data[BATCH_SIZE*pinned_bufferX->cols*CURRENT_BATCH], nextbatchX->bytes, cudaMemcpyHostToDevice,streamX);
 		cudaMemcpyAsync(nextbatchY->data,&pinned_bufferY->data[BATCH_SIZE*pinned_bufferY->cols*CURRENT_BATCH], nextbatchY->bytes, cudaMemcpyHostToDevice,streamY);
-	}
 }
 
 void BatchAllocator::replace_current_with_next_batch()
@@ -65,18 +51,13 @@ void BatchAllocator::replace_current_with_next_batch()
 
 	cudaStreamSynchronize(streamX);
 	cudaStreamSynchronize(streamY);
+	boost::swap(batchX,nextbatchX);
+	boost::swap(batchY,nextbatchY);
 
-	if(CURRENT_BATCH < BATCHES-1)
-	{
-		//because these batches have the same size we can just swap them
-		boost::swap(batchX,nextbatchX);
-		boost::swap(batchY,nextbatchY);
+	CURRENT_BATCH += 1;
 
-		CURRENT_BATCH += 1;
-	}
-	else if(CURRENT_BATCH == BATCHES-1)
+	if(CURRENT_BATCH == BATCHES)
 	{
-		//we filled the offbatch with memory here, we return it to the user via the get_current_batch methods
 		CURRENT_BATCH = 0;
 		EPOCH += 1;
 	}

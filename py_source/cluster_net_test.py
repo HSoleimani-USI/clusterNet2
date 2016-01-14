@@ -178,8 +178,7 @@ def test_to_pinned():
     B = gpu.to_pinned(A)
     
     t.assert_almost_equal(A,B , 3, "Pinned not working")
-    
-    
+     
 def test_batch_allocator():
     X = np.float32(np.random.rand(1000,17))
     Y = np.float32(np.random.rand(1000,13))
@@ -187,19 +186,25 @@ def test_batch_allocator():
         
     alloc = gpu.BatchAllocator(X,Y,batch_size)  
     
-    
+
     alloc.alloc_next_async()
     for i in range(3):  
         for i in range(0,1000,batch_size):
             batchX = X[i:i+batch_size]
             batchY = Y[i:i+batch_size]
-                    
+            
             alloc.replace_current_with_next_batch()
-            t.assert_almost_equal(alloc.X.tocpu(),batchX , 3, "Batch allocator not working")  
-            t.assert_almost_equal(alloc.Y.tocpu(),batchY , 3, "Batch allocator not working")        
+            
+            if i+batch_size > 1000:
+                t.assert_almost_equal(alloc.X.tocpu()[:batchX.shape[0]],batchX , 3, "Batch allocator not working")  
+                t.assert_almost_equal(alloc.Y.tocpu()[:batchY.shape[0]],batchY , 3, "Batch allocator not working")   
+            else:
+                t.assert_almost_equal(alloc.X.tocpu(),batchX , 3, "Batch allocator not working")  
+                t.assert_almost_equal(alloc.Y.tocpu(),batchY , 3, "Batch allocator not working")        
             alloc.alloc_next_async()   
-        
     
+  
+
 def test_row_reductions():
     A = np.float32(np.random.randn(100,100))
     B = gpu.array(A)
@@ -260,25 +265,7 @@ def test_free():
         gpu.dot(A,B,C)
         del A, B, C
          
-'''
-# not working on Maxwell right now   
-def test_sortbykey():
-    
-    for i in range(1000):
-        dim = np.random.randint(10,1000)
-        keys = np.float32(np.random.rand(dim))
-        values = np.float32(np.random.rand(dim))
-        
-        Keys = gpu.array(keys)
-        Values = gpu.array(values)
-        gpu.sortbykey(Keys, Values)
-        order = np.argsort(keys)
-        
-        result = Values.tocpu()
-        print dim, i
-        print np.sum(np.abs((result-values[order])))
-        t.assert_equal(values[order], result)
-'''  
+
         
 def test_euclidean_distance():
     x = np.float32(np.random.rand(100,10))
@@ -338,4 +325,24 @@ def test_neural_net():
     
     
     
+
     
+'''
+# not working on Maxwell right now   
+def test_sortbykey():
+    
+    for i in range(1000):
+        dim = np.random.randint(10,1000)
+        keys = np.float32(np.random.rand(dim))
+        values = np.float32(np.random.rand(dim))
+        
+        Keys = gpu.array(keys)
+        Values = gpu.array(values)
+        gpu.sortbykey(Keys, Values)
+        order = np.argsort(keys)
+        
+        result = Values.tocpu()
+        print dim, i
+        print np.sum(np.abs((result-values[order])))
+        t.assert_equal(values[order], result)
+'''  

@@ -125,9 +125,6 @@ class BatchAllocator(object):
 					y.ctypes.data_as(ct.POINTER(ct.c_float)),
 					int(X.shape[0]), int(X.shape[1]), int(y.shape[1]),
 					int(batch_size))
-	
-		self.offbatchX = array(None, lib.funcs.fgetOffBatchX(self.pt), (self.offsize, X.shape[1]))
-		self.offbatchY = array(None, lib.funcs.fgetOffBatchY(self.pt), (self.offsize, y.shape[1]))
 		
 		self.batchX = array(None, lib.funcs.fgetBatchX(self.pt), (batch_size, X.shape[1]))
 		self.batchY = array(None, lib.funcs.fgetBatchY(self.pt), (batch_size, y.shape[1]))
@@ -142,21 +139,15 @@ class BatchAllocator(object):
 	
 	@property
 	def X(self):		
-		if self.current_batch == 0 and self.epoch > 0: 
-			return self.offbatchX
-		else:
-			pt =  lib.funcs.fgetBatchX(self.pt)
-			self.batchX.pt = pt
-			return self.batchX
+		pt =  lib.funcs.fgetBatchX(self.pt)
+		self.batchX.pt = pt
+		return self.batchX
 		
 	@property
-	def Y(self):		
-		if self.current_batch == 0 and self.epoch > 0: 
-			return self.offbatchY
-		else:
-			pt =  lib.funcs.fgetBatchY(self.pt)
-			self.batchY.pt = pt
-			return self.batchY
+	def Y(self):	
+		pt =  lib.funcs.fgetBatchY(self.pt)
+		self.batchY.pt = pt
+		return self.batchY
 	
 		
 		

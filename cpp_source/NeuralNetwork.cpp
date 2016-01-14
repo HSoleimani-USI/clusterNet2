@@ -46,7 +46,7 @@ void NeuralNetwork::fit()
 		cout << "EPOCH: " << epoch + 1 << endl;
 
 
-		for(int i = 0; i < _b_train->BATCHES-1; i++)
+		for(int i = 0; i < _b_train->BATCHES; i++)
 		{
 			_b_train->replace_current_with_next_batch();
 			_b_train->allocate_next_batch_async();
@@ -62,7 +62,7 @@ void NeuralNetwork::fit()
 		_b_train->replace_current_with_next_batch();
 		_b_train->allocate_next_batch_async();
 
-		for(int i = 0; i < _b_train->BATCHES-1; i++)
+		for(int i = 0; i < _b_train->BATCHES; i++)
 		{
 			_b_train->replace_current_with_next_batch();
 			_b_train->allocate_next_batch_async();
@@ -77,7 +77,7 @@ void NeuralNetwork::fit()
 		start->print_error("Train error: ");
 
 
-		for(int i = 0; i < _b_cv->BATCHES-1; i++)
+		for(int i = 0; i < _b_cv->BATCHES; i++)
 		{
 			_b_cv->replace_current_with_next_batch();
 			_b_cv->allocate_next_batch_async();

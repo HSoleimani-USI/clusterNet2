@@ -104,6 +104,7 @@ template<typename T> Matrix<T> *ones(int rows, int cols);
 template<typename T> void to_host(Matrix<T> *gpu, T *cpu);
 template<typename T> void to_gpu(T *cpu, Matrix<T> *gpu);
 template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu);
+template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu, size_t bytes_to_copy);
 
 
 template <typename T> void sortbykey(Matrix<T> *keys, Matrix<T> *values);
