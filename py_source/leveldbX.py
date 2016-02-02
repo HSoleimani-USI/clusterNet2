@@ -16,12 +16,12 @@ home = expanduser("~")
 
 
 class Table(object):
-    def __init__(self, name, path, ip, hasServer):
+    def __init__(self, name, path, address, hasServer):
         self.name = name
         self.queue = Queue()
         self.hasServer = hasServer
         self.db = leveldb.LevelDB(join(path,name))
-        self.ip = ip
+        self.address = address
         
     def get(self, key):
         ret = None
@@ -31,7 +31,7 @@ class Table(object):
             ret = None
             
         if self.hasServer and ret == None: 
-            r = urllib2.urlopen(join(self.ip, self.name, key))
+            r = urllib2.urlopen(join(self.address, self.name, key))
             value = simplejson.load(r)
             self.set(key, value)
             return value
@@ -53,6 +53,8 @@ class Table(object):
                 response = urllib2.urlopen(req, simplejson.dumps(value))
             
             self.set(key, value)
+        else:
+            print 'Server not reachable!'
         
         
     def delete(self, key):
@@ -67,9 +69,11 @@ class Table(object):
 
 
 class LevelDBX(object):
-    def __init__(self, isServer = False, path=join(home, '.nlpdb'), ip='http://127.0.0.1:5000'):
+    def __init__(self, isServer = False, path=join(home, '.nlpdb'), ip='http://127.0.0.1:5000', port=5000):
         self.isServer = isServer
         self.ip = ip
+        self.port = 5000
+        self.address = "http://{0}:{1}".format(ip,port)
         
         if isServer:
             self.path = join(home,'.nlpdb_server')     
@@ -79,7 +83,7 @@ class LevelDBX(object):
         self.db = leveldb.LevelDB(self.path)
         
         try:
-            stamp = parser.parse(simplejson.load(urllib2.urlopen(join(self.ip, 'ping'))))
+            stamp = parser.parse(simplejson.load(urllib2.urlopen(join( self.address, 'ping'))))
         except:
             stamp = None
         if stamp != None: self.hasServer = True
@@ -90,7 +94,7 @@ class LevelDBX(object):
             self.bgServer.join()
         
     def get_table(self, name):
-        return Table(name, self.path, self.ip, self.hasServer)
+        return Table(name, self.path,  self.address, self.hasServer)
     
     def table_exists(self, name):
         return exists(join(self.path, name))
