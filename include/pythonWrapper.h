@@ -1,9 +1,9 @@
 #include <basicOps.cuh>
-#include <clusterNet2.h>
+#include <ClusterNet.h>
 #include <BatchAllocator.h>
 #include <NeuralNetwork.h>
 
-typedef ClusterNet2<float> ClusterNet;
+typedef ClusterNet ClusterNet;
 typedef Matrix<float> FloatMatrix;
 typedef BatchAllocator FloatBatchAllocator;
 

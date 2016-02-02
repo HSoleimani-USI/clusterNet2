@@ -5,18 +5,18 @@ using std::endl;
 using std::string;
 using std::vector;
 
-Layer::Layer(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet2<float> *gpu){ init(unitcount, start_batch_size,unit,gpu); }
+Layer::Layer(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu){ init(unitcount, start_batch_size,unit,gpu); }
 Layer::Layer(int unitcount, Unittype_t unit){ init(unitcount, 0,unit, NULL); }
 Layer::Layer(int unitcount){ init(unitcount, 0,Rectified_Linear, NULL); }
 
 
-Layer::Layer(int unitcount, int start_batch_size, Unittype_t unit, Layer *prev, ClusterNet2<float> *gpu)
+Layer::Layer(int unitcount, int start_batch_size, Unittype_t unit, Layer *prev, ClusterNet *gpu)
 { init(unitcount, start_batch_size,unit,gpu); prev->link_with_next_layer(this); }
 Layer::Layer(int unitcount, Unittype_t unit, Layer *prev){ init(unitcount, 0,unit, prev->GPU); prev->link_with_next_layer(this); }
 Layer::Layer(int unitcount, Layer *prev){ init(unitcount, 0,Rectified_Linear, NULL); prev->link_with_next_layer(this); }
 
 
-void Layer::init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet2<float> *gpu)
+void Layer::init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu)
 {
 
 	next = NULL;

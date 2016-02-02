@@ -6,7 +6,7 @@ Created on Apr 2, 2015
 import ctypes as ct
 import logging
 import numpy as np
-funcs = ct.cdll.LoadLibrary('libclusternet2.so')
+funcs = ct.cdll.LoadLibrary('libClusterNet.so')
 
 class FloatMatrix(ct.Structure):
     _fields_ = [('rows', ct.c_int),

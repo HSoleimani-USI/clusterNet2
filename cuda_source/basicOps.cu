@@ -28,7 +28,6 @@ template <typename T> void to_host(Matrix<T> *gpu, T *cpu)
 //pinned memory needed for asynchronous copies between CPU and GPU
 //pinned memory makes sure that we do not have to allocate a page CPU buffer before the copy
 //this makes the copy faster and asynchronous with respect to the caller
-
 template Matrix<int> *to_pinned(int rows, int cols, int *cpu);
 template Matrix<float> *to_pinned(int rows, int cols, float *cpu);
 template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu){ return to_pinned<T>(rows, cols, cpu,sizeof(T)*rows*cols); }

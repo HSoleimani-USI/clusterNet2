@@ -1,2 +1,2 @@
-# clusterNet2
+# ClusterNet
 Scientific Deep Learning and NLP Software for GPU clusters

@@ -1,4 +1,4 @@
-#include "clusterNet2.h"
+#include "ClusterNet.h"
 #include "Timer.cuh"
 #include "NeuralNetwork.h"
 
@@ -7,7 +7,7 @@ using namespace std;
 
 void test_timer()
 {
-	ClusterNet2<float> gpu = ClusterNet2<float>();
+	ClusterNet gpu = ClusterNet();
 	Matrix<float> *A = gpu.rand(100,100);
 	Matrix<float> *B = gpu.rand(100,100);
 	Matrix<float> *C = gpu.rand(100,100);
@@ -23,7 +23,7 @@ void test_timer()
 void test_neural_network()
 {
 
-	ClusterNet2<float> *gpu = new ClusterNet2<float>();
+	ClusterNet *gpu = new ClusterNet();
 
 	Matrix<float> *X_train = gpu->rand(1000,10);
 	Matrix<float> *y_train = gpu->rand(1000,1);

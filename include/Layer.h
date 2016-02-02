@@ -4,7 +4,7 @@
 #include <vector>
 #include <cstdlib>
 #include <basicOps.cuh>
-#include <clusterNet2.h>
+#include <ClusterNet.h>
 
 class Layer
 {
@@ -31,7 +31,7 @@ public:
 	Matrix<float> *result;
 	Matrix<float> *eq;
 
-	ClusterNet2<float> *GPU;
+	ClusterNet *GPU;
 
 	int count;
 	int count2;
@@ -53,11 +53,11 @@ public:
 
 	WeightUpdateType_t UPDATE_TYPE;
 
-	Layer(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet2<float> *gpu);
+	Layer(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu);
 	Layer(int unitcount, Unittype_t unit);
 	Layer(int unitcount);
 
-	Layer(int unitcount, int start_batch_size, Unittype_t unit, Layer *prev, ClusterNet2<float> *gpu);
+	Layer(int unitcount, int start_batch_size, Unittype_t unit, Layer *prev, ClusterNet *gpu);
 	Layer(int unitcount, Unittype_t unit, Layer *prev);
 	Layer(int unitcount, Layer *prev);
 
@@ -70,7 +70,7 @@ public:
 	virtual void weight_update();
 
 	virtual void link_with_next_layer(Layer *next_layer);
-	virtual void init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet2<float> *gpu);
+	virtual void init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu);
 
 	virtual void set_hidden_dropout(float dropout);
 

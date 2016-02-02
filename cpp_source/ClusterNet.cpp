@@ -1,4 +1,4 @@
-#include "clusterNet2.h"
+#include "ClusterNet.h"
 #include <stdlib.h>
 #include "leveldb/db.h"
 #include <iostream>     // std::cout
@@ -14,9 +14,7 @@ using json = nlohmann::json;
 using std::cout;
 using std::endl;
 
-template ClusterNet2<float>::ClusterNet2();
-template<typename T>
-ClusterNet2<T>::ClusterNet2()
+ClusterNet::ClusterNet()
 {
     cudaError_t res = cudaFree(0);
     if (res != cudaSuccess)
@@ -61,47 +59,35 @@ ClusterNet2<T>::ClusterNet2()
 
 
 
-template void ClusterNet2<float>::setRandomState(int seed);
-template<typename T> void ClusterNet2<T>::setRandomState(int seed)
+void ClusterNet::setRandomState(int seed)
 {
 	curandCreateGenerator(&m_generator, CURAND_RNG_PSEUDO_DEFAULT);
 	curandSetPseudoRandomGeneratorSeed(m_generator, seed);
 	curandSetGeneratorOffset(m_generator, 100);
 }
 
-template Matrix<float> *ClusterNet2<float>::rand(int rows, int cols);
-template <typename T> Matrix<T> *ClusterNet2<T>::rand(int rows, int cols)
+Matrix<float> *ClusterNet::rand(int rows, int cols)
 {
-	Matrix<T> *out = empty<T>(rows, cols);
+	Matrix<float> *out = empty<float>(rows, cols);
 	curandGenerateUniform(m_generator, out->data, rows * cols);
 
 	return out;
 }
 
-template Matrix<float> *ClusterNet2<float>::randn(int rows, int cols);
-template <typename T> Matrix<T> *ClusterNet2<T>::randn(int rows, int cols){ return normal(rows, cols, 0.0f, 1.0f); }
-
-template Matrix<float> *ClusterNet2<float>::normal(int rows, int cols, float mean, float std);
-template <typename T> Matrix<T> *ClusterNet2<T>::normal(int rows, int cols, float mean, float std)
+Matrix<float> *ClusterNet::randn(int rows, int cols){ return normal(rows, cols, 0.0f, 1.0f); }
+Matrix<float> *ClusterNet::normal(int rows, int cols, float mean, float std)
 {
-	Matrix<T> *out = empty<T>(rows, cols);
+	Matrix<float> *out = empty<float>(rows, cols);
 	curandGenerateNormal(m_generator, out->data, out->size, mean, std);
 
 	return out;
 }
 
 
-template void ClusterNet2<float>::Tdot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
-template <typename T> void ClusterNet2<T>::Tdot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out){ dot(A,B,out,true,false); }
-
-template void ClusterNet2<float>::dotT(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
-template <typename T> void ClusterNet2<T>::dotT(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out){ dot(A,B,out,false,true); }
-
-template void ClusterNet2<float>::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
-template <typename T> void ClusterNet2<T>::dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out){ dot(A,B,out,false,false); }
-
-template void ClusterNet2<float>::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2);
-template <typename T> void ClusterNet2<T>::dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out, bool T1, bool T2)
+void ClusterNet::Tdot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ dot(A,B,out,true,false); }
+void ClusterNet::dotT(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ dot(A,B,out,false,true); }
+void ClusterNet::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ dot(A,B,out,false,false); }
+void ClusterNet::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2)
 {
 		const float alpha = 1.0f;
 		const float beta = 0.0f;
@@ -119,9 +105,7 @@ template <typename T> void ClusterNet2<T>::dot(Matrix<T> *A, Matrix<T> *B, Matri
 		if (!success){ throw "NERVANA ERROR"; }
 }
 
-
-template void ClusterNet2<float>::dropout(Matrix<float> *A, Matrix <float> *out, const float dropout);
-template <typename T> void ClusterNet2<T>::dropout(Matrix<T> *A, Matrix <T> *out, const float dropout)
+void ClusterNet::dropout(Matrix<float> *A, Matrix <float> *out, const float dropout)
 {
 	curandGenerateUniform(m_generator, out->data, out->size);
 	elementWise<kdropout>(A, out, out, dropout);

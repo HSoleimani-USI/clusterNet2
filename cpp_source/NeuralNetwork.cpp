@@ -8,7 +8,7 @@
 #include "NeuralNetwork.h"
 
 
-NeuralNetwork::NeuralNetwork(ClusterNet2<float> *gpu, BatchAllocator *b_train, BatchAllocator *b_cv, std::vector<int> layers, Unittype_t unit, int classes)
+NeuralNetwork::NeuralNetwork(ClusterNet *gpu, BatchAllocator *b_train, BatchAllocator *b_cv, std::vector<int> layers, Unittype_t unit, int classes)
 {
 	_gpu = gpu;
 

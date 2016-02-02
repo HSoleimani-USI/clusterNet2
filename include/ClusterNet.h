@@ -8,8 +8,8 @@
 #include "nervana_c_api.h"
 #include "leveldb/db.h"
 
-#ifndef __CLUSTERNET2_H__
-#define __CLUSTERNET2_H__
+#ifndef __ClusterNet_H__
+#define __ClusterNet_H__
 
 typedef enum Unittype_t
 {
@@ -44,24 +44,25 @@ typedef enum Costfunction_t
 } Costfunction_t;
 
 
-template<typename T> class ClusterNet2
+class ClusterNet
 {
     public:
-        ClusterNet2();
+        ClusterNet();
   		void setRandomState(int seed);
-  		Matrix<T> *rand(int rows, int cols);
-  		Matrix<T> *randn(int rows, int cols);
-  		Matrix<T> *normal(int rows, int cols, float mean, float std);
+  		Matrix<float> *rand(int rows, int cols);
+  		Matrix<float> *randn(int rows, int cols);
+  		Matrix<float> *normal(int rows, int cols, float mean, float std);
 
-  		void Tdot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out);
-  		void dotT(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out);
-  		void dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out);
-  		void dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out, bool T1, bool T2);
+  		void Tdot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+  		void dotT(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+  		void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+  		void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2);
+  	    void dropout(Matrix<float> *A, Matrix <float> *out, const float dropout);
+    private:
   		curandGenerator_t m_generator;
-  	    void dropout(Matrix<T> *A, Matrix <T> *out, const float dropout);
 
 };
 
 
 
-#endif //__CLUSTERNET2_H__
+#endif //__ClusterNet_H__
