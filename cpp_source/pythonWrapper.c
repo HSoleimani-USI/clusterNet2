@@ -44,12 +44,12 @@ void freemat(FloatMatrix *A){ cudaFree(A->data); free(A); }
 
 void wsortbykey(FloatMatrix *keys, FloatMatrix *values){ sortbykey<float>(keys, values); }
 
-NeuralNetwork *get_neural_net(ClusterNet *gpu, BatchAllocator *b_train, BatchAllocator *b_cv, float*layers, int layercount, int unit, int classes)
+NeuralNetwork *get_neural_net(ClusterNet *gpu, BatchAllocator *b_train, BatchAllocator *b_cv, float*FCLayers, int FCLayercount, int unit, int classes)
 {
 	std::vector<int> vec = std::vector<int>();
 
-	for(int i = 0; i < layercount; i++)
-		vec.push_back((int)layers[i]);
+	for(int i = 0; i < FCLayercount; i++)
+		vec.push_back((int)FCLayers[i]);
 
 	return new NeuralNetwork(gpu, b_train, b_cv,vec, (Unittype_t)unit, classes);
 

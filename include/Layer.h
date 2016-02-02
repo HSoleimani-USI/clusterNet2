@@ -1,21 +1,22 @@
-#ifndef Layer_H
-#define Layer_H
 #include <stdlib.h>
 #include <vector>
 #include <cstdlib>
 #include <basicOps.cuh>
 #include <ClusterNet.h>
 
+#ifndef Layer_H
+#define Layer_H
+
 class Layer
 {
 public:
-	Matrix<float> *b_grad_next;
 	Layer *next;
 	Layer *prev;
+
+	Matrix<float> *b_grad_next;
+	Matrix<float>* w_grad_next;
 	Matrix<float> *w_next;
 	Matrix<float> *b_next;
-
-	Matrix<float>* w_grad_next;
 
 	Matrix<float> *w_rms_next;
 	Matrix<float> *b_rms_next;
@@ -33,60 +34,43 @@ public:
 
 	ClusterNet *GPU;
 
-	int count;
-	int count2;
-
 	float LEARNING_RATE;
-	float MOMENTUM;
 	float RMSPROP_MOMENTUM;
 	float RUNNING_ERROR;
 	float RUNNING_SAMPLE_SIZE;
-	float L2;
-    Unittype_t UNIT_TYPE;
+	Unittype_t UNIT_TYPE;
 	Costfunction_t COST;
 	float DROPOUT;
 	int UNITCOUNT;
 	int BATCH_SIZE;
-	int LAYER_ID;
+	int Layer_ID;
 
 
 
 	WeightUpdateType_t UPDATE_TYPE;
+	virtual void forward() = 0;
+	virtual void forward(bool useDropout) = 0;
+	virtual void running_error() = 0;
+	virtual void backward_errors() = 0;
+	virtual void backward_grads() = 0;
+	virtual void print_error(std::string message) = 0;
+	virtual void weight_update() = 0;
 
-	Layer(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu);
-	Layer(int unitcount, Unittype_t unit);
-	Layer(int unitcount);
+	virtual void link_with_next_Layer(Layer *next_Layer) = 0;
+	virtual void init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu) = 0;
 
-	Layer(int unitcount, int start_batch_size, Unittype_t unit, Layer *prev, ClusterNet *gpu);
-	Layer(int unitcount, Unittype_t unit, Layer *prev);
-	Layer(int unitcount, Layer *prev);
+	virtual void set_hidden_dropout(float dropout) = 0;
 
-	virtual void forward();
-	virtual void forward(bool useDropout);
-	virtual void running_error();
-	virtual void backward_errors();
-	virtual void backward_grads();
-	virtual void print_error(std::string message);
-	virtual void weight_update();
+	virtual void dropout_decay() = 0;
+	virtual void learning_rate_decay(float decay_rate) = 0;
 
-	virtual void link_with_next_layer(Layer *next_layer);
-	virtual void init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu);
+	virtual Layer *get_root() = 0;
 
-	virtual void set_hidden_dropout(float dropout);
-
-	virtual void dropout_decay();
-	virtual void learning_rate_decay(float decay_rate);
-
-	virtual Layer *get_root();
-
-
-
-private:
-	virtual void unit_activation();
-	virtual void unit_activation(bool useDropout);
-	virtual void activation_gradient();
-	virtual void apply_dropout();
-	void handle_offsize();
+protected:
+	virtual void unit_activation() = 0;
+	virtual void unit_activation(bool useDropout) = 0;
+	virtual void activation_gradient() = 0;
+	virtual void apply_dropout() = 0;
 
 
 };

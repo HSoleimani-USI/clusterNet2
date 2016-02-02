@@ -36,10 +36,10 @@ void test_neural_network()
 	BatchAllocator *b_train = new BatchAllocator(X_train->to_host()->data, y_train->to_host()->data, X_train->rows, X_train->cols,y_train->cols,128);
 	BatchAllocator *b_cv = new BatchAllocator(X_cv->to_host()->data, y_cv->to_host()->data, X_cv->rows, X_cv->cols,y_cv->cols,128);
 
-	std::vector<int> layers = std::vector<int>();
-	layers.push_back(1024);
-	layers.push_back(1024);
-	NeuralNetwork net = NeuralNetwork(gpu, b_train, b_cv, layers, Rectified_Linear, 2);
+	std::vector<int> FCLayers = std::vector<int>();
+	FCLayers.push_back(1024);
+	FCLayers.push_back(1024);
+	NeuralNetwork net = NeuralNetwork(gpu, b_train, b_cv, FCLayers, Rectified_Linear, 2);
 
 	net.fit();
 }

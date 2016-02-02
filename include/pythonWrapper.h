@@ -51,5 +51,5 @@ void freemat(FloatMatrix *A);
 
 void wsortbykey(FloatMatrix *keys, FloatMatrix *values);
 
-NeuralNetwork *get_neural_net(ClusterNet *gpu, BatchAllocator *b_train, BatchAllocator *b_cv, float *layers, int layercount, int unit, int classes);
+NeuralNetwork *get_neural_net(ClusterNet *gpu, BatchAllocator *b_train, BatchAllocator *b_cv, float *FCLayers, int FCLayercount, int unit, int classes);
 

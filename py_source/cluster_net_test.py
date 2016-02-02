@@ -2,6 +2,10 @@ import cluster_net as gpu
 import nose
 import numpy as np
 import numpy.testing as t
+import time
+from scipy.spatial.distance import cdist
+from cluster_net import NeuralNetwork
+import time
 
 
 
@@ -221,3 +225,105 @@ def test_matrix_reductions():
     t.assert_almost_equal(C, np.sum(A), 2, "Sum not working")
     C = gpu.max(B)    
     t.assert_almost_equal(C, np.max(A), 3, "Max not working")
+
+
+    
+def test_timer():
+    t = gpu.Timer()
+    A = gpu.rand(100,100)
+    B = gpu.rand(100,100)
+    C = gpu.rand(100,100)
+    time = 0
+    
+    t.tick()
+    for i in range(10):
+        gpu.dot(A,B,C)    
+    time = t.tock()
+    print time
+    assert time > 0
+    
+    time = 0
+    t.tick("Timer test")
+    gpu.dot(A,B,C)    
+    time = t.tock("Timer test")
+    assert time > 0
+    
+    accumulative_time = 0
+    for i in range(100):
+        t.tick('cumulative')
+        gpu.dot(A,B,C)
+        t.tick('cumulative')
+    accumulative_time = t.tock('cumulative')
+    
+    assert accumulative_time > 5*time
+    
+def test_free():
+    #needs at least 3GB ram
+    dim = 1
+    for i in range(14):
+        dim*=2
+        print dim
+        A = gpu.rand(dim,dim)
+        B = gpu.rand(dim,dim)
+        C = gpu.rand(dim,dim)
+        gpu.dot(A,B,C)
+        del A, B, C
+         
+
+        
+def test_euclidean_distance():
+    x = np.float32(np.random.rand(100,10))
+    
+    t.assert_equal(x.T,np.transpose(x))
+    rows = x.shape[1]
+    dim = x.shape[0]
+    X = gpu.array(x)
+    x = x.T
+    vec = gpu.empty((dim,1))
+    buffer = gpu.empty((dim,rows))
+    bufferT = gpu.empty((rows,dim))
+    distances = gpu.empty((rows,1))
+    
+    dist = cdist(x,x,'euclidean')
+    for i in range(X.shape[1]):
+        gpu.slice(X, 0, dim, i, i+1, vec)
+                        
+        gpu.vector_sub(X, vec, buffer)
+                
+        gpu.pow(buffer, 2.0, buffer)
+        
+        gpu.transpose(buffer, bufferT)
+        gpu.row_sum(bufferT, distances)
+        
+        gpu.sqrt(distances, distances)
+        
+        t.assert_allclose(np.sqrt(np.sum((x-x[i])**2,1)), distances.tocpu(), rtol=0.01) 
+        t.assert_allclose(np.sqrt(np.sum((x-x[i])**2,1)), dist[i], rtol=0.01) 
+    
+    
+def test_get_closest_index():
+    X = np.float32(np.random.rand(10,100))
+    results_gpu = gpu.get_closest_index(X,5)
+    
+    dist = cdist(X,X,'euclidean')
+    results = []
+    for i in range(10):
+        results.append(np.argsort(dist[i,:])[::-1][0:5])
+        
+    
+    
+    
+    t.assert_equal(np.array(results), results_gpu)
+    
+    
+def test_neural_net():
+    X = np.float32(np.load('train_small_X.npy'))
+    y = np.float32(np.load('train_small_y.npy'))  
+    t0 = time.time()
+    #X = np.float32(np.load('/home/tim/data/mnist/train_X.npy'))
+    #y = np.float32(np.load('/home/tim/data/mnist/train_y.npy')) 
+    net = NeuralNetwork(X, y)
+    
+    net.fit()
+    print time.time()-t0
+    #assert False

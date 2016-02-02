@@ -8,7 +8,7 @@
 #include "NeuralNetwork.h"
 
 
-NeuralNetwork::NeuralNetwork(ClusterNet *gpu, BatchAllocator *b_train, BatchAllocator *b_cv, std::vector<int> layers, Unittype_t unit, int classes)
+NeuralNetwork::NeuralNetwork(ClusterNet *gpu, BatchAllocator *b_train, BatchAllocator *b_cv, std::vector<int> FCLayers, Unittype_t unit, int classes)
 {
 	_gpu = gpu;
 
@@ -19,18 +19,18 @@ NeuralNetwork::NeuralNetwork(ClusterNet *gpu, BatchAllocator *b_train, BatchAllo
 	_b_cv->allocate_next_batch_async();
 
 
-	Layer *l0 = new Layer(_b_train->get_current_batchX()->cols,128,Input,_gpu);
+	FCLayer *l0 = new FCLayer(_b_train->get_current_batchX()->cols,128,Input,_gpu);
 	l0->DROPOUT = 0.2f;
-	Layer *prev = l0;
-	for(int i = 0; i < layers.size(); i++)
+	FCLayer *prev = l0;
+	for(int i = 0; i < FCLayers.size(); i++)
 	{
-		Layer *next = new Layer(layers[i], unit, prev);
+		FCLayer *next = new FCLayer(FCLayers[i], unit, prev);
 		prev = next;
 	}
 
 
 
-	Layer *next = new Layer(classes, Softmax, prev);
+	FCLayer *next = new FCLayer(classes, Softmax, prev);
 
 	start = l0;
 	end = next;

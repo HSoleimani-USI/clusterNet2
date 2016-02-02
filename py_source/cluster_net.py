@@ -2,6 +2,116 @@ import library_interface as lib
 import numpy as np
 import ctypes as ct
 
+class NeuralNetwork(object):
+	
+	def __init__(self, X, y, layers = [1024, 1024], classes = 10):
+		cv_size = 0.2
+		n = X.shape[0]
+		cv_start = n*(1.0-cv_size)
+		x_cv = X[cv_start:].copy()
+		y_cv = y[cv_start:].copy()
+		train = BatchAllocator(X[:cv_start], y[:cv_start], 128)
+		cv = BatchAllocator(x_cv, y_cv, 128)
+		'''
+		pt_train = lib.funcs.fget_BatchAllocator(
+					X[:cv_start].ctypes.data_as(ct.POINTER(ct.c_float)),
+					y[:cv_start].ctypes.data_as(ct.POINTER(ct.c_float)),
+					int(X[:cv_start].shape[0]), int(X.shape[1]), int(y.shape[1]),
+					int(128))
+		
+		
+		pt_cv = lib.funcs.fget_BatchAllocator(
+					x_cv.ctypes.data_as(ct.POINTER(ct.c_float)),
+					y_cv.ctypes.data_as(ct.POINTER(ct.c_float)),
+					int(x_cv.shape[0]), int(X.shape[1]), int(y.shape[1]),
+					int(128))
+		'''
+		layers = np.array(layers, dtype=np.float32)
+		print type(X)
+		print type(x_cv)
+		#self.net_pt = lib.funcs.fget_neural_net(lib.pt_clusterNet, pt_train, pt_cv, layers.ctypes.data_as(ct.POINTER(ct.c_float)),layers.shape[0], 1, classes)
+		self.net_pt = lib.funcs.fget_neural_net(lib.pt_clusterNet, train.pt, cv.pt, layers.ctypes.data_as(ct.POINTER(ct.c_float)),layers.shape[0], 1, classes)
+		
+	def fit(self):
+		lib.funcs.ffit_neural_net(self.net_pt)
+
+class Timer(object):
+	def __init__(self):
+		self.pt = lib.funcs.fget_Timer()
+		
+	def tick(self, name='default'):
+		lib.funcs.ftick(self.pt, ct.c_char_p(name))
+		
+	def tock(self, name='default'):		
+		return lib.funcs.ftock(self.pt, ct.c_char_p(name))
+	
+class VectorSpace(object):
+	def __init__(self, x, vocabulary=None, stopwords=None):
+		self.rows = x.shape[0]
+		self.dim = x.shape[1] 
+		self.bufferT = array(x)
+		self.vec = empty((self.dim,1))
+		self.buffer = empty((self.dim,self.rows))
+		self.X = self.bufferT.T	
+		self.distances = empty((self.rows,1))
+		self.distances_cpu = np.empty((self.rows,),dtype=np.float32)
+		
+		self.vocab2idx = {}
+		self.idx2vocab = {}		
+		self.stopdict = {}
+		
+		if stopwords != None:
+			if isinstance(stopwords, dict): self.stopdict = stopwords
+			else:
+				for word in stopwords:
+					self.stopdict[word] = 1
+		
+		for i, word in enumerate(vocabulary):
+			word = word.strip().lower()
+			self.vocab2idx[word] = i
+			self.idx2vocab[i] = word
+			
+		
+		
+		
+	def find_nearest(self, strValue, split=True, top=50):				
+		vec = zeros((self.vec.shape[0], 1))
+		slice_buffer = zeros((self.vec.shape[0], 1))	
+			
+		
+		word_count = 0
+		for word in strValue.strip().lower().split(' '):
+			if word in self.vocab2idx and word not in self.stopdict:
+				word_count +=1
+				idx = self.vocab2idx[word]
+				slice(self.X,0,self.dim,idx,idx+1,slice_buffer)
+				add(vec,slice_buffer,vec)
+				
+				
+		if word_count == 0:
+			return [None, None]
+		
+		scalar_mul(vec,1.0/word_count,vec)				
+		
+		
+		vector_sub(self.X, vec, self.buffer)
+		pow(self.buffer, 2.0, self.buffer)
+		transpose(self.buffer, self.bufferT)
+		row_sum(self.bufferT, self.distances)
+		sqrt(self.distances, self.distances)	
+			
+		tocpu(self.distances, self.distances_cpu)
+		closest_idx = np.int32(np.argsort(self.distances_cpu)[0:top])
+		
+		closest_words = []
+		for idx in closest_idx:
+			closest_words.append(self.idx2vocab[idx])
+			
+		
+		return [closest_idx, closest_words]
+		
+	
+
 class BatchAllocator(object):
 	def __init__(self, X, y, batch_size):
 		self.current_batch = 0
@@ -69,7 +179,7 @@ class array(object):
 		return self.cpu_arr
 	
 	@property
-	def T(self): return array(None, self.fT(self.pt), self.shape[::-1])
+	def T(self): return array(None, lib.funcs.fT(self.pt), self.shape[::-1])
 
 	
 
@@ -204,6 +314,11 @@ def vector_add(A, v, out=None):
 	lib.funcs.fvadd(A.pt, v.pt, out.pt)
 	return out
 
+def vector_sub(A, v, out=None):	
+	if not out: out = empty((A.shape[0],A.shape[1]))
+	lib.funcs.fvsub(A.pt, v.pt, out.pt)
+	return out
+
 def create_t_matrix(v, max_value, out=None):		
 	if not out: out = empty((v.shape[0],max_value+1))
 	lib.funcs.ftmatrix(out.pt, v.pt, out.pt)
@@ -240,5 +355,39 @@ def row_max(A, out=None):
 	lib.funcs.frowMax(A.pt, out.pt)
 	return out
 
+def transpose(A, out=None):
+	if not out: out = empty((A.shape[1],A.shape[0]))
+	lib.funcs.ftranspose(A.pt, out.pt)
+	return out
+
 def max(A): return lib.funcs.ffmax(A.pt)
 def sum(A): return lib.funcs.ffsum(A.pt)
+
+	
+def get_closest_index(x, top=50):
+	rows = x.shape[0]
+	dim = x.shape[1] 
+	bufferT = array(x)
+	vec = empty((dim,1))
+	buffer = empty((dim,rows))
+	X = bufferT.T	
+	distances = empty((rows,1))
+	row_indexes = []
+	print X.shape[1]
+	distances_cpu = np.empty((rows,),dtype=np.float32)
+	for i in range(X.shape[1]):
+		if i % 100 == 0: print i
+		slice(X, 0, dim, i, i+1, vec)
+		vector_sub(X, vec, buffer)
+		pow(buffer, 2.0, buffer)
+		transpose(buffer, bufferT)
+		row_sum(bufferT, distances)
+		sqrt(distances, distances)	
+		
+		tocpu(distances, distances_cpu)
+		row_indexes.append(np.int32(np.argsort(distances_cpu)[:-top-1:-1]))
+	return np.array(row_indexes)
+
+def tocpu(A, out):
+	lib.funcs.fto_host(A.pt,out.ctypes.data_as(ct.POINTER(ct.c_float)))
+
