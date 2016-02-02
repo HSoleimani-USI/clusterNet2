@@ -43,7 +43,6 @@ def set(tbl, key):
         tbls[tbl] = db.get_table(tbl)
         
     value = request.data
-    print value, 'set'
     tbls[tbl].set(key, value)
     
     return ""

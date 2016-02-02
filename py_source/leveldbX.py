@@ -44,7 +44,7 @@ class Table(object):
         
     def post(self, key, value):
         if self.hasServer:
-            req = urllib2.Request(join(self.ip, self.name, key))
+            req = urllib2.Request(join(self.address, self.name, key))
             req.add_header('Content-Type', 'application/json')
             print simplejson.dumps(value)
             if isinstance(value, basestring):
@@ -69,7 +69,7 @@ class Table(object):
 
 
 class LevelDBX(object):
-    def __init__(self, isServer = False, path=join(home, '.nlpdb'), ip='http://127.0.0.1:5000', port=5000):
+    def __init__(self, isServer = False, path=join(home, '.nlpdb'), ip='86.119.32.220', port=5000):
         self.isServer = isServer
         self.ip = ip
         self.port = 5000
