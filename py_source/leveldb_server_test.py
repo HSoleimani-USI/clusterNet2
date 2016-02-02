@@ -10,10 +10,10 @@ from threading import Thread
 
 
 
-db = LevelDBX(isServer=False)
+db = LevelDBX(path="/home/tim/test",isServer=False)
 test = db.get_table('test')
 
-test.post('abc',{"afgdsf" : 5346.33})
+
 print test.get('abc')
 
 

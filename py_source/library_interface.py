@@ -23,7 +23,6 @@ funcs.fto_host.restype = ct.c_void_p
 funcs.fto_gpu.restype = ct.c_void_p
 funcs.fto_pinned.restype = ct.POINTER(ct.c_float)
 funcs.fT.restype = ct.POINTER(FloatMatrix)
-funcs.ftranspose.restype = ct.c_void_p
 
 funcs.fget_BatchAllocator.restype = ct.c_void_p
 funcs.falloc_next_batch.restype = ct.c_void_p
@@ -32,9 +31,6 @@ funcs.fgetBatchX.restype = ct.POINTER(FloatMatrix)
 funcs.fgetBatchY.restype = ct.POINTER(FloatMatrix)
 funcs.fgetOffBatchX.restype = ct.POINTER(FloatMatrix)
 funcs.fgetOffBatchY.restype = ct.POINTER(FloatMatrix)
-
-funcs.fget_neural_net.restype = ct.c_void_p
-funcs.ffit_neural_net.restype = ct.c_void_p
 
 funcs.ffabs.restype = ct.c_void_p
 funcs.flog.restype = ct.c_void_p
@@ -64,7 +60,6 @@ funcs.fsquared_diff.restype = ct.c_void_p
 
 
 funcs.fvadd.restype = ct.c_void_p
-funcs.fvsub.restype = ct.c_void_p
 funcs.ftmatrix.restype = ct.c_void_p
 
 
@@ -92,15 +87,7 @@ funcs.ffmax.restype = ct.c_float
 funcs.ffsum.restype = ct.c_float
 
 
-funcs.fget_Timer.restype = ct.c_void_p
-funcs.ftick.restype = ct.c_void_p
-funcs.ftock.restype = ct.c_float
 
-funcs.ffree.restype = ct.c_void_p
-
-funcs.fsortbykey.restype = ct.c_void_p
-
-funcs.fscalar_mul.restype = ct.c_void_p
 
 
 

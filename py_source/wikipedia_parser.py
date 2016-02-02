@@ -13,6 +13,12 @@ import lucene
 import cPickle as pickle
 import time
 import numpy as np
+from WikiExtractor import Extractor
+import codecs
+
+
+
+
 
 
 
@@ -80,6 +86,7 @@ with open(wiki_xml_path,'r') as f:
         
         if start: page.append(line)
         if '</page>' in line:
+            
             i+=1       
             title =  rTitle.search(page[1]).group(1)            
             page = "".join(page)
@@ -119,6 +126,12 @@ with open(wiki_xml_path,'r') as f:
             match = rshortSummary.search(page)
             
             #print page
+            
+            content = page.decode('utf-8').encode('ascii', 'ignore')
+            lines = Extractor(0, title, content).extract()
+                
+            
+            page = "".join(lines)
             page_data = {'raw' : page, 'headers' : headers, 'links' : links}
             if match:
                 page_data['short_summary'] = match.group(1)
