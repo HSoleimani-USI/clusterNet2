@@ -1,5 +1,6 @@
 #include <basicOps.cuh>
 #include <clusterKernels.cuh>
+#include <hdf5.h>
 
 template Matrix<int> *Matrix<int>::to_host();
 template Matrix<float> *Matrix<float>::to_host();
@@ -228,6 +229,10 @@ template void elementWise<ksquared_diff>(Matrix<float> *A, Matrix<float> *B, Mat
 template void elementWise<kdropout>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
 template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar)
 {
+  check_for_same_dimensions(A,B);
+  check_for_same_dimensions(A,out);
+
+
   kElementWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, B->data, out->data,scalar, out->size);
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
@@ -310,3 +315,62 @@ void RMSprop_with_weight_update(Matrix<float> *RMS, Matrix<float> *grad, Matrix<
 	kRMSprop_with_weight_update<<<blocks,THREADS_PER_BLOCKS>>>(RMS->data, grad->data, w->data, RMS_multiplier, learning_rate, RMS->size);
 }
 
+Matrix<float> *read_hdf5(const char *filepath){ return read_hdf5(filepath,"/Default"); }
+Matrix<float> *read_hdf5(const char *filepath, const char *tag)
+{
+	   hid_t       file_id, dataset_id;
+
+	   file_id = H5Fopen(filepath, H5F_ACC_RDWR, H5P_DEFAULT);
+	   dataset_id = H5Dopen2(file_id, tag, H5P_DEFAULT);
+
+	   hid_t dspace = H5Dget_space(dataset_id);
+	   hsize_t dims[2];
+	   H5Sget_simple_extent_dims(dspace, dims, NULL);
+	   size_t bytes = sizeof(float)*dims[0]*dims[1];
+
+	   float *data;
+	   CUDA_CHECK_RETURN(cudaHostAlloc(&data, bytes, cudaHostAllocPortable));
+
+	   H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+	   H5Dclose(dataset_id);
+	   H5Fclose(file_id);
+
+	   Matrix<float> *out = (Matrix<float>*)malloc(sizeof(Matrix<float>));
+	   out->rows = (int)dims[0];
+	   out->cols= (int)dims[1];
+	   out->bytes = bytes;
+	   out->data = data;
+	   out->size = (int)(dims[0]*dims[1]);
+
+	   return out;
+}
+
+bool check_for_same_dimensions(Matrix<float> *A, Matrix<float> *B)
+{
+	if(A && B)
+	{
+		if(A->rows == B->rows && A->cols == B->cols) return true;
+		else
+		{
+			cout << "Matrices do not have the same dimension: " << A->rows << "x" << A->cols << " vs " << B->rows << "x" << B->cols << endl;
+			throw "Matricies do not have same dimension!";
+		}
+	}
+	else
+		return true;
+}
+
+bool check_matrix_multiplication(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2)
+{
+	int A_rows = A->rows, A_cols = A->cols, B_rows = B->rows, B_cols = B->cols;
+	if (T1){ A_rows = A->cols; A_cols = A->rows; }
+	if (T2){ B_rows = B->cols; B_cols = B->rows; }
+
+	if(A_rows == out->rows && A_cols == B_rows && B_cols == out->cols) return true;
+	else
+	{
+		cout << "Matrices are not aligned: " << A_rows<< "x" << A_cols << " dot " << B_rows << "x" << B_cols << " -->"  << out->rows << "x" << out->cols <<endl;
+		throw "Matrices are not aligned!";
+	}
+
+}

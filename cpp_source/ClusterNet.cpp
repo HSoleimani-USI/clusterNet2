@@ -3,6 +3,7 @@
 #include "leveldb/db.h"
 #include <iostream>     // std::cout
 #include "json.hpp"
+#include <assert.h>
 
 
 #include <unistd.h>
@@ -29,10 +30,8 @@ ClusterNet::ClusterNet()
         exit(1);
     }
 
-	setRandomState(time(0));
-	curandCreateGenerator(&m_generator, CURAND_RNG_PSEUDO_DEFAULT);
-	curandSetPseudoRandomGeneratorSeed(m_generator, time(0));//random seed
-	curandSetGeneratorOffset(m_generator, 100);//burn in the rdm generator
+	//setRandomState(time(0));
+    setRandomState(56564);
 
 
 	/*
@@ -91,9 +90,11 @@ void ClusterNet::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, boo
 {
 		const float alpha = 1.0f;
 		const float beta = 0.0f;
-		int A_rows = A->rows, A_cols = A->cols, B_cols = B->cols;
+		int A_rows = A->rows, A_cols = A->cols, B_rows = B->rows, B_cols = B->cols;
 		if (T1){ A_rows = A->cols; A_cols = A->rows; }
-		if (T2){ B_cols = B->rows; }
+		if (T2){ B_cols = B->rows; B_rows = B->cols; }
+
+		check_matrix_multiplication(A, B, out, T1, T2);
 
 		bool success = nervana_sgemm(A->data, B->data, out->data, T1,T2,
 									 A_rows, B_cols, A_cols,

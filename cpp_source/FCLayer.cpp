@@ -90,7 +90,6 @@ void FCLayer::forward()
 	//cout << BATCH_SIZE << " " << UNITCOUNT << endl;
 	if(UNIT_TYPE != Input && (!activation))
 	{
-		cout << "alloc" << endl;
 		bias_activations = ones<float>(1, BATCH_SIZE);
 		activation = zeros<float>(BATCH_SIZE, UNITCOUNT);
 		error = zeros<float>(BATCH_SIZE, UNITCOUNT);

@@ -137,7 +137,6 @@ void Layer::init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNe
 
 	GPU = gpu;
 
-	cout << "pre buffers layer" << endl;
 	if(BATCH_SIZE > 0)
 	{
 		bias_activations = ones<float>(1, BATCH_SIZE);
@@ -150,8 +149,6 @@ void Layer::init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNe
 		activation = NULL;
 		error = NULL;
 	}
-
-	cout << "post buffers layer" << endl;
 
 }
 

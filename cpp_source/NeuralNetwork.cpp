@@ -57,7 +57,7 @@ void NeuralNetwork::fit()
 	float decay = 0.99f;
 	for(int epoch = 0; epoch < 100; epoch++)
 	{
-		//cout << "EPOCH: " << epoch + 1 << endl;
+		cout << "EPOCH: " << epoch + 1 << endl;
 
 
 		start->_network->_isTrainTime = true;

@@ -129,5 +129,12 @@ template <int reduction> float reduceToValue(Matrix<float> *A);
 template <int reduction> float reduceToValue(Matrix<float> *A, Matrix<float> *vout_rows);
 
 
+bool check_for_same_dimensions(Matrix<float> *A, Matrix<float> *B);
+bool check_matrix_multiplication(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2);
+
+Matrix<float> *read_hdf5(const char *filepath);
+Matrix<float> *read_hdf5(const char *filepath, const char *tag);
+
+
 #define _add elementWise<kadd>
 #endif

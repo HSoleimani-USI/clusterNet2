@@ -320,8 +320,8 @@ def test_neural_net():
     X = np.float32(np.load('train_small_X.npy'))
     y = np.float32(np.load('train_small_y.npy'))  
     t0 = time.time()
-    #X = np.float32(np.load('/home/tim/data/mnist/train_X.npy'))
-    #y = np.float32(np.load('/home/tim/data/mnist/train_y.npy')) 
+    X = np.float32(np.load('/home/tim/data/mnist/train_X.npy'))
+    y = np.float32(np.load('/home/tim/data/mnist/train_y.npy')) 
     net = NeuralNetwork(X, y)
     
     net.fit()
