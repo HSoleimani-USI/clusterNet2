@@ -10,9 +10,12 @@ class NeuralNetwork(object):
 		cv_start = n*(1.0-cv_size)
 		x_cv = X[cv_start:].copy()
 		y_cv = y[cv_start:].copy()
-		train = BatchAllocator(X[:cv_start], y[:cv_start], 128)
-		cv = BatchAllocator(x_cv, y_cv, 128)
-		'''
+		layers = np.array(layers, dtype=np.float32)
+		#train = BatchAllocator(X[:cv_start], y[:cv_start], 128)
+		#cv = BatchAllocator(x_cv, y_cv, 128)
+		#self.net_pt = lib.funcs.fget_neural_net(lib.pt_clusterNet, train.pt, cv.pt, layers.ctypes.data_as(ct.POINTER(ct.c_float)),layers.shape[0], 1, classes)
+		
+		
 		pt_train = lib.funcs.fget_BatchAllocator(
 					X[:cv_start].ctypes.data_as(ct.POINTER(ct.c_float)),
 					y[:cv_start].ctypes.data_as(ct.POINTER(ct.c_float)),
@@ -25,12 +28,8 @@ class NeuralNetwork(object):
 					y_cv.ctypes.data_as(ct.POINTER(ct.c_float)),
 					int(x_cv.shape[0]), int(X.shape[1]), int(y.shape[1]),
 					int(128))
-		'''
-		layers = np.array(layers, dtype=np.float32)
-		print type(X)
-		print type(x_cv)
-		#self.net_pt = lib.funcs.fget_neural_net(lib.pt_clusterNet, pt_train, pt_cv, layers.ctypes.data_as(ct.POINTER(ct.c_float)),layers.shape[0], 1, classes)
-		self.net_pt = lib.funcs.fget_neural_net(lib.pt_clusterNet, train.pt, cv.pt, layers.ctypes.data_as(ct.POINTER(ct.c_float)),layers.shape[0], 1, classes)
+		
+		self.net_pt = lib.funcs.fget_neural_net(lib.pt_clusterNet, pt_train, pt_cv, layers.ctypes.data_as(ct.POINTER(ct.c_float)),layers.shape[0], 1, classes)
 		
 	def fit(self):
 		lib.funcs.ffit_neural_net(self.net_pt)

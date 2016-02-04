@@ -18,23 +18,29 @@ NeuralNetwork::NeuralNetwork(ClusterNet *gpu, BatchAllocator *b_train, BatchAllo
 	_b_train->allocate_next_batch_async();
 	_b_cv->allocate_next_batch_async();
 
-
+	cout << "neural net init" << endl;
 	FCLayer *l0 = new FCLayer(_b_train->get_current_batchX()->cols,128,Input,_gpu);
+	cout << "neural net init2" << endl;
 	l0->DROPOUT = 0.2f;
 	FCLayer *prev = l0;
 	for(int i = 0; i < FCLayers.size(); i++)
 	{
+		cout << "neural net init3" << endl;
 		FCLayer *next = new FCLayer(FCLayers[i], unit, prev);
 		prev = next;
 	}
 
 
 
+	cout << "neural net init4" << endl;
 	FCLayer *next = new FCLayer(classes, Softmax, prev);
+
+	cout << "post softmax" << endl;
 
 	start = l0;
 	end = next;
 	l0->set_hidden_dropout(0.3f);
+	cout << "post hidden dropout set" << endl;
 }
 
 void NeuralNetwork::fit()
@@ -48,14 +54,19 @@ void NeuralNetwork::fit()
 
 		for(int i = 0; i < _b_train->BATCHES; i++)
 		{
+			cout << "batch init" << endl;
 			_b_train->replace_current_with_next_batch();
 			_b_train->allocate_next_batch_async();
 			start->activation = _b_train->get_current_batchX();
 			end->target = _b_train->get_current_batchY();
 
+			cout << "forward" << endl;
 			start->forward(true);
+			cout << "backwards errors" << endl;
 			start->backward_errors();
+			cout << "backwards grads" << endl;
 			start->backward_grads();
+			cout << "weight update" << endl;
 			start->weight_update();
 
 		}

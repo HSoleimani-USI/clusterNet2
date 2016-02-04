@@ -15,6 +15,6 @@ all:
 	nvcc -gencode $(COMPUTE_CAPABILITY) -Xcompiler '-fPIC' -dc $(FILES) $(INCLUDE) $(LIB) --output-directory $(ROOT_DIR)/build
 	nvcc -gencode $(COMPUTE_CAPABILITY) -Xcompiler '-fPIC' -dlink $(BUILD_DIR)/basicOps.o $(BUILD_DIR)/clusterKernels.o $(BUILD_DIR)/Timer.o -o $(BUILD_DIR)/link.o 
 	g++ -std=c++11 -shared -fPIC $(INCLUDE) $(wildcard $(BUILD_DIR)/*.o) $(FILES_CPP) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) 	
-	g++ -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/main.cpp -o main.o $(LIB) -lClusterNet  
+	#g++ -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/main.cpp -o main.o $(LIB) -lClusterNet  
 clean:
 	rm *.o *.out $(ROOT_DIR)/py_source/gpupylib.so

@@ -8,6 +8,7 @@
 #include "nervana_c_api.h"
 #include "leveldb/db.h"
 
+
 #ifndef __ClusterNet_H__
 #define __ClusterNet_H__
 
