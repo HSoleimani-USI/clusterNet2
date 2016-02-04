@@ -12,6 +12,8 @@ void Layer::weight_update()
 
 	next->weight_update();
 
+	if(_LayerType == "Dropout"){ return; }
+
 	switch(UPDATE_TYPE)
 	{
 		case RMSProp:
@@ -85,11 +87,11 @@ void Layer::running_error()
 	switch(COST)
 	{
 		case Misclassification:
-			argmax(out, result);
+			argmax(activation, result);
 			elementWise<keq>(result,target,eq,0.0f);
 			sum_value = reduceToValue<rsum>(eq);
-			RUNNING_ERROR += (out->rows  - sum_value);
-			RUNNING_SAMPLE_SIZE += out->rows;
+			RUNNING_ERROR += (activation->rows  - sum_value);
+			RUNNING_SAMPLE_SIZE += activation->rows;
 			break;
 		default:
 			throw "Unknown cost function!";
@@ -99,7 +101,7 @@ void Layer::running_error()
 
 
 
-void Layer::init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu)
+void Layer::init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu, Network *network)
 {
 
 	cout << "cosntructor layer" << endl;
@@ -117,6 +119,8 @@ void Layer::init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNe
 	target = NULL;
 	target_matrix = NULL;
 	error = NULL;
+
+	_network = network;
 
 	LEARNING_RATE = 0.001f;
 	RMSPROP_MOMENTUM = 0.9f;
@@ -136,19 +140,16 @@ void Layer::init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNe
 	cout << "pre buffers layer" << endl;
 	if(BATCH_SIZE > 0)
 	{
-		out = zeros<float>(BATCH_SIZE, UNITCOUNT);
 		bias_activations = ones<float>(1, BATCH_SIZE);
 		activation = zeros<float>(BATCH_SIZE, UNITCOUNT);
 		error = zeros<float>(BATCH_SIZE, UNITCOUNT);
 	}
 	else
 	{
-		out = NULL;
 		bias_activations = NULL;
 		activation = NULL;
 		error = NULL;
 	}
-
 
 	cout << "post buffers layer" << endl;
 

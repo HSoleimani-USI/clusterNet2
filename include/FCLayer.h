@@ -9,7 +9,7 @@ public:
 	FCLayer(){};
 	~FCLayer(){};
 
-	FCLayer(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu);
+	FCLayer(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu, Network *network);
 	FCLayer(int unitcount, Unittype_t unit);
 	FCLayer(int unitcount);
 
@@ -18,7 +18,6 @@ public:
 	FCLayer(int unitcount, Layer *prev);
 
 	void forward();
-	void forward(bool useDropout);
 	void backward_errors();
 	void backward_grads();
 
@@ -27,9 +26,7 @@ public:
 
 protected:
 	void unit_activation();
-	void unit_activation(bool useDropout);
 	void activation_gradient();
-	void apply_dropout();
 
 
 };
