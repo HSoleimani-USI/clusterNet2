@@ -20,6 +20,14 @@ template <typename T> Matrix<T> *Matrix<T>::to_host()
   return out;
 }
 
+
+template void Matrix<float>::free_matrix();
+template <typename T> void Matrix<T>::free_matrix()
+{
+	CUDA_CHECK_RETURN(cudaFree(data));
+	free(this);
+}
+
 //to host where we already have created a gpu buffer
 template void to_host(Matrix<int> *gpu, int *cpu);
 template void to_host(Matrix<float> *gpu, float *cpu);
@@ -124,6 +132,13 @@ template <typename T> void sortbykey(Matrix<T> *keys, Matrix<T> *values)
 }
 
 
+float sum(Matrix<float> *A)
+{
+	thrust::device_ptr<float> d_values(A->data);
+	return thrust::reduce(d_values, d_values+A->size);
+}
+
+
 template void transpose(Matrix<float> *A, Matrix<float> *out, int rows, int cols);
 template <typename T> void transpose(Matrix<T> *A, Matrix<T> *out, int rows, int cols)
 {
@@ -203,11 +218,13 @@ template void elementWiseUnary<klogistic_grad>(Matrix<float> *A, Matrix<float>*o
 template void elementWiseUnary<krectified>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWiseUnary<krectified_grad>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWiseUnary<ksmul>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void elementWiseUnary<kssub>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWiseUnary<ksgt>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWiseUnary<kcopy>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWiseUnary<kprint>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template <int action> void elementWiseUnary(Matrix<float> *A, Matrix<float>*out, float scalar)
 {
+  check_for_same_dimensions(A,out);
   kElementWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, NULL, out->data,scalar, out->size);
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
 
@@ -244,7 +261,8 @@ template void vectorWise<kvsub>(Matrix<float> *A, Matrix<float> *v, Matrix<float
 template void vectorWise<ktmatrix>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
 template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar)
 {
-  kVectorWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, v->data, out->data, scalar, out->cols, out->size);
+  check_matrix_vector_op(A, v);
+  kVectorWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, v->data, out->data, scalar, out->rows, out->cols);
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
@@ -270,7 +288,7 @@ template <int reduction> float reduceToValue(Matrix<float> *A)
 {
 	Matrix<float> *vout = empty<float>(A->rows, 1);
 	float retValue = reduceToValue<reduction>(A, vout);
-	cudaFree(vout->data);
+	CUDA_CHECK_RETURN(cudaFree(vout->data));
 	free(vout);
 	return retValue;
 }
@@ -297,6 +315,7 @@ template <int reduction> float reduceToValue(Matrix<float> *A, Matrix<float> *vo
 //this softmax is numerically stable
 void softmax(Matrix<float> *A, Matrix<float> *out)
 {
+	check_for_same_dimensions(A, out);
     kSoftMax<<<A->rows > 1024 ? 1024 : A->rows, 256>>>(A->data, out->data, A->rows, A->cols);
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
@@ -304,15 +323,20 @@ void softmax(Matrix<float> *A, Matrix<float> *out)
 
 void argmax(Matrix<float> *A, Matrix<float> *out)
 {
+	check_matrix_vector_op(A, out);
     kArgmax<<<A->rows > 1024 ? 1024 : A->rows, 256>>>(A->data, out->data, A->rows, A->cols);
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
-void RMSprop_with_weight_update(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate)
+template void WeightUpdate<RMSProp>(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
+template void WeightUpdate<RMSPropInit>(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
+template <int action> void WeightUpdate(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate)
 {
-
+	check_for_same_dimensions(RMS, grad);
+	check_for_same_dimensions(RMS, w);
 	int blocks = (RMS->size/THREADS_PER_BLOCKS) + 1;
-	kRMSprop_with_weight_update<<<blocks,THREADS_PER_BLOCKS>>>(RMS->data, grad->data, w->data, RMS_multiplier, learning_rate, RMS->size);
+	kRMSprop<action><<<blocks,THREADS_PER_BLOCKS>>>(RMS->data, grad->data, w->data, RMS_multiplier, learning_rate, RMS->size);
+    CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
 Matrix<float> *read_hdf5(const char *filepath){ return read_hdf5(filepath,"/Default"); }
@@ -372,5 +396,81 @@ bool check_matrix_multiplication(Matrix<float> *A, Matrix<float> *B, Matrix<floa
 		cout << "Matrices are not aligned: " << A_rows<< "x" << A_cols << " dot " << B_rows << "x" << B_cols << " -->"  << out->rows << "x" << out->cols <<endl;
 		throw "Matrices are not aligned!";
 	}
+
+}
+
+bool check_matrix_vector_op(Matrix<float> *A, Matrix<float> *vec)
+{
+	if(A && vec)
+	{
+		if((A->rows == vec->rows && vec->cols == 1) ||
+		   (A->cols == vec->rows && vec->cols == 1) ||
+		   (A->rows == vec->cols && vec->rows == 1) ||
+		   (A->cols == vec->cols && vec->rows == 1)) return true;
+		else
+		{
+			cout << "Matrix vector opt does not align: " << A->rows << "x" << A->cols << " vs " << vec->rows << "x" << vec->cols << endl;
+			throw "Matrix vector opt does not align!";
+		}
+	}
+	else return true;
+}
+
+
+
+
+void print_matrix(Matrix<float> *A, int end_rows, int end_cols){ print_matrix(A,0,end_rows,0,end_cols); }
+void print_matrix(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col)
+{
+	for(int row = start_row; row< end_row; row++)
+	{
+		printf("[");
+		for(int col =start_col; col < end_col; col++)
+		{
+		  if(A->data[(row*A->cols)+col] < 0.0f)
+			  printf("% f ",A->data[(row*A->cols)+col]);
+		  else
+			  printf("%f ",A->data[(row*A->cols)+col]);
+		}
+		printf("]\n");
+	}
+	printf("\n");
+}
+
+void printmat(Matrix<float> *A)
+{
+  Matrix<float> * m = A->to_host();
+  print_matrix(m,A->rows,A->cols);
+  free(m->data);
+  free(m);
+
+}
+
+void printdim(Matrix<float> *A)
+{
+	cout << A->rows << "x" << A->cols << endl;
+}
+
+void printsum(Matrix<float> *A)
+{
+	cout << sum(A) << endl;
+}
+
+void printhostmat(Matrix<float> *A){ print_matrix(A,A->rows,A->cols); }
+void printmat(Matrix<float> *A, int end_rows, int end_cols)
+{
+  Matrix<float> * m = A->to_host();
+  print_matrix(m, end_rows, end_cols);
+  free(m->data);
+  free(m);
+
+}
+
+void printmat(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col)
+{
+  Matrix<float> * m = A->to_host();
+  print_matrix(m, start_row, end_row, start_col, end_col);
+  free(m->data);
+  free(m);
 
 }

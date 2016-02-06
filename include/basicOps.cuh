@@ -38,6 +38,14 @@ using std::endl;
 
 
 
+typedef enum WeightUpdateType_t
+{
+	RMSProp = 0,
+	Momentum = 1,
+	PlainSGD = 2,
+	RMSPropInit = 3
+} WeightUpdateType_t;
+
 typedef enum Operations_t
 {
 	kabs = 0,
@@ -66,6 +74,7 @@ typedef enum Operations_t
 	kvsub = 20,
 	ktmatrix = 21,
 
+
 	ksmul = 22,
 	ksgt = 23,
 
@@ -73,7 +82,8 @@ typedef enum Operations_t
 
 	kprint = 25,
 
-	kcopy = 26
+	kcopy = 26,
+	kssub = 27,
 
 } Operations_t;
 
@@ -85,7 +95,7 @@ typedef enum Reduction_t
 
 } Reduction_t;
 
-template<typename T> struct Matrix
+template<typename T> class Matrix
 {
   public:
     int rows;
@@ -94,6 +104,7 @@ template<typename T> struct Matrix
     int size;
     T *data;
     Matrix<T> *to_host();
+    void free_matrix();
 };
 
 
@@ -108,6 +119,7 @@ template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu, size_t by
 
 
 template <typename T> void sortbykey(Matrix<T> *keys, Matrix<T> *values);
+float sum(Matrix<float> *A);
 
 template <typename T> void transpose(Matrix<T> *A, Matrix<T> *out, int rows, int cols);
 template <typename T> Matrix<T> *to_col_major(Matrix<T> *A);
@@ -122,13 +134,14 @@ void slice(Matrix<float> *A, Matrix<float>*out, int rstart, int rend, int cstart
 void softmax(Matrix<float> *A, Matrix<float> *out);
 void argmax(Matrix<float> *A, Matrix<float> *out);
 
-void RMSprop_with_weight_update(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
+template <int action> void WeightUpdate(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
 
 template <int reduction> void reduceToRows(Matrix<float> *A, Matrix<float> *vout);
 template <int reduction> float reduceToValue(Matrix<float> *A);
 template <int reduction> float reduceToValue(Matrix<float> *A, Matrix<float> *vout_rows);
 
 
+bool check_matrix_vector_op(Matrix<float> *A, Matrix<float> *vec);
 bool check_for_same_dimensions(Matrix<float> *A, Matrix<float> *B);
 bool check_matrix_multiplication(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2);
 
@@ -136,5 +149,14 @@ Matrix<float> *read_hdf5(const char *filepath);
 Matrix<float> *read_hdf5(const char *filepath, const char *tag);
 
 
-#define _add elementWise<kadd>
+void print_matrix(Matrix<float> *A, int end_rows, int end_cols);
+void print_matrix(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col);
+void printmat(Matrix<float> *A);
+void printhostmat(Matrix<float> *A);
+void printdim(Matrix<float> *A);
+void printsum(Matrix<float> *A);
+void printmat(Matrix<float> *A, int end_rows, int end_cols);
+void printmat(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col);
+
+
 #endif

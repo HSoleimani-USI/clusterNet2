@@ -8,6 +8,7 @@
 #define Layer_H
 
 class Network;
+class ActivationFunction;
 
 class Layer
 {
@@ -28,6 +29,7 @@ public:
 	Matrix<float> *bias_activations;
 	Matrix<float> *error;
 	Matrix<float> *activation;
+	Matrix<float> *activation_grad;
 
 	Matrix<float> *target;
 	Matrix<float> *target_matrix;
@@ -37,41 +39,27 @@ public:
 
 	ClusterNet *GPU;
 
-	float LEARNING_RATE;
-	float RMSPROP_MOMENTUM;
-	float RUNNING_ERROR;
-	float RUNNING_SAMPLE_SIZE;
-	Unittype_t UNIT_TYPE;
-	Costfunction_t COST;
-	float DROPOUT;
+
 	int UNITCOUNT;
 	int BATCH_SIZE;
 	int Layer_ID;
-	WeightUpdateType_t UPDATE_TYPE;
 	Network *_network;
 
 	Layer(){};
 	~Layer(){};
 
-
 	virtual void forward() = 0;
 	virtual void backward_errors() = 0;
 	virtual void backward_grads() = 0;
-	virtual void link_with_next_Layer(Layer *next_Layer) = 0;
 
-	void init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu, Network *network);
-	void running_error();
-	void print_error(std::string message);
-	void weight_update();
+	void init(int unitcount, Unittype_t unitType);
 
-	void set_hidden_dropout(float dropout);
+	ActivationFunction *_func;
 
-	void dropout_decay();
-	void learning_rate_decay(float decay_rate);
+
+
 
 protected:
-	virtual void unit_activation() = 0;
-	virtual void activation_gradient() = 0;
 
 
 

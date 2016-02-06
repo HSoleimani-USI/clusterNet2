@@ -34,5 +34,5 @@ __global__ void kSoftMax(float* A, float* out, const unsigned int rows, const un
 __global__ void kArgmax(float* A, float* vout, const unsigned int rows, const unsigned int cols);
 
 
-__global__ void kRMSprop_with_weight_update (float *RMS, float *grad, float *w, float RMS_multiplier, float learning_rate, int size);
+template <int action> __global__ void kRMSprop (float *RMS, float *grad, float *w, float RMS_multiplier, float learning_rate, int size);
 #endif

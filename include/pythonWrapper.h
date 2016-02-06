@@ -1,7 +1,6 @@
 #include <basicOps.cuh>
 #include <ClusterNet.h>
 #include <BatchAllocator.h>
-#include <NeuralNetwork.h>
 
 typedef ClusterNet ClusterNet;
 typedef Matrix<float> FloatMatrix;
@@ -51,5 +50,5 @@ void freemat(FloatMatrix *A);
 
 void wsortbykey(FloatMatrix *keys, FloatMatrix *values);
 
-NeuralNetwork *get_neural_net(ClusterNet *gpu, BatchAllocator *b_train, BatchAllocator *b_cv, float *FCLayers, int FCLayercount, int unit, int classes);
+void wprintmat(FloatMatrix *A, int rstart, int rend, int cstart, int cend);
 

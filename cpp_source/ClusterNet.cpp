@@ -103,7 +103,11 @@ void ClusterNet::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, boo
 									 NULL, false, false,0);
 
 
-		if (!success){ throw "NERVANA ERROR"; }
+		if (!success)
+		{
+			cout << "NERVANA ERROR" << endl;
+			throw "NERVANA ERROR";
+		}
 }
 
 void ClusterNet::dropout(Matrix<float> *A, Matrix <float> *out, const float dropout)

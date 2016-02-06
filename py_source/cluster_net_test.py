@@ -102,8 +102,8 @@ def test_elementwise():
     t.assert_almost_equal(gpu.log(B1).tocpu(), np.log(A1), 3, "Log not working")
     t.assert_almost_equal(gpu.sqrt(B1).tocpu(), np.sqrt(A1), 3, "Sqrt not working")
     t.assert_almost_equal(gpu.pow(B1,2.0).tocpu(), np.power(A1,2.0), 3, "Pow not working")
-    t.assert_almost_equal(gpu.logistic(B1).tocpu(), 1.0/(1.0+np.exp(A1)), 3, "Logistic not working")
-    t.assert_almost_equal(gpu.logistic_grad(B1).tocpu(), A1*(A1-1.0), 3, "Logistic grad not working")
+    t.assert_almost_equal(gpu.logistic(B1).tocpu(), 1.0/(1.0+np.exp(-A1)), 3, "Logistic not working")
+    t.assert_almost_equal(gpu.logistic_grad(B1).tocpu(), A1*(1.0-A1), 3, "Logistic grad not working")
     t.assert_almost_equal(gpu.rectified_linear(B1).tocpu(), A1*(A1>0), 3, "Rectified not working")
     t.assert_almost_equal(gpu.rectified_linear_grad(B1).tocpu(), (A1>0), 3, "Rectified grad not working")
     
@@ -132,14 +132,17 @@ def test_vectorwise():
            
         return t
     
-    A = np.float32(np.random.randn(100,100))
-    v = np.float32(np.random.randn(100,1))    
+    A = np.float32(np.random.randn(2,4))
+    v = np.float32(np.random.randn(1,4))    
     
-    labels = np.float32(np.random.randint(0,10,100))
+    labels = np.float32(np.random.randint(0,4,128)).reshape(128,1)
+    
+    
+    
     B = gpu.array(A)
     V = gpu.array(v)
     Y = gpu.array(labels)
-    
+        
     t.assert_almost_equal(gpu.vector_add(B, V).tocpu(), A+v, 3, "Vec add not working")
     t.assert_almost_equal(gpu.create_t_matrix(Y, 9).tocpu(), create_t_matrix(labels,9), 3, "Tmatrix not working")
 
@@ -272,28 +275,24 @@ def test_free():
 
         
 def test_euclidean_distance():
-    x = np.float32(np.random.rand(100,10))
-    
-    t.assert_equal(x.T,np.transpose(x))
-    rows = x.shape[1]
-    dim = x.shape[0]
+    x = np.float32(np.random.rand(10,100))
+    rows = x.shape[0]
+    dim = x.shape[1]
     X = gpu.array(x)
-    x = x.T
     vec = gpu.empty((dim,1))
-    buffer = gpu.empty((dim,rows))
-    bufferT = gpu.empty((rows,dim))
+    buffer = gpu.empty((rows,dim))
+    bufferT = gpu.empty((dim,rows))
     distances = gpu.empty((rows,1))
     
     dist = cdist(x,x,'euclidean')
-    for i in range(X.shape[1]):
-        gpu.slice(X, 0, dim, i, i+1, vec)
+    for i in range(X.shape[0]):
+        gpu.slice(X, i,i+1,0,dim, vec)
                         
         gpu.vector_sub(X, vec, buffer)
                 
         gpu.pow(buffer, 2.0, buffer)
-        
-        gpu.transpose(buffer, bufferT)
-        gpu.row_sum(bufferT, distances)
+                
+        gpu.row_sum(buffer, distances)
         
         gpu.sqrt(distances, distances)
         
@@ -315,7 +314,13 @@ def test_get_closest_index():
     
     t.assert_equal(np.array(results), results_gpu)
     
+def test_printmat():
+    X = np.float32(np.random.rand(10,10))
+    A = gpu.array(X)
+    gpu.printmat(A)
+    print X
     
+'''
 def test_neural_net():
     X = np.float32(np.load('train_small_X.npy'))
     y = np.float32(np.load('train_small_y.npy'))  
@@ -327,3 +332,4 @@ def test_neural_net():
     net.fit()
     print time.time()-t0
     #assert False
+'''

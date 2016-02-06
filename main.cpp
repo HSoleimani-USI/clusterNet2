@@ -1,6 +1,11 @@
 #include "ClusterNet.h"
 #include "Timer.cuh"
-#include "NeuralNetwork.h"
+#include "Network.h"
+#include <Optimizer.h>
+#include <FCLayer.h>
+#include <BatchAllocator.h>
+#include <ErrorHandler.h>
+#include <Configurator.h>
 
 using namespace std;
 
@@ -45,12 +50,22 @@ void test_neural_network()
 	BatchAllocator *b_train = new BatchAllocator(trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
 	BatchAllocator *b_cv= new BatchAllocator(cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,128);
 
-	std::vector<int> FCLayers = std::vector<int>();
-	FCLayers.push_back(1024);
-	FCLayers.push_back(1024);
-	NeuralNetwork net = NeuralNetwork(gpu, b_train, b_cv, FCLayers, Rectified_Linear, 10);
+	Network net = Network(gpu);
 
-	net.fit();
+	net._conf->LEARNING_RATE = 0.001f;
+	net._conf->RMSPROP_MOMENTUM = 0.999f;
+
+	net.add(new FCLayer(784,Input));
+	net.add(new FCLayer(1024,Rectified_Linear));
+	net.add(new FCLayer(1024,Rectified_Linear));
+	net.add(new FCLayer(10,Softmax));
+
+	net._opt = new Optimizer(RMSProp);
+
+	net.init_weights(UniformSqrt);
+
+	net.train(b_train, b_cv, 200);
+	//net.fit(b_train,200);
 }
 
 int main(int argc, char const *argv[]) {

@@ -1,11 +1,12 @@
 #include <Layer.h>
+#include <ActivationFunction.h>
 
 using std::cout;
 using std::endl;
 using std::string;
 using std::vector;
 
-
+/*
 void Layer::weight_update()
 {
 	if(target){ return; }
@@ -89,7 +90,7 @@ void Layer::running_error()
 		case Misclassification:
 			argmax(activation, result);
 			elementWise<keq>(result,target,eq,0.0f);
-			sum_value = reduceToValue<rsum>(eq);
+			sum_value = sum(eq);
 			RUNNING_ERROR += (activation->rows  - sum_value);
 			RUNNING_SAMPLE_SIZE += activation->rows;
 			break;
@@ -100,12 +101,9 @@ void Layer::running_error()
 }
 
 
-
-void Layer::init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNet *gpu, Network *network)
+*/
+void Layer::init(int unitcount, Unittype_t unitType)
 {
-
-	cout << "cosntructor layer" << endl;
-
 	next = NULL;
 	prev = NULL;
 	w_next = NULL;
@@ -120,35 +118,10 @@ void Layer::init(int unitcount, int start_batch_size, Unittype_t unit, ClusterNe
 	target_matrix = NULL;
 	error = NULL;
 
-	_network = network;
-
-	LEARNING_RATE = 0.001f;
-	RMSPROP_MOMENTUM = 0.9f;
-	UNIT_TYPE = unit;
-	DROPOUT = 0.5f;
 	UNITCOUNT = unitcount;
-	BATCH_SIZE = start_batch_size;
-	RUNNING_ERROR = 0.0f;
-	RUNNING_SAMPLE_SIZE = 0.0f;
 
-	UPDATE_TYPE = RMSProp;
-	COST = Misclassification;
 	Layer_ID = 0;
 
-	GPU = gpu;
-
-	if(BATCH_SIZE > 0)
-	{
-		bias_activations = ones<float>(1, BATCH_SIZE);
-		activation = zeros<float>(BATCH_SIZE, UNITCOUNT);
-		error = zeros<float>(BATCH_SIZE, UNITCOUNT);
-	}
-	else
-	{
-		bias_activations = NULL;
-		activation = NULL;
-		error = NULL;
-	}
-
+	_func = new ActivationFunction(unitType);
 }
 

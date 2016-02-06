@@ -12,6 +12,12 @@
 #ifndef __ClusterNet_H__
 #define __ClusterNet_H__
 
+typedef enum WeightInitType_t
+{
+	Gaussian = 0,
+	UniformSqrt = 1
+} WeightInitType_t;
+
 typedef enum Unittype_t
 {
 	Logistic = 0,
@@ -28,13 +34,6 @@ typedef enum DataPropagationType_t
 	CVerror = 2
 } DataPropagationType_t;
 
-
-typedef enum WeightUpdateType_t
-{
-	RMSProp = 0,
-	Momentum = 1,
-	PlainSGD = 2
-} WeightUpdateType_t;
 
 typedef enum Costfunction_t
 {

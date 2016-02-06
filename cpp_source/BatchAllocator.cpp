@@ -12,13 +12,11 @@ BatchAllocator::BatchAllocator(){}
 BatchAllocator::BatchAllocator(float *X, float *y, int rows, int colsX, int colsY, int batch_size)
 {
 
-	int offsize = rows % batch_size > 0 ? batch_size-(rows % batch_size) : 0;
-	pinned_bufferX = to_pinned<float>(rows + offsize,colsX, X, sizeof(float)*rows*colsX);
-	pinned_bufferY = to_pinned<float>(rows + offsize,colsY, y,sizeof(float)*rows*colsY);
-
 	BATCH_SIZE = batch_size;
-	BATCHES = (rows + offsize)/batch_size;
+	BATCHES = rows/batch_size;
 
+	pinned_bufferX = to_pinned<float>(BATCHES*batch_size,colsX, X, sizeof(float)*BATCHES*batch_size*colsX);
+	pinned_bufferY = to_pinned<float>(BATCHES*batch_size,colsY, y,sizeof(float)*BATCHES*batch_size*colsY);
 	CURRENT_BATCH = 0;
 	EPOCH = 0;
 
@@ -30,6 +28,8 @@ BatchAllocator::BatchAllocator(float *X, float *y, int rows, int colsX, int cols
 
 	cudaStreamCreate(&streamX);
 	cudaStreamCreate(&streamY);
+
+	allocate_next_batch_async();
 
 }
 

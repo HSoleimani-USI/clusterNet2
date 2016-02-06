@@ -6,7 +6,7 @@
  */
 
 #include <pythonWrapper.h>
-	#include <Timer.cuh>
+#include <Timer.cuh>
 
 //the extern C statement requires that we have no templates and overloaded methods, because
 //it cannot infer the signature of the method otherwise in our python library
@@ -84,7 +84,6 @@ extern "C"
 
 	void fsortbykey(FloatMatrix *keys, FloatMatrix *values){ wsortbykey(keys, values); }
 
-	NeuralNetwork *fget_neural_net(ClusterNet *gpu, BatchAllocator *b_train, BatchAllocator *b_cv, float*FCLayers, int FCLayercount, int unit, int classes)
-	{return get_neural_net(gpu, b_train, b_cv, FCLayers, FCLayercount, unit, classes); }
-	void ffit_neural_net(NeuralNetwork *net){net->fit();}
+	void fprintmat(FloatMatrix *A, int rstart, int rend, int cstart, int cend){ wprintmat(A,rstart,rend,cstart,cend); }
+
 }

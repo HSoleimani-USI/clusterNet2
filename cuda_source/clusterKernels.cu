@@ -68,6 +68,7 @@ template __global__ void kElementWise<kne>(const float *A, const float *B, float
 template __global__ void kElementWise<ksquared_diff>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<kdropout>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<ksmul>(const float *A, const float *B, float *out, const float scalar, int size);
+template __global__ void kElementWise<kssub>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<ksgt>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<kcopy>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<kprint>(const float *A, const float *B, float *out, const float scalar, int size);
@@ -89,8 +90,8 @@ template<int operation> __global__ void kElementWise(const float *A, const float
        	   case ksub: out[i] = A[i] - B[i]; break;
        	   case kdiv: out[i] = fdividef(A[i], B[i]); break;
        	   case kmul: out[i] = A[i] * B[i]; break;
-       	   case klogistic: out[i] = 1.0f/(1.0f + expf(A[i])); break;
-       	   case klogistic_grad: out[i] = A[i]*(A[i]-1.0f); break;
+       	   case klogistic: out[i] = 1.0f/(1.0f + expf(-A[i])); break;
+       	   case klogistic_grad: out[i] = A[i]*(1.0f-A[i]); break;
        	   case krectified: out[i] = A[i] > 0.0f ? A[i] : 0.0f; break;
        	   case krectified_grad: out[i] = A[i] > 0.0f ? 1.0f : 0.0f; break;
        	   case keq: out[i] = (float)(A[i] == B[i]); break;
@@ -102,6 +103,7 @@ template<int operation> __global__ void kElementWise(const float *A, const float
        	   case ksquared_diff: out[i] = powf(A[i]-B[i],2.0f); break;
 
        	   case ksmul: out[i] = A[i] * scalar; break;
+       	   case kssub: out[i] = A[i] - scalar; break;
        	   case kdropout: out[i] = B[i] > scalar ? A[i] : 0.0f; break;
        	   case kcopy: out[i] = A[i]; break;
        	   case kprint: printf("%f ", A[i]); break;
@@ -113,24 +115,22 @@ template<int operation> __global__ void kElementWise(const float *A, const float
 }
 
 
-template __global__ void kVectorWise<kvadd>(float *A, float *v, float *out, const float scalar, int rows, int size);
-template __global__ void kVectorWise<kvsub>(float *A, float *v, float *out, const float scalar, int rows, int size);
-template __global__ void kVectorWise<ktmatrix>(float *A, float *v, float *out, const float scalar, int rows, int size);
-template <int operation > __global__ void kVectorWise(float *A, float *v, float *out, const float scalar, int cols, int size)
+template __global__ void kVectorWise<kvadd>(float *A, float *v, float *out, const float scalar, int rows, int cols);
+template __global__ void kVectorWise<kvsub>(float *A, float *v, float *out, const float scalar, int rows, int cols);
+template __global__ void kVectorWise<ktmatrix>(float *A, float *v, float *out, const float scalar, int rows, int cols);
+template <int operation > __global__ void kVectorWise(float *A, float *v, float *out, const float scalar, int rows, int cols)
 {
 	const unsigned int numThreads = blockDim.x * gridDim.x;
 	const int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
 
-	int row = 0;
-	for (unsigned int i = idx; i < size; i += numThreads)
+	for (unsigned int i = idx; i < rows*cols; i += numThreads)
 	{
 		//this switch operation will be removed by the compiler upon instantiation of the template
-		row = (i / cols);
 		switch(operation)
 		{
-			case kvadd: out[i] =  A[i] + v[row]; break;
-			case kvsub: out[i] =  A[i] - v[row]; break;
-			case ktmatrix: out[i] = i-(row*cols) == (int)v[row] ? 1.0f : 0.0f; break;
+			case kvadd: out[i] =  A[i] + v[i - ((i / cols)*cols)]; break;
+			case kvsub: out[i] =  A[i] - v[i - ((i / cols)*cols)]; break;
+			case ktmatrix: out[i] = i-((i / cols)*cols) == (int)v[(i / cols)] ? 1.0f : 0.0f; break;
 		}
 	}
 }
@@ -401,7 +401,18 @@ __global__ void kArgmax(float* A, float* vout, const unsigned int rows, const un
 	}
 }
 
-__global__ void kRMSprop_with_weight_update(float *RMS, float *grad, float *w, float RMS_multiplier, float learning_rate, int size)
+
+
+/*
+RMSProp = 0,
+Momentum = 1,
+PlainSGD = 2,
+RMSPropInit = 3
+*/
+
+template __global__ void kRMSprop<RMSProp>(float *RMS, float *grad, float *w, float RMS_multiplier, float learning_rate, int size);
+template __global__ void kRMSprop<RMSPropInit>(float *RMS, float *grad, float *w, float RMS_multiplier, float learning_rate, int size);
+template <int action> __global__ void kRMSprop(float *RMS, float *grad, float *w, float RMS_multiplier, float learning_rate, int size)
 {
 	  const unsigned int numThreads = blockDim.x * gridDim.x;
 	  const int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
@@ -413,11 +424,22 @@ __global__ void kRMSprop_with_weight_update(float *RMS, float *grad, float *w, f
 	  {
 		  grad_value = grad[i];
 
-		  RMS_value = (RMS_multiplier*RMS[i]) + (powf(grad_value,2.0f)*rms_reciprocal);
-		  grad_value = learning_rate*fdividef(grad_value,(sqrtf(RMS_value)+1.0e-08f));
+		  switch(action)
+		  {
+		  	  case RMSProp:
+				  RMS_value = (RMS_multiplier*RMS[i]) + (powf(grad_value,2.0f)*rms_reciprocal);
+				  grad_value = learning_rate*fdividef(grad_value,(sqrtf(RMS_value)+1.0e-08f));
+				  RMS[i] = RMS_value;
+				  w[i] -= grad_value;
+		  		  break;
+		  	  case RMSPropInit:
+				  RMS_value = (RMS_multiplier*RMS[i]) + (powf(grad_value,2.0f)*rms_reciprocal);
+				  grad_value = learning_rate*grad_value;
+				  RMS[i] = RMS_value;
+				  w[i] -= grad_value;
+				  break;
+		  }
 
-		  RMS[i] = RMS_value;
-		  w[i] -= grad_value;
 
 	  }
 }

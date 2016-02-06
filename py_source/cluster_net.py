@@ -367,21 +367,18 @@ def sum(A): return lib.funcs.ffsum(A.pt)
 def get_closest_index(x, top=50):
 	rows = x.shape[0]
 	dim = x.shape[1] 
-	bufferT = array(x)
+	X = array(x)
+	buffer = empty(x.shape)
 	vec = empty((dim,1))
-	buffer = empty((dim,rows))
-	X = bufferT.T	
 	distances = empty((rows,1))
 	row_indexes = []
-	print X.shape[1]
 	distances_cpu = np.empty((rows,),dtype=np.float32)
-	for i in range(X.shape[1]):
+	for i in range(x.shape[0]):
 		if i % 100 == 0: print i
-		slice(X, 0, dim, i, i+1, vec)
+		slice(X, i,i+1,0, dim, vec)
 		vector_sub(X, vec, buffer)
 		pow(buffer, 2.0, buffer)
-		transpose(buffer, bufferT)
-		row_sum(bufferT, distances)
+		row_sum(buffer, distances)
 		sqrt(distances, distances)	
 		
 		tocpu(distances, distances_cpu)
@@ -390,4 +387,8 @@ def get_closest_index(x, top=50):
 
 def tocpu(A, out):
 	lib.funcs.fto_host(A.pt,out.ctypes.data_as(ct.POINTER(ct.c_float)))
+	
+def printmat(A, rstart=None, rend=None, cstart=None,cend=None):
+	if rstart and rend and cstart and cend: lib.funcs.fprintmat(A.pt, rstart, rend, cstart, cend)
+	else: lib.funcs.fprintmat(A.pt, 0, int(A.shape[0]), 0, int(A.shape[1]))
 
