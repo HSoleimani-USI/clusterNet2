@@ -81,7 +81,7 @@ void ErrorHandler::print_error(std::string message)
 	value += strEmpty;
 	value += std::to_string((RUNNING_ERROR/RUNNING_SAMPLE_SIZE));
 
-	float standard_error = (2.57*sqrtf(RUNNING_VARIANCE)/sqrtf(RUNNING_BATCHES));
+	float standard_error = (1.96*sqrtf(RUNNING_VARIANCE)/sqrtf(RUNNING_BATCHES));
 	value += " (" + std::to_string((RUNNING_MEAN - standard_error)) + "," + std::to_string((RUNNING_MEAN + standard_error)) + ")";
 
 

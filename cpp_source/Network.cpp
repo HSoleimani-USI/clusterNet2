@@ -4,6 +4,7 @@
 #include <ErrorHandler.h>
 #include <Optimizer.h>
 #include <Configurator.h>
+#include <Transformer.h>
 
 
 Network::Network(ClusterNet *gpu)
@@ -26,6 +27,10 @@ void Network::add(Layer *layer)
 
 	_layers.push_back(layer);
 	layer->GPU = _gpu;
+	layer->_network = this;
+	if(layer->_transformer){ layer->_transformer->_gpu = _gpu; }
+	if(layer->_transformer){ layer->_transformer->_net = this; }
+
 }
 
 void Network::init_weights(WeightInitType_t wtype)
@@ -61,6 +66,8 @@ void Network::init_weights(WeightInitType_t wtype)
 
 void Network::init_activations(int batchsize)
 {
+	if(_layers.front()->_transformer){_layers.front()->_transformer->output = zeros<float>(batchsize, _layers.front()->UNITCOUNT);}
+
 	for(int i = 1; i < _layers.size(); i++)
 	{
 		if(_layers[i]->bias_activations != NULL && _layers[i]->bias_activations->rows == batchsize){ return; }
@@ -72,6 +79,7 @@ void Network::init_activations(int batchsize)
 			_layers[i]->activation_grad->free_matrix();
 			_layers[i]->error->free_matrix();
 			if(i == _layers.size()-1){ _layers[i]->target_matrix->free_matrix(); }
+			if(_layers[i]->_transformer){ _layers[i]->_transformer->output->free_matrix(); }
 		}
 
 		_layers[i]->bias_activations = ones<float>(1, batchsize);
@@ -79,8 +87,19 @@ void Network::init_activations(int batchsize)
 		_layers[i]->activation_grad = zeros<float>(batchsize, _layers[i]->UNITCOUNT);
 		_layers[i]->error = zeros<float>(batchsize, _layers[i]->UNITCOUNT);
 		if(i == _layers.size()-1){ _layers[i]->target_matrix = zeros<float>(batchsize, _layers[i]->UNITCOUNT);}
+		if(_layers[i]->_transformer){ _layers[i]->_transformer->output = zeros<float>(batchsize, _layers[i]->UNITCOUNT); }
 	}
 
+}
+
+void Network::copy_global_params_to_layers()
+{
+	for(int i = 0; i < _layers.size(); i++)
+	{
+		_layers[i]->_conf->LEARNING_RATE = _conf->LEARNING_RATE;
+		_layers[i]->_conf->RMSPROP_MOMENTUM = _conf->RMSPROP_MOMENTUM;
+		_layers[i]->_conf->DROPOUT = _conf->DROPOUT;
+	}
 }
 
 void Network::fit_partial(BatchAllocator *b, int batches)
@@ -151,6 +170,7 @@ void Network::train(BatchAllocator *train, BatchAllocator *CV, int epochs)
 
 Matrix<float> *Network::predict(Matrix<float> *X)
 {
+	_isTrainTime = false;
 	init_activations(X->rows);
 
 	_layers.front()->activation = X;

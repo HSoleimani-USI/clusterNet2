@@ -16,6 +16,7 @@ public:
 
 	float LEARNING_RATE;
 	float RMSPROP_MOMENTUM;
+	float DROPOUT;
 
 	void set_hidden_dropout(float dropout);
 

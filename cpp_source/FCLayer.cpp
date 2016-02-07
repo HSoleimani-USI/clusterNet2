@@ -1,6 +1,7 @@
 #include <FCLayer.h>
 #include <Network.h>
 #include <ActivationFunction.h>
+#include <Transformer.h>
 
 using std::cout;
 using std::endl;
@@ -11,12 +12,13 @@ FCLayer::FCLayer(int unitcount, Unittype_t unitType){ init(unitcount, unitType);
 
 void FCLayer::forward()
 {
-	if(!prev){ next->forward(); return; }
+	if(!prev){ if(_transformer){ _transformer->transform(activation); } next->forward(); return; }
 
-	GPU->dot(prev->activation,prev->w_next,activation);
+	GPU->dot(prev->get_forward_activation(),prev->w_next,activation);
 	vectorWise<kvadd>(activation, prev->b_next, activation, 0.0f);
-
 	_func->activation(activation,activation);
+
+	if(_transformer){ _transformer->transform(activation); }
 
     if(next){ next->forward(); }
 }

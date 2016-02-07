@@ -9,6 +9,8 @@
 
 class Network;
 class ActivationFunction;
+class Transformer;
+class Configurator;
 
 class Layer
 {
@@ -53,8 +55,13 @@ public:
 	virtual void backward_grads() = 0;
 
 	void init(int unitcount, Unittype_t unitType);
+	Matrix<float> *get_forward_activation();
 
 	ActivationFunction *_func;
+
+	Transformer *_transformer;
+
+	Configurator *_conf;
 
 
 

@@ -12,7 +12,7 @@ Configurator::Configurator()
 	// TODO Auto-generated constructor stub
 	LEARNING_RATE = 0.001f;
 	RMSPROP_MOMENTUM = 0.9f;
-
+	DROPOUT = 0.5f;
 }
 
 Configurator::~Configurator() {

@@ -12,6 +12,11 @@
 #ifndef __ClusterNet_H__
 #define __ClusterNet_H__
 
+typedef enum TransformerType_t
+{
+	DropoutTransform = 0
+} TransformerType_t;
+
 typedef enum WeightInitType_t
 {
 	Gaussian = 0,

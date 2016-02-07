@@ -27,6 +27,7 @@ public:
 	void add(Layer *layer);
 
 	void init_weights(WeightInitType_t wtype);
+	void copy_global_params_to_layers();
 
 	void fit_partial(BatchAllocator *b, int batches);
 	void fit(BatchAllocator *b, int epochs);
@@ -39,10 +40,10 @@ public:
 	Optimizer *_opt;
 	Configurator *_conf;
 	ErrorHandler *_errorhandler;
+	vector<Layer*> _layers;
 
 protected:
 	void init_activations(int batchsize);
-	vector<Layer*> _layers;
 	ClusterNet *_gpu;
 
 

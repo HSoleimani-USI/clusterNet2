@@ -52,19 +52,38 @@ void test_neural_network()
 
 	Network net = Network(gpu);
 
-	net._conf->LEARNING_RATE = 0.001f;
-	net._conf->RMSPROP_MOMENTUM = 0.999f;
+	net._conf->LEARNING_RATE = 0.003f;
+	net._conf->RMSPROP_MOMENTUM = 0.9f;
 
 	net.add(new FCLayer(784,Input));
 	net.add(new FCLayer(1024,Rectified_Linear));
 	net.add(new FCLayer(1024,Rectified_Linear));
 	net.add(new FCLayer(10,Softmax));
 
-	net._opt = new Optimizer(RMSProp);
+	net.copy_global_params_to_layers();
+	net._layers.front()->_conf->DROPOUT = 0.2f;
 
+	net._opt = new Optimizer(RMSProp);
 	net.init_weights(UniformSqrt);
 
-	net.train(b_train, b_cv, 200);
+
+	/*
+	net._opt->_updatetype = RMSPropInit;
+	net._conf->RMSPROP_MOMENTUM = 0.0f;
+
+	net.fit_partial(b_train,10);
+
+	net._conf->RMSPROP_MOMENTUM = 0.99f;
+	net._opt->_updatetype = RMSProp;
+
+	*/
+
+	Timer t = Timer();
+
+	t.tick();
+	net.train(b_train, b_cv, 100);
+	t.tock();
+
 	//net.fit(b_train,200);
 }
 
