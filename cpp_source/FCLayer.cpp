@@ -15,7 +15,7 @@ void FCLayer::forward()
 	if(!prev){ if(_transformer){ _transformer->transform(activation); } next->forward(); return; }
 
 	GPU->dot(prev->get_forward_activation(),prev->w_next,activation);
-	vectorWise<kvadd>(activation, prev->b_next, activation, 0.0f);
+	vectorWise<kvadd>(activation, prev->b_next, activation);
 	_func->activation(activation,activation);
 
 	if(_transformer){ _transformer->transform(activation); }
@@ -34,13 +34,13 @@ void FCLayer::backward_errors()
 		if(activation->cols != target->cols)
 		{
 			//cout << "activations: " << reduceToValue<rsum>(activation) << endl;
-			vectorWise<ktmatrix>(target,target, target_matrix,0.0f);
-			elementWise<ksub>(activation,target_matrix,error,0.0f);
+			vectorWise<ktmatrix>(target, target_matrix);
+			elementWise<ksub>(activation,target_matrix,error);
 		}
-		else{ elementWise<ksub>(activation,target,error,0.0f); }
+		else{ elementWise<ksub>(activation,target,error); }
 
 
-		elementWiseUnary<ksmul>(error,error,1.0f/error->rows);
+		elementWise<ksmul>(error,error,1.0f/error->rows);
 		//GPU->Tdot(prev->activation, error, prev->w_grad_next);
 
 		return;
@@ -51,7 +51,7 @@ void FCLayer::backward_errors()
 
 	_func->activation_gradient(activation, activation_grad);
 	GPU->dotT(next->error, w_next,error);
-	elementWise<kmul>(error, activation_grad, error,0.0f);
+	elementWise<kmul>(error, activation_grad, error);
 	//GPU->Tdot(prev->activation, error, prev->w_grad_next);
 }
 

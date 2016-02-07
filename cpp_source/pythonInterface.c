@@ -27,29 +27,29 @@ extern "C"
 	void flog(FloatMatrix * A, FloatMatrix *out){ return log(A,out); }
 	void fsqrt(FloatMatrix * A, FloatMatrix *out){ return sqrt(A,out); }
 	void fpow(FloatMatrix * A, FloatMatrix *out, float scalar){ return pow(A,out, scalar); }
-	void flogistic(FloatMatrix * A, FloatMatrix *out, float scalar){ return logistic(A,out, scalar); }
-	void flogistic_grad(FloatMatrix * A, FloatMatrix *out, float scalar){ return logistic_grad(A,out, scalar); }
-	void frectified(FloatMatrix * A, FloatMatrix *out, float scalar){ return rectified(A,out, scalar); }
-	void frectified_grad(FloatMatrix * A, FloatMatrix *out, float scalar){ return rectified_grad(A,out, scalar); }
-	void fcopy(FloatMatrix * A, FloatMatrix *out){ return wcopy(A,out, 0.0f); }
+	void flogistic(FloatMatrix * A, FloatMatrix *out){ return logistic(A,out); }
+	void flogistic_grad(FloatMatrix * A, FloatMatrix *out){ return logistic_grad(A,out); }
+	void frectified(FloatMatrix * A, FloatMatrix *out){ return rectified(A,out); }
+	void frectified_grad(FloatMatrix * A, FloatMatrix *out){ return rectified_grad(A,out); }
+	void fcopy(FloatMatrix * A, FloatMatrix *out){ return wcopy(A,out); }
 
-	void fadd(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return add(A,B, out, scalar); }
-	void fsub(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return sub(A,B, out, scalar); }
-	void fmul(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return mul(A,B, out, scalar); }
-	void fdiv(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return div(A,B, out, scalar); }
-	void feq(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return eq(A,B, out, scalar); }
-	void flt(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return lt(A,B, out, scalar); }
-	void fgt(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return gt(A,B, out, scalar); }
-	void fge(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return ge(A,B, out, scalar); }
-	void fle(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return le(A,B, out, scalar); }
-	void fne(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return ne(A,B, out, scalar); }
-	void fsquared_diff(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out, float scalar){ return squared_diff(A,B, out, scalar); }
+	void fadd(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out){ return add(A,B, out); }
+	void fsub(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out){ return sub(A,B, out); }
+	void fmul(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out){ return mul(A,B, out); }
+	void fdiv(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out){ return div(A,B, out); }
+	void feq(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out){ return eq(A,B, out); }
+	void flt(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out){ return lt(A,B, out); }
+	void fgt(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out){ return gt(A,B, out); }
+	void fge(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out){ return ge(A,B, out); }
+	void fle(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out){ return le(A,B, out); }
+	void fne(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out){ return ne(A,B, out); }
+	void fsquared_diff(FloatMatrix * A, FloatMatrix *B, FloatMatrix *out){ return squared_diff(A,B, out); }
 
 	void fscalar_mul(FloatMatrix * A, FloatMatrix *out, float scalar){ scalar_mul(A,out, scalar); }
 
-	void fvadd(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return vadd(A,v, out, 0.0f); }
-	void fvsub(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return vsub(A,v, out, 0.0f); }
-	void ftmatrix(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return tmatrix(A,v, out, 0.0f); }
+	void fvadd(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return vadd(A,v, out); }
+	void fvsub(FloatMatrix * A, FloatMatrix *v, FloatMatrix *out){ return vsub(A,v, out); }
+	void ftmatrix(FloatMatrix *v, FloatMatrix *out){ return tmatrix(v, out); }
 
 	void fslice(FloatMatrix *A, FloatMatrix *out, int rstart, int rend, int cstart, int cend){ slice(A, out, rstart, rend, cstart, cend); }
 	void fsoftmax(FloatMatrix *A, FloatMatrix *out){ softmax(A, out);}

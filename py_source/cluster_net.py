@@ -321,7 +321,7 @@ def vector_sub(A, v, out=None):
 
 def create_t_matrix(v, max_value, out=None):		
 	if not out: out = empty((v.shape[0],max_value+1))
-	lib.funcs.ftmatrix(out.pt, v.pt, out.pt)
+	lib.funcs.ftmatrix(v.pt, out.pt)
 	return out
 
 def slice(A, rstart, rend, cstart, cend, out=None):

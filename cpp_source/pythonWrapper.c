@@ -7,32 +7,32 @@ void to_host(FloatMatrix *gpu, float *cpu){ to_host<float>(gpu, cpu); }
 void to_gpu(float *cpu, FloatMatrix *gpu){ to_gpu<float>(cpu, gpu); }
 ClusterNet *get_clusterNet(){ return new ClusterNet(); }
 
-void abs(FloatMatrix *A, FloatMatrix *out){ elementWiseUnary<kabs>(A, out, 0.0f); }
-void log(FloatMatrix *A, FloatMatrix *out){ elementWiseUnary<klog>(A, out, 0.0f); }
-void sqrt(FloatMatrix *A, FloatMatrix *out){ elementWiseUnary<ksqrt>(A, out, 0.0f); }
-void pow(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<kpow>(A, out, scalar); }
-void logistic(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<klogistic>(A, out, scalar); }
-void logistic_grad(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<klogistic_grad>(A, out, scalar); }
-void rectified(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<krectified>(A, out, scalar); }
-void rectified_grad(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<krectified_grad>(A, out, scalar); }
-void wcopy(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<kcopy>(A, out, scalar); }
+void pow(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWise<kpow>(A, out, scalar); }
+void abs(FloatMatrix *A, FloatMatrix *out){ elementWise<kabs>(A, out); }
+void log(FloatMatrix *A, FloatMatrix *out){ elementWise<klog>(A, out); }
+void sqrt(FloatMatrix *A, FloatMatrix *out){ elementWise<ksqrt>(A, out); }
+void logistic(FloatMatrix *A, FloatMatrix *out){ elementWise<klogistic>(A, out); }
+void logistic_grad(FloatMatrix *A, FloatMatrix *out){ elementWise<klogistic_grad>(A, out); }
+void rectified(FloatMatrix *A, FloatMatrix *out){ elementWise<krectified>(A, out); }
+void rectified_grad(FloatMatrix *A, FloatMatrix *out){ elementWise<krectified_grad>(A, out); }
+void wcopy(FloatMatrix *A, FloatMatrix *out){ elementWise<kcopy>(A, out); }
 
 
-void add(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kadd>(A, B, out, scalar); }
-void sub(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<ksub>(A, B, out, scalar); }
-void div(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kdiv>(A, B, out, scalar); }
-void mul(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kmul>(A, B, out, scalar); }
-void scalar_mul(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWiseUnary<ksmul>(A, out, scalar); }
-void eq(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<keq>(A, B, out, scalar); }
-void lt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<klt>(A, B, out, scalar); }
-void gt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kgt>(A, B, out, scalar); }
-void le(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kle>(A, B, out, scalar); }
-void ge(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kge>(A, B, out, scalar); }
-void ne(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<kne>(A, B, out, scalar); }
-void squared_diff(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar){ elementWise<ksquared_diff>(A, B, out, scalar); }
-void vadd(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar){ vectorWise<kvadd>(A, v, out, scalar); }
-void vsub(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar){ vectorWise<kvsub>(A, v, out, scalar); }
-void tmatrix(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar){ vectorWise<ktmatrix>(A, v, out, scalar); }
+void add(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out){ elementWise<kadd>(A, B, out); }
+void sub(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out){ elementWise<ksub>(A, B, out); }
+void div(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out){ elementWise<kdiv>(A, B, out); }
+void mul(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out){ elementWise<kmul>(A, B, out); }
+void scalar_mul(FloatMatrix *A, FloatMatrix *out, float scalar){ elementWise<ksmul>(A, out, scalar); }
+void eq(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out){ elementWise<keq>(A, B, out); }
+void lt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out){ elementWise<klt>(A, B, out); }
+void gt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out){ elementWise<kgt>(A, B, out); }
+void le(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out){ elementWise<kle>(A, B, out); }
+void ge(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out){ elementWise<kge>(A, B, out); }
+void ne(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out){ elementWise<kne>(A, B, out); }
+void squared_diff(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out){ elementWise<ksquared_diff>(A, B, out); }
+void vadd(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out){ vectorWise<kvadd>(A, v, out); }
+void vsub(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out){ vectorWise<kvsub>(A, v, out); }
+void tmatrix(FloatMatrix *v, FloatMatrix *out){ vectorWise<ktmatrix>(v, out); }
 
 
 void rowMax(FloatMatrix *A, FloatMatrix *vout){ reduceToRows<rmax>(A, vout); }

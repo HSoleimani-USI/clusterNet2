@@ -29,7 +29,7 @@ Matrix<float> *Transformer::transform(Matrix<float> *input)
 	}
 	else
 	{
-		elementWiseUnary<ksmul>(input,output,(1.0f-_layer->_conf->DROPOUT));
+		elementWise<ksmul>(input,output,(1.0f-_layer->_conf->DROPOUT));
 	}
 
 	return output;

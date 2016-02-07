@@ -61,7 +61,7 @@ void ErrorHandler::add_error(Matrix<float> *predictions, Matrix<float> *labels)
 {
 	if(_errors.size() == 0){ init_buffers(predictions, labels); }
 	argmax(predictions, result);
-	elementWise<keq>(result,labels,eq,0.0f);
+	elementWise<keq>(result,labels,eq);
 	float sum_value = reduceToValue<rsum>(eq);
 	_errors.push_back(((predictions->rows  - sum_value)/(float)predictions->rows));
 	RUNNING_ERROR += (predictions->rows  - sum_value);

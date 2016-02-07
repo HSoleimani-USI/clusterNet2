@@ -25,8 +25,8 @@ void Optimizer::weight_update(Matrix<float> *accelerator, Matrix<float> *weight,
 			WeightUpdate<RMSPropInit>(accelerator,grad,weight,accelerator_value,learning_rate);
 			break;
 		case PlainSGD:
-			elementWiseUnary<ksmul>(grad,grad,learning_rate);
-			elementWise<ksub>(weight,grad,weight,0.0f);
+			elementWise<ksmul>(grad,grad,learning_rate);
+			elementWise<ksub>(weight,grad,weight);
 			break;
 		default:
 			cout << "Unknown update type!" << endl;

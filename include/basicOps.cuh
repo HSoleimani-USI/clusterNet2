@@ -79,11 +79,8 @@ typedef enum Operations_t
 	ksgt = 23,
 
 	kdropout = 24,
-
-	kprint = 25,
-
-	kcopy = 26,
-	kssub = 27,
+	kcopy = 25,
+	kssub = 26,
 
 } Operations_t;
 
@@ -127,9 +124,14 @@ template <typename T> void to_col_major(Matrix<T> *A, Matrix<T> *out);
 template <typename T> Matrix<T> *to_row_major(Matrix<T> *A);
 template <typename T> Matrix<T> *transpose(Matrix<T> *A);
 
-template <int action> void elementWiseUnary(Matrix<float> *A, Matrix<float>*out, float scalar);
+template <int action> void elementWise(Matrix<float> *A, Matrix<float>*out);
+template <int action> void elementWise(Matrix<float> *A, Matrix<float>*out, float scalar);
+template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out);
 template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
+
+template <int action> void vectorWise(Matrix<float> *v, Matrix<float>*out);
+template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out);
+
 void slice(Matrix<float> *A, Matrix<float>*out, int rstart, int rend, int cstart, int cend);
 void softmax(Matrix<float> *A, Matrix<float> *out);
 void argmax(Matrix<float> *A, Matrix<float> *out);

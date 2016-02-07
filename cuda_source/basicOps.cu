@@ -207,44 +207,56 @@ template <typename T> Matrix<T> *transpose(Matrix<T> *A)
   return out;
 }
 
-
 //elementwise operation with a single matrix argument
-template void elementWiseUnary<kabs>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template void elementWiseUnary<klog>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template void elementWiseUnary<ksqrt>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template void elementWiseUnary<kpow>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template void elementWiseUnary<klogistic>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template void elementWiseUnary<klogistic_grad>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template void elementWiseUnary<krectified>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template void elementWiseUnary<krectified_grad>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template void elementWiseUnary<ksmul>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template void elementWiseUnary<kssub>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template void elementWiseUnary<ksgt>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template void elementWiseUnary<kcopy>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template void elementWiseUnary<kprint>(Matrix<float> *A, Matrix<float>*out, float scalar);
-template <int action> void elementWiseUnary(Matrix<float> *A, Matrix<float>*out, float scalar)
+template void elementWise<kabs>(Matrix<float> *A, Matrix<float>*out);
+template void elementWise<klog>(Matrix<float> *A, Matrix<float>*out);
+template void elementWise<ksqrt>(Matrix<float> *A, Matrix<float>*out);
+template void elementWise<klogistic>(Matrix<float> *A, Matrix<float>*out);
+template void elementWise<klogistic_grad>(Matrix<float> *A, Matrix<float>*out);
+template void elementWise<krectified>(Matrix<float> *A, Matrix<float>*out);
+template void elementWise<krectified_grad>(Matrix<float> *A, Matrix<float>*out);
+template void elementWise<kcopy>(Matrix<float> *A, Matrix<float>*out);
+template <int action> void elementWise(Matrix<float> *A, Matrix<float>*out)
+{
+  check_for_same_dimensions(A,out);
+  kElementWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, NULL, out->data,0.0f, out->size);
+  CUDA_CHECK_RETURN(cudaPeekAtLastError());
+}
+
+template void elementWise<kpow>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void elementWise<ksmul>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void elementWise<kssub>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void elementWise<ksgt>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template <int action> void elementWise(Matrix<float> *A, Matrix<float>*out, float scalar)
 {
   check_for_same_dimensions(A,out);
   kElementWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, NULL, out->data,scalar, out->size);
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
-
-  if(action == kprint){ cudaDeviceSynchronize(); }
 }
 
 //elementwise operation with a two matrix arguments
-template void elementWise<kadd>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template void elementWise<ksub>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template void elementWise<kdiv>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template void elementWise<kmul>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template void elementWise<keq>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template void elementWise<klt>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template void elementWise<kgt>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template void elementWise<kge>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template void elementWise<kle>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template void elementWise<kne>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template void elementWise<ksquared_diff>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template void elementWise<kdropout>(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
-template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar)
+template void elementWise<kadd>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void elementWise<ksub>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void elementWise<kdiv>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void elementWise<kmul>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void elementWise<keq>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void elementWise<klt>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void elementWise<kgt>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void elementWise<kge>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void elementWise<kle>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void elementWise<kne>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void elementWise<ksquared_diff>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
+{
+  check_for_same_dimensions(A,B);
+  check_for_same_dimensions(A,out);
+
+  kElementWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, B->data, out->data,0.0f, out->size);
+  CUDA_CHECK_RETURN(cudaPeekAtLastError());
+}
+
+template void elementWise<kdropout>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar);
+template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar)
 {
   check_for_same_dimensions(A,B);
   check_for_same_dimensions(A,out);
@@ -256,13 +268,20 @@ template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matri
 
 //vectorwise operation between matrix and vector
 //this is equivalent to broadcasting in numpy
-template void vectorWise<kvadd>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
-template void vectorWise<kvsub>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
-template void vectorWise<ktmatrix>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar);
-template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out, float scalar)
+template void vectorWise<kvadd>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out);
+template void vectorWise<kvsub>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out);
+template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out)
 {
   check_matrix_vector_op(A, v);
-  kVectorWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, v->data, out->data, scalar, out->rows, out->cols);
+  kVectorWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(A->data, v->data, out->data, 0.0f, out->rows, out->cols);
+  CUDA_CHECK_RETURN(cudaPeekAtLastError());
+}
+
+template void vectorWise<ktmatrix>(Matrix<float> *v, Matrix<float>*out);
+template <int action> void vectorWise(Matrix<float> *v, Matrix<float>*out)
+{
+  check_matrix_vector_op(out, v);
+  kVectorWise<action><<<out->size/THREADS_PER_BLOCKS + 1, THREADS_PER_BLOCKS>>>(NULL, v->data, out->data, 0.0f, out->rows, out->cols);
   CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 

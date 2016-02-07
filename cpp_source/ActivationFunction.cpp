@@ -15,10 +15,10 @@ void ActivationFunction::activation(Matrix<float> *in, Matrix<float> *out)
 	switch(_unitType)
 		{
 			case Logistic:
-				elementWiseUnary<klogistic>(in, out, 0.0f);
+				elementWise<klogistic>(in, out);
 				break;
 			case Rectified_Linear:
-				elementWiseUnary<krectified>(in, out, 0.0f);
+				elementWise<krectified>(in, out);
 				break;
 			case Softmax:
 				softmax(in,out);
@@ -36,10 +36,10 @@ void ActivationFunction::activation_gradient(Matrix<float> *in, Matrix<float> *o
 	switch(_unitType)
 	{
 		case Logistic:
-			elementWiseUnary<klogistic>(in, out, 0.0f);
+			elementWise<klogistic>(in, out);
 			break;
 		case Rectified_Linear:
-			elementWiseUnary<krectified_grad>(in, out, 0.0f);
+			elementWise<krectified_grad>(in, out);
 			break;
 		case Softmax:
 			break;

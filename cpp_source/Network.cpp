@@ -48,8 +48,8 @@ void Network::init_weights(WeightInitType_t wtype)
 		{
 			prev->w_next = _gpu->rand(prev->UNITCOUNT,_layers[i]->UNITCOUNT);
 			float range = 8.0f*sqrtf(6.0f/((float)prev->UNITCOUNT + _layers[i]->UNITCOUNT));
-			elementWiseUnary<ksmul>(prev->w_next,prev->w_next,range);
-			elementWiseUnary<kssub>(prev->w_next,prev->w_next,range/2.0f);
+			elementWise<ksmul>(prev->w_next,prev->w_next,range);
+			elementWise<kssub>(prev->w_next,prev->w_next,range/2.0f);
 		}
 
 		prev->w_rms_next = zeros<float>(prev->UNITCOUNT,_layers[i]->UNITCOUNT);

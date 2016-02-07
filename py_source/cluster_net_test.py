@@ -194,20 +194,16 @@ def test_batch_allocator():
     alloc = gpu.BatchAllocator(X,Y,batch_size)  
     
     
-    alloc.alloc_next_async()   
-    for i in range(3):  
+    for epoch in range(3):  
         for i in range(0,1000,batch_size):
             batchX = X[i:i+batch_size]
             batchY = Y[i:i+batch_size]
             
-            if batchX.shape[0] != batch_size:
-                batchX = np.vstack([batchX, np.zeros((batch_size-batchX.shape[0],batchX.shape[1]),dtype=np.float32)])
-                batchY = np.vstack([batchY, np.zeros((batch_size-batchY.shape[0],batchY.shape[1]),dtype=np.float32)])
-                    
-            alloc.replace_current_with_next_batch()
-            t.assert_almost_equal(alloc.X.tocpu(),batchX , 3, "Batch allocator not working")  
-            t.assert_almost_equal(alloc.Y.tocpu(),batchY , 3, "Batch allocator not working")        
+            if batchX.shape[0] != batch_size: continue
+            alloc.replace_current_with_next_batch()    
             alloc.alloc_next_async()   
+            t.assert_almost_equal(alloc.X.tocpu(),batchX , 3, "Batch allocator not working")  
+            t.assert_almost_equal(alloc.Y.tocpu(),batchY , 3, "Batch allocator not working")    
           
     
 def test_row_reductions():

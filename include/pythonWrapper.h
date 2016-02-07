@@ -17,29 +17,29 @@ void abs(FloatMatrix *A, FloatMatrix *out);
 void log(FloatMatrix *A, FloatMatrix *out);
 void sqrt(FloatMatrix *A, FloatMatrix *out);
 void pow(FloatMatrix *A, FloatMatrix *out, float scalar);
-void logistic(FloatMatrix *A, FloatMatrix *out, float scalar);
-void logistic_grad(FloatMatrix *A, FloatMatrix *out, float scalar);
-void rectified(FloatMatrix *A, FloatMatrix *out, float scalar);
-void rectified_grad(FloatMatrix *A, FloatMatrix *out, float scalar);
-void wcopy(FloatMatrix *A, FloatMatrix *out, float scalar);
+void logistic(FloatMatrix *A, FloatMatrix *out);
+void logistic_grad(FloatMatrix *A, FloatMatrix *out);
+void rectified(FloatMatrix *A, FloatMatrix *out);
+void rectified_grad(FloatMatrix *A, FloatMatrix *out);
+void wcopy(FloatMatrix *A, FloatMatrix *out);
 
-void add(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
-void sub(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
-void div(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
-void mul(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
+void add(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void sub(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void div(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void mul(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
 void scalar_mul(FloatMatrix *A, FloatMatrix *out, float scalar);
-void eq(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
-void lt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
-void gt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
-void ge(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
-void le(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
-void ne(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
-void squared_diff(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out, float scalar);
+void eq(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void lt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void gt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void ge(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void le(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void ne(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void squared_diff(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
 
 
-void vadd(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar);
-void vsub(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar);
-void tmatrix(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out, float scalar);
+void vadd(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out);
+void vsub(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out);
+void tmatrix(FloatMatrix *v, FloatMatrix *out);
 
 void rowMax(FloatMatrix *A, FloatMatrix *vout);
 void rowSum(FloatMatrix *A, FloatMatrix *vout);
