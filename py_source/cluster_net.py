@@ -355,6 +355,26 @@ def row_max(A, out=None):
 	lib.funcs.frowMax(A.pt, out.pt)
 	return out
 
+def row_mean(A, out=None):
+	if not out: out = empty((A.shape[0],1))
+	lib.funcs.frowMean(A.pt, out.pt)
+	return out
+
+def col_sum(A, out=None):
+	if not out: out = empty((A.shape[1],1))
+	lib.funcs.fcolSum(A.pt, out.pt)
+	return out
+
+def col_max(A, out=None):
+	if not out: out = empty((A.shape[1],1))
+	lib.funcs.fcolMax(A.pt, out.pt)
+	return out
+
+def col_mean(A, out=None):
+	if not out: out = empty((A.shape[1],1))
+	lib.funcs.fcolMean(A.pt, out.pt)
+	return out
+
 def transpose(A, out=None):
 	if not out: out = empty((A.shape[1],A.shape[0]))
 	lib.funcs.ftranspose(A.pt, out.pt)
@@ -362,6 +382,7 @@ def transpose(A, out=None):
 
 def max(A): return lib.funcs.ffmax(A.pt)
 def sum(A): return lib.funcs.ffsum(A.pt)
+def mean(A): return lib.funcs.ffmean(A.pt)
 
 	
 def get_closest_index(x, top=50):

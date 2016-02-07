@@ -43,9 +43,14 @@ void tmatrix(FloatMatrix *v, FloatMatrix *out);
 
 void rowMax(FloatMatrix *A, FloatMatrix *vout);
 void rowSum(FloatMatrix *A, FloatMatrix *vout);
+void rowMean(FloatMatrix *A, FloatMatrix *vout);
+void colMax(FloatMatrix *A, FloatMatrix *vout);
+void colSum(FloatMatrix *A, FloatMatrix *vout);
+void colMean(FloatMatrix *A, FloatMatrix *vout);
 
 float wMax(FloatMatrix *A);
 float wSum(FloatMatrix *A);
+float wMean(FloatMatrix *A);
 void freemat(FloatMatrix *A);
 
 void wsortbykey(FloatMatrix *keys, FloatMatrix *values);

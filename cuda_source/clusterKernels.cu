@@ -200,6 +200,7 @@ __global__ void kSoftMax(float* A, float* out, const unsigned int rows, const un
 
 template __global__ void kReduceToRows<rsum>(float* A, float* out, const unsigned int rows, const unsigned int cols);
 template __global__ void kReduceToRows<rmax>(float* A, float* out, const unsigned int rows, const unsigned int cols);
+template __global__ void kReduceToRows<rmean>(float* A, float* out, const unsigned int rows, const unsigned int cols);
 template <int reduction>__global__ void kReduceToRows(float* A, float* out, const unsigned int rows, const unsigned int cols)
 {
 	float col_value = 0.0f;
@@ -212,6 +213,7 @@ template <int reduction>__global__ void kReduceToRows(float* A, float* out, cons
 		{
 			case rmax: col_reductions[threadIdx.x] = -FLT_MAX; break;
 			case rsum: col_reductions[threadIdx.x] = 0.0f; break;
+			case rmean: col_reductions[threadIdx.x] = 0.0f; break;
 		}
 
 		row_offset = row*cols;
@@ -222,25 +224,86 @@ template <int reduction>__global__ void kReduceToRows(float* A, float* out, cons
 			{
 				case rmax: col_reductions[threadIdx.x] = fmaxf(col_reductions[threadIdx.x],col_value); break;
 				case rsum: col_reductions[threadIdx.x] = col_reductions[threadIdx.x]+col_value; break;
+				case rmean: col_reductions[threadIdx.x] = col_reductions[threadIdx.x]+col_value; break;
 			}
 		}
 
 		reduceByValue<reduction>(col_reductions,threadIdx.x,blockDim.x);
 
 		if(threadIdx.x == 0)
-			out[row] = col_reductions[0];
+		{
+			switch(reduction)
+			{
+				case rmean:
+					out[row] = col_reductions[0]/(float)cols;
+					break;
+				default:
+					out[row] = col_reductions[0];
+					break;
+			}
+
+		}
 
 	}
 }
 
-template __device__ float reduction_action<0>(float a, float b);
-template __device__ float reduction_action<1>(float a, float b);
+template __global__ void kReduceToCols<rsum>(float* A, float* out, const unsigned int rows, const unsigned int cols);
+template __global__ void kReduceToCols<rmax>(float* A, float* out, const unsigned int rows, const unsigned int cols);
+template __global__ void kReduceToCols<rmean>(float* A, float* out, const unsigned int rows, const unsigned int cols);
+template <int reduction>__global__ void kReduceToCols(float* A, float* out, const unsigned int rows, const unsigned int cols)
+{
+	float row_value = 0.0f;
+	__shared__ float row_reductions[256];
+
+	for (unsigned int col = blockIdx.x; col < cols; col += gridDim.x)
+	{
+		switch(reduction)
+		{
+			case rmax: row_reductions[threadIdx.x] = -FLT_MAX; break;
+			case rsum: row_reductions[threadIdx.x] = 0.0f; break;
+			case rmean: row_reductions[threadIdx.x] = 0.0f; break;
+		}
+
+		for (unsigned int row = threadIdx.x; row < rows; row+=blockDim.x)
+		{
+			row_value = A[col + (cols*row)];
+			switch(reduction)
+			{
+				case rmax: row_reductions[threadIdx.x] = fmaxf(row_reductions[threadIdx.x],row_value); break;
+				case rsum: row_reductions[threadIdx.x] = row_reductions[threadIdx.x]+row_value; break;
+				case rmean: row_reductions[threadIdx.x] = row_reductions[threadIdx.x]+row_value; break;
+			}
+		}
+
+		reduceByValue<reduction>(row_reductions,threadIdx.x,blockDim.x);
+
+		if(threadIdx.x == 0)
+		{
+			switch(reduction)
+			{
+				case rmean:
+					out[col] = row_reductions[0]/(float)rows;
+					break;
+				default:
+					out[col] = row_reductions[0];
+					break;
+			}
+
+		}
+
+	}
+}
+
+template __device__ float reduction_action<rsum>(float a, float b);
+template __device__ float reduction_action<rmax>(float a, float b);
+template __device__ float reduction_action<rmean>(float a, float b);
 template<int action> __device__ float reduction_action(float a, float b)
 {
 	//this switch operation will be removed by the compiler upon instantiation of the template
 	switch(action)
 	{
 		case rsum: return a+b;
+		case rmean: return a+b;
 		case rmax: return fmaxf(a,b);
 		default: return 0.0f;
 	}
@@ -249,6 +312,7 @@ template<int action> __device__ float reduction_action(float a, float b)
 //reductions in shared memory. These are very fast, especially for 32 or less elements.
 template __device__ void reduceByValue<rsum>(float* sdata, const unsigned int tid, const unsigned int threads);
 template __device__ void reduceByValue<rmax>(float* sdata, const unsigned int tid, const unsigned int threads);
+template __device__ void reduceByValue<rmean>(float* sdata, const unsigned int tid, const unsigned int threads);
 template <int action> __device__ void reduceByValue(float* sdata, const unsigned int tid, const unsigned int threads)
 {
 

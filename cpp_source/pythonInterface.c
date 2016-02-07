@@ -71,9 +71,14 @@ extern "C"
 
 	void frowMax(FloatMatrix *A, FloatMatrix *vout){ rowMax(A, vout); }
 	void frowSum(FloatMatrix *A, FloatMatrix *vout){ rowSum(A, vout); }
+	void frowMean(FloatMatrix *A, FloatMatrix *vout){ rowMean(A, vout); }
+	void fcolMax(FloatMatrix *A, FloatMatrix *vout){ colMax(A, vout); }
+	void fcolSum(FloatMatrix *A, FloatMatrix *vout){ colSum(A, vout); }
+	void fcolMean(FloatMatrix *A, FloatMatrix *vout){ colMean(A, vout); }
 
 	float ffmax(FloatMatrix *A){ return wMax(A); }
 	float ffsum(FloatMatrix *A){ return wSum(A); }
+	float ffmean(FloatMatrix *A){ return wMean(A); }
 
 
 	Timer *fget_Timer(){ return new Timer(); }

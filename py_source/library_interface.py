@@ -89,9 +89,15 @@ pt_clusterNet = funcs.fget_clusterNet()
 
 funcs.frowMax.restype = ct.c_void_p
 funcs.frowSum.restype = ct.c_void_p
+funcs.frowMean.restype = ct.c_void_p
+
+funcs.fcolMax.restype = ct.c_void_p
+funcs.fcolSum.restype = ct.c_void_p
+funcs.fcolMean.restype = ct.c_void_p
 
 funcs.ffmax.restype = ct.c_float
 funcs.ffsum.restype = ct.c_float
+funcs.ffmean.restype = ct.c_float
 
 
 funcs.fget_Timer.restype = ct.c_void_p

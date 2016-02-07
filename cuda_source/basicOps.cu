@@ -295,14 +295,25 @@ void slice(Matrix<float> *A, Matrix<float>*out, int rstart, int rend, int cstart
 
 template void reduceToRows<rmax>(Matrix<float> *A, Matrix<float> *vout);
 template void reduceToRows<rsum>(Matrix<float> *A, Matrix<float> *vout);
+template void reduceToRows<rmean>(Matrix<float> *A, Matrix<float> *vout);
 template <int reduction> void reduceToRows(Matrix<float> *A, Matrix<float> *vout)
 {
     kReduceToRows<reduction><<<A->rows > 1024 ? 1024 : A->rows, 256>>>(A->data, vout->data, A->rows, A->cols);
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
+template void reduceToCols<rmax>(Matrix<float> *A, Matrix<float> *vout);
+template void reduceToCols<rsum>(Matrix<float> *A, Matrix<float> *vout);
+template void reduceToCols<rmean>(Matrix<float> *A, Matrix<float> *vout);
+template <int reduction> void reduceToCols(Matrix<float> *A, Matrix<float> *vout)
+{
+	kReduceToCols<reduction><<<A->cols > 1024 ? 1024 : A->cols, 256>>>(A->data, vout->data, A->rows, A->cols);
+    CUDA_CHECK_RETURN(cudaPeekAtLastError());
+}
+
 template float reduceToValue<rsum>(Matrix<float> *A);
 template float reduceToValue<rmax>(Matrix<float> *A);
+template float reduceToValue<rmean>(Matrix<float> *A);
 template <int reduction> float reduceToValue(Matrix<float> *A)
 {
 	Matrix<float> *vout = empty<float>(A->rows, 1);
@@ -314,6 +325,7 @@ template <int reduction> float reduceToValue(Matrix<float> *A)
 
 template float reduceToValue<rsum>(Matrix<float> *A, Matrix<float> *vout_rows);
 template float reduceToValue<rmax>(Matrix<float> *A, Matrix<float> *vout_rows);
+template float reduceToValue<rmean>(Matrix<float> *A, Matrix<float> *vout_rows);
 template <int reduction> float reduceToValue(Matrix<float> *A, Matrix<float> *vout_rows)
 {
 	reduceToRows<reduction>(A, vout_rows);

@@ -88,7 +88,8 @@ typedef enum Operations_t
 typedef enum Reduction_t
 {
 	rmax,
-	rsum
+	rsum,
+	rmean
 
 } Reduction_t;
 
@@ -138,6 +139,7 @@ void argmax(Matrix<float> *A, Matrix<float> *out);
 
 template <int action> void WeightUpdate(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
 
+template <int reduction> void reduceToCols(Matrix<float> *A, Matrix<float> *vout);
 template <int reduction> void reduceToRows(Matrix<float> *A, Matrix<float> *vout);
 template <int reduction> float reduceToValue(Matrix<float> *A);
 template <int reduction> float reduceToValue(Matrix<float> *A, Matrix<float> *vout_rows);

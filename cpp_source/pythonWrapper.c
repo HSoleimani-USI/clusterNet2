@@ -37,9 +37,15 @@ void tmatrix(FloatMatrix *v, FloatMatrix *out){ vectorWise<ktmatrix>(v, out); }
 
 void rowMax(FloatMatrix *A, FloatMatrix *vout){ reduceToRows<rmax>(A, vout); }
 void rowSum(FloatMatrix *A, FloatMatrix *vout){ reduceToRows<rsum>(A, vout); }
+void rowMean(FloatMatrix *A, FloatMatrix *vout){ reduceToRows<rmean>(A, vout); }
+
+void colMax(FloatMatrix *A, FloatMatrix *vout){ reduceToCols<rmax>(A, vout); }
+void colSum(FloatMatrix *A, FloatMatrix *vout){ reduceToCols<rsum>(A, vout); }
+void colMean(FloatMatrix *A, FloatMatrix *vout){ reduceToCols<rmean>(A, vout); }
 
 float wMax(FloatMatrix *A){ return reduceToValue<rmax>(A); }
 float wSum(FloatMatrix *A){ return reduceToValue<rsum>(A); }
+float wMean(FloatMatrix *A){ return reduceToValue<rmean>(A); }
 void freemat(FloatMatrix *A){ cudaFree(A->data); free(A); }
 
 void wsortbykey(FloatMatrix *keys, FloatMatrix *values){ sortbykey<float>(keys, values); }

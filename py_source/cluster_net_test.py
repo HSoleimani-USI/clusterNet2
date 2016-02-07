@@ -207,7 +207,7 @@ def test_batch_allocator():
           
     
 def test_row_reductions():
-    A = np.float32(np.random.randn(100,100))
+    A = np.float32(np.random.randn(100,110))
     B = gpu.array(A)
     
     C = gpu.row_sum(B).tocpu()    
@@ -216,6 +216,22 @@ def test_row_reductions():
     C = gpu.row_max(B).tocpu()    
     t.assert_almost_equal(C, np.max(A,1), 3, "Rowmax not working")
     
+    C = gpu.row_mean(B).tocpu()    
+    t.assert_almost_equal(C, np.mean(A,1), 3, "Rowmean not working")
+    
+def test_col_reductions():
+    A = np.float32(np.random.randn(100,110))
+    B = gpu.array(A)
+    
+    C = gpu.col_sum(B).tocpu()    
+    t.assert_almost_equal(C, np.sum(A,0), 3, "Colsum not working")
+    
+    C = gpu.col_max(B).tocpu()    
+    t.assert_almost_equal(C, np.max(A,0), 3, "Colmax not working")
+    
+    C = gpu.col_mean(B).tocpu()    
+    t.assert_almost_equal(C, np.mean(A,0), 3, "Colmean not working")
+    
 def test_matrix_reductions():
     A = np.float32(np.random.randn(100,100))
     B = gpu.array(A)
@@ -223,7 +239,9 @@ def test_matrix_reductions():
     C = gpu.sum(B)    
     t.assert_almost_equal(C, np.sum(A), 2, "Sum not working")
     C = gpu.max(B)    
-    t.assert_almost_equal(C, np.max(A), 3, "Max not working")
+    t.assert_almost_equal(C, np.max(A), 3, "Max not working")    
+    C = gpu.mean(B)    
+    t.assert_almost_equal(C, np.mean(A), 3, "Max not working")
 
 
     

@@ -25,6 +25,7 @@ __global__ void kSlice(float *A, float *out, int rows_A, int cols_A, int rstart,
 __global__ void kSoftMax(float* A, float* out, unsigned int rows, unsigned int cols);
 
 template <int reduction>__global__ void kReduceToRows(float* A, float* out, const unsigned int rows, const unsigned int cols);
+template <int reduction>__global__ void kReduceToCols(float* A, float* out, const unsigned int rows, const unsigned int cols);
 
 
 template<int action> __device__ float reduction_action(float a, float b);
