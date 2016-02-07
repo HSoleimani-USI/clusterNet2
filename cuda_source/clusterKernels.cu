@@ -57,6 +57,8 @@ template __global__ void kElementWise<kdiv>(const float *A, const float *B, floa
 template __global__ void kElementWise<kmul>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<klogistic>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<klogistic_grad>(const float *A, const float *B, float *out, const float scalar, int size);
+template __global__ void kElementWise<kELU>(const float *A, const float *B, float *out, const float scalar, int size);
+template __global__ void kElementWise<kELU_grad>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<krectified>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<krectified_grad>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<keq>(const float *A, const float *B, float *out, const float scalar, int size);
@@ -91,6 +93,8 @@ template<int operation> __global__ void kElementWise(const float *A, const float
        	   case kmul: out[i] = A[i] * B[i]; break;
        	   case klogistic: out[i] = 1.0f/(1.0f + expf(-A[i])); break;
        	   case klogistic_grad: out[i] = A[i]*(1.0f-A[i]); break;
+       	   case kELU: out[i] = A[i] > 0.0f ? A[i] : expf(A[i])-1.0f; break;
+       	   case kELU_grad: out[i] = A[i] > 0.0f ? 1.0f : A[i] + 1.0f; break;
        	   case krectified: out[i] = A[i] > 0.0f ? A[i] : 0.0f; break;
        	   case krectified_grad: out[i] = A[i] > 0.0f ? 1.0f : 0.0f; break;
        	   case keq: out[i] = (float)(A[i] == B[i]); break;

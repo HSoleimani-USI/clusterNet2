@@ -20,6 +20,9 @@ void ActivationFunction::activation(Matrix<float> *in, Matrix<float> *out)
 			case Rectified_Linear:
 				elementWise<krectified>(in, out);
 				break;
+			case Exponential_linear:
+				elementWise<kELU>(in, out);
+				break;
 			case Softmax:
 				softmax(in,out);
 				break;
@@ -40,6 +43,9 @@ void ActivationFunction::activation_gradient(Matrix<float> *in, Matrix<float> *o
 			break;
 		case Rectified_Linear:
 			elementWise<krectified_grad>(in, out);
+			break;
+		case Exponential_linear:
+			elementWise<kELU_grad>(in, out);
 			break;
 		case Softmax:
 			break;

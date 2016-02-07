@@ -57,13 +57,9 @@ void FCLayer::backward_errors()
 
 void FCLayer::backward_grads()
 {
-
-	//cout << "error: " << reduceToValue<rsum>(next->error) << endl;
-
 	GPU->Tdot(activation, next->error, w_grad_next);
 	if(!next->target){ next->backward_grads(); }
-	GPU->dot(next->bias_activations, next->error,b_grad_next);
-	//cout << "grad: " << reduceToValue<rsum>(w_grad_next) << endl;
+	reduceToCols<rmean>(next->error,b_grad_next);
 }
 
 

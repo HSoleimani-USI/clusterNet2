@@ -213,6 +213,8 @@ template void elementWise<klog>(Matrix<float> *A, Matrix<float>*out);
 template void elementWise<ksqrt>(Matrix<float> *A, Matrix<float>*out);
 template void elementWise<klogistic>(Matrix<float> *A, Matrix<float>*out);
 template void elementWise<klogistic_grad>(Matrix<float> *A, Matrix<float>*out);
+template void elementWise<kELU>(Matrix<float> *A, Matrix<float>*out);
+template void elementWise<kELU_grad>(Matrix<float> *A, Matrix<float>*out);
 template void elementWise<krectified>(Matrix<float> *A, Matrix<float>*out);
 template void elementWise<krectified_grad>(Matrix<float> *A, Matrix<float>*out);
 template void elementWise<kcopy>(Matrix<float> *A, Matrix<float>*out);

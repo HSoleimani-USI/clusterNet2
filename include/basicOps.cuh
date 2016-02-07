@@ -81,6 +81,8 @@ typedef enum Operations_t
 	kdropout = 24,
 	kcopy = 25,
 	kssub = 26,
+	kELU = 27,
+	kELU_grad = 28,
 
 } Operations_t;
 

@@ -28,8 +28,9 @@ typedef enum Unittype_t
 	Logistic = 0,
 	Rectified_Linear = 1,
 	Softmax = 2,
-	Linear = 4,
-	Input = 8
+	Linear = 3,
+	Input = 4,
+	Exponential_linear = 5
 } Unittype_t;
 
 typedef enum DataPropagationType_t

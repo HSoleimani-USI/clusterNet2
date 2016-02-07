@@ -28,7 +28,6 @@ public:
 	Matrix<float> *w_rms_next;
 	Matrix<float> *b_rms_next;
 
-	Matrix<float> *bias_activations;
 	Matrix<float> *error;
 	Matrix<float> *activation;
 	Matrix<float> *activation_grad;

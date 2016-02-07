@@ -70,11 +70,10 @@ void Network::init_activations(int batchsize)
 
 	for(int i = 1; i < _layers.size(); i++)
 	{
-		if(_layers[i]->bias_activations != NULL && _layers[i]->bias_activations->rows == batchsize){ return; }
+		if(_layers[i]->activation != NULL && _layers[i]->activation->rows == batchsize){ return; }
 
-		if(_layers[i]->bias_activations != NULL)
+		if(_layers[i]->activation != NULL)
 		{
-			_layers[i]->bias_activations->free_matrix();
 			_layers[i]->activation->free_matrix();
 			_layers[i]->activation_grad->free_matrix();
 			_layers[i]->error->free_matrix();
@@ -82,7 +81,6 @@ void Network::init_activations(int batchsize)
 			if(_layers[i]->_transformer){ _layers[i]->_transformer->output->free_matrix(); }
 		}
 
-		_layers[i]->bias_activations = ones<float>(1, batchsize);
 		_layers[i]->activation = zeros<float>(batchsize, _layers[i]->UNITCOUNT);
 		_layers[i]->activation_grad = zeros<float>(batchsize, _layers[i]->UNITCOUNT);
 		_layers[i]->error = zeros<float>(batchsize, _layers[i]->UNITCOUNT);
