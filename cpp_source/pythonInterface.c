@@ -58,15 +58,19 @@ extern "C"
 	float *fto_pinned(int rows, int cols, float *cpu){ return to_pinned<float>(rows, cols, cpu)->data; }
 
 
-	FloatBatchAllocator *fget_BatchAllocator(float *X, float *y, int rows, int colsX, int colsY, int batch_size)
-	{ return new FloatBatchAllocator(X, y, rows, colsX, colsY, batch_size); }
+	FloatCPUBatchAllocator *fget_CPUBatchAllocator(float *X, float *y, int rows, int colsX, int colsY, int batch_size)
+	{ return new FloatCPUBatchAllocator(X, y, rows, colsX, colsY, batch_size); }
+	FloatGPUBatchAllocator *fget_GPUBatchAllocator(float *X, float *y, int rows, int colsX, int colsY, int batch_size)
+	{ return new FloatGPUBatchAllocator(X, y, rows, colsX, colsY, batch_size); }
+
+
 	void falloc_next_batch(FloatBatchAllocator *alloc){ alloc->allocate_next_batch_async(); }
 	void freplace_current_with_next_batch(FloatBatchAllocator *alloc){ alloc->replace_current_with_next_batch(); }
-	FloatMatrix *fgetOffBatchX(FloatBatchAllocator *alloc){ return alloc->nextoffbatchX; }
-	FloatMatrix *fgetOffBatchY(FloatBatchAllocator *alloc){ return alloc->nextoffbatchY; }
+	FloatMatrix *fgetOffBatchX(FloatCPUBatchAllocator *alloc){ return alloc->nextoffbatchX; }
+	FloatMatrix *fgetOffBatchY(FloatCPUBatchAllocator *alloc){ return alloc->nextoffbatchY; }
 
-	FloatMatrix *fgetBatchX(FloatBatchAllocator *alloc){ return alloc->get_current_batchX(); }
-	FloatMatrix *fgetBatchY(FloatBatchAllocator *alloc){ return alloc->get_current_batchY(); }
+	FloatMatrix *fgetBatchX(FloatCPUBatchAllocator *alloc){ return alloc->get_current_batchX(); }
+	FloatMatrix *fgetBatchY(FloatCPUBatchAllocator *alloc){ return alloc->get_current_batchY(); }
 
 
 	FloatMatrix *fget_view(FloatMatrix *A, int rstart, int rend){ wget_view(A, rstart, rend); }

@@ -10,15 +10,16 @@
 #include <boost/swap.hpp>
 
 
-#ifndef BATCHALLOCATOR_H_
-#define BATCHALLOCATOR_H_
+#ifndef BatchAllocator_H_
+#define BatchAllocator_H_
 
 class BatchAllocator {
 public:
-	BatchAllocator();
-	BatchAllocator(float *X, float *y, int rows, int colsX, int colsY, int batch_size);
-	Matrix<float> *pinned_bufferX;
-	Matrix<float> *pinned_bufferY;
+	BatchAllocator(){};
+	virtual ~BatchAllocator(){};
+
+	Matrix<float> *batch_bufferX;
+	Matrix<float> *batch_bufferY;
 	Matrix<float> *batchX;
 	Matrix<float> *batchY;
 
@@ -31,16 +32,14 @@ public:
 	int CURRENT_BATCH;
 	int EPOCH;
 
-
 	cudaStream_t streamX;
 	cudaStream_t streamY;
 
 	Matrix<float> *get_current_batchX();
 	Matrix<float> *get_current_batchY();
-	void allocate_next_batch_async();
-	void replace_current_with_next_batch();
-private:
-	int OFFBATCH_SIZE;
+
+	virtual void allocate_next_batch_async() = 0;
+	virtual void replace_current_with_next_batch() = 0;
 };
 
-#endif /* BATCHALLOCATOR_H_ */
+#endif /* BatchAllocator_H_ */

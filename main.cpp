@@ -4,6 +4,8 @@
 #include <Optimizer.h>
 #include <FCLayer.h>
 #include <BatchAllocator.h>
+#include <GPUBatchAllocator.h>
+#include <BufferedBatchAllocator.h>
 #include <ErrorHandler.h>
 #include <Configurator.h>
 
@@ -62,8 +64,8 @@ void test_neural_network()
 
 
 
-	BatchAllocator *b_train = new BatchAllocator(trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
-	BatchAllocator *b_cv= new BatchAllocator(cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
+	BatchAllocator *b_train = new BufferedBatchAllocator(trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
+	BatchAllocator *b_cv = new BufferedBatchAllocator(cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
 
 	Network net = Network(gpu);
 

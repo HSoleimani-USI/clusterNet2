@@ -186,12 +186,12 @@ def test_to_pinned():
     
 
     
-def test_batch_allocator():
+def test_batch_allocator_CPU():
     X = np.float32(np.random.rand(1000,17))
     Y = np.float32(np.random.rand(1000,13))
     batch_size = 128
         
-    alloc = gpu.BatchAllocator(X,Y,batch_size)  
+    alloc = gpu.BatchAllocator(X,Y,batch_size, 'CPU')  
     
     
     for epoch in range(3):  
@@ -204,7 +204,26 @@ def test_batch_allocator():
             alloc.alloc_next_async()   
             t.assert_almost_equal(alloc.X.tocpu(),batchX , 3, "Batch allocator not working")  
             t.assert_almost_equal(alloc.Y.tocpu(),batchY , 3, "Batch allocator not working")    
-          
+            
+    
+   
+def test_batch_allocator_GPU():
+    X = np.float32(np.random.rand(1000,17))
+    Y = np.float32(np.random.rand(1000,13))
+    batch_size = 128 
+    alloc = gpu.BatchAllocator(X,Y,batch_size,'GPU')  
+    
+    for epoch in range(3):  
+        for i in range(0,1000,batch_size):
+            batchX = X[i:i+batch_size]
+            batchY = Y[i:i+batch_size]
+            
+            if batchX.shape[0] != batch_size: continue
+            alloc.replace_current_with_next_batch()    
+            alloc.alloc_next_async()   
+            t.assert_almost_equal(alloc.X.tocpu(),batchX , 3, "Batch allocator not working")  
+            t.assert_almost_equal(alloc.Y.tocpu(),batchY , 3, "Batch allocator not working")    
+       
     
 def test_row_reductions():
     A = np.float32(np.random.randn(100,110))
@@ -350,6 +369,7 @@ def test_get_view():
     t.assert_equal(np.sqrt(Y[5:10]), A.tocpu()[5:10], "Partial application to view not working!")
     
     
+
     
     
     

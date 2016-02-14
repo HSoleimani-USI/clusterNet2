@@ -1,6 +1,49 @@
 import library_interface as lib
 import numpy as np
 import ctypes as ct
+from nltk.tokenize import WordPunctTokenizer
+from nltk.corpus import stopwords
+import string
+from os.path import join
+import cPickle as pickle
+import time
+
+
+class TextToIndex(object):
+	def __init__(self, path, output_dir):
+		self.vocab = {}		
+		self.path = path
+		self.output_dir = output_dir
+		
+	def create_vocabulary(self, filter_stopwords=True, save_to_disk=True):
+		tokenizer = WordPunctTokenizer()
+		sent = "this is a foo bar, bar black sheep."
+		stop = stopwords.words('english') + string.punctuation
+		t0 = time.time()
+		with open(self.path) as f:
+			for lineno, line in enumerate(f):
+				if lineno % 100000 == 0:
+					if lineno > 0:
+						print "Current line number is {0}. Operating at {1} lines per second".format(lineno, int(lineno/t0-time.time()))
+					
+				if filter_stopwords:
+					words = [word for word in tokenizer.tokenize(line.lower()) if word not in stop]
+				else:
+					words = [word for word in tokenizer.tokenize(line.lower())]
+					
+				for word in words:
+					if word not in self.vocab: self.vocab[word] = 0
+					self.vocab[word] +=1
+					
+					
+					
+		if save_to_disk:
+			pickle.dump(self.vocab, join(self.output_dir, 'vocab.p'), pickle.HIGHEST_PROTOCOL)
+					
+		
+				
+		
+		pass
 
 class NeuralNetwork(object):
 	
@@ -11,19 +54,19 @@ class NeuralNetwork(object):
 		x_cv = X[cv_start:].copy()
 		y_cv = y[cv_start:].copy()
 		layers = np.array(layers, dtype=np.float32)
-		train = BatchAllocator(X[:cv_start], y[:cv_start], 128)
-		cv = BatchAllocator(x_cv, y_cv, 128)
+		train = CPUBatchAllocator(X[:cv_start], y[:cv_start], 128)
+		cv = CPUBatchAllocator(x_cv, y_cv, 128)
 		self.net_pt = lib.funcs.fget_neural_net(lib.pt_clusterNet, train.pt, cv.pt, layers.ctypes.data_as(ct.POINTER(ct.c_float)),layers.shape[0], 1, classes)
 		
 		'''
-		pt_train = lib.funcs.fget_BatchAllocator(
+		pt_train = lib.funcs.fget_CPUBatchAllocator(
 					X[:cv_start].ctypes.data_as(ct.POINTER(ct.c_float)),
 					y[:cv_start].ctypes.data_as(ct.POINTER(ct.c_float)),
 					int(X[:cv_start].shape[0]), int(X.shape[1]), int(y.shape[1]),
 					int(128))
 		
 		
-		pt_cv = lib.funcs.fget_BatchAllocator(
+		pt_cv = lib.funcs.fget_CPUBatchAllocator(
 					x_cv.ctypes.data_as(ct.POINTER(ct.c_float)),
 					y_cv.ctypes.data_as(ct.POINTER(ct.c_float)),
 					int(x_cv.shape[0]), int(X.shape[1]), int(y.shape[1]),
@@ -113,17 +156,24 @@ class VectorSpace(object):
 	
 
 class BatchAllocator(object):
-	def __init__(self, X, y, batch_size):
+	def __init__(self, X, y, batch_size,buffertype='CPU'):
 		self.current_batch = 0
 		self.epoch = 0
-		self.batches = X.shape[0]/batch_size +1
-		self.offsize = X.shape[0] - ((self.batches-1)*batch_size)
-		self.offsize = self.offsize if self.offsize != 0 else batch_size
-		self.pt = lib.funcs.fget_BatchAllocator(
-					X.ctypes.data_as(ct.POINTER(ct.c_float)),
-					y.ctypes.data_as(ct.POINTER(ct.c_float)),
-					int(X.shape[0]), int(X.shape[1]), int(y.shape[1]),
-					int(batch_size))
+		self.batches = X.shape[0]/batch_size
+		if buffertype == 'CPU':
+			self.pt = lib.funcs.fget_CPUBatchAllocator(
+						X.ctypes.data_as(ct.POINTER(ct.c_float)),
+						y.ctypes.data_as(ct.POINTER(ct.c_float)),
+						int(X.shape[0]), int(X.shape[1]), int(y.shape[1]),
+						int(batch_size))
+		elif buffertype == 'GPU':
+			self.pt = lib.funcs.fget_GPUBatchAllocator(
+						X.ctypes.data_as(ct.POINTER(ct.c_float)),
+						y.ctypes.data_as(ct.POINTER(ct.c_float)),
+						int(X.shape[0]), int(X.shape[1]), int(y.shape[1]),
+						int(batch_size))
+		else:
+			raise Exception("Batch allocator buffertype not supported. The supported types are: CPU, GPU")
 		
 		self.batchX = array(None, lib.funcs.fgetBatchX(self.pt), (batch_size, X.shape[1]))
 		self.batchY = array(None, lib.funcs.fgetBatchY(self.pt), (batch_size, y.shape[1]))
@@ -147,10 +197,6 @@ class BatchAllocator(object):
 		pt =  lib.funcs.fgetBatchY(self.pt)
 		self.batchY.pt = pt
 		return self.batchY
-	
-		
-		
-		
 
 
 class array(object):
