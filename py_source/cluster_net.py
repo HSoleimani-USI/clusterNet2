@@ -384,6 +384,11 @@ def max(A): return lib.funcs.ffmax(A.pt)
 def sum(A): return lib.funcs.ffsum(A.pt)
 def mean(A): return lib.funcs.ffmean(A.pt)
 
+def get_view(A, rstart=0, rend=None):	
+	if rend == None: rend = A.shape[0]
+	return array(None, lib.funcs.fget_view(A.pt,rstart, rend), (rend-rstart, A.shape[1]))
+	
+
 	
 def get_closest_index(x, top=50):
 	rows = x.shape[0]

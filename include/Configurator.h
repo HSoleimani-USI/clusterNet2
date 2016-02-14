@@ -14,6 +14,7 @@ public:
 	Configurator();
 	virtual ~Configurator();
 
+	float LEARNING_RATE_DECAY;
 	float LEARNING_RATE;
 	float RMSPROP_MOMENTUM;
 	float DROPOUT;

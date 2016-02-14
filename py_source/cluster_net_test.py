@@ -334,6 +334,25 @@ def test_printmat():
     gpu.printmat(A)
     print X
     
+    
+def test_get_view():
+    X = np.float32(np.random.rand(10,10))
+    Y = np.copy(X)
+    A = gpu.array(X)
+    B = gpu.get_view(A, rstart=0, rend=5)
+    t.assert_equal(X[0:5], B.tocpu(), "Get view not working!")
+    B = gpu.get_view(A, rstart=5, rend=10)
+    t.assert_equal(X[5:10], B.tocpu(), "Get view not working!")
+    
+    gpu.sqrt(B, B)
+    
+    t.assert_equal(Y[0:5], A.tocpu()[0:5], "Partial application to view not working!")
+    t.assert_equal(np.sqrt(Y[5:10]), A.tocpu()[5:10], "Partial application to view not working!")
+    
+    
+    
+    
+    
 '''
 def test_neural_net():
     X = np.float32(np.load('train_small_X.npy'))

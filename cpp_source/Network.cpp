@@ -97,6 +97,7 @@ void Network::copy_global_params_to_layers()
 		_layers[i]->_conf->LEARNING_RATE = _conf->LEARNING_RATE;
 		_layers[i]->_conf->RMSPROP_MOMENTUM = _conf->RMSPROP_MOMENTUM;
 		_layers[i]->_conf->DROPOUT = _conf->DROPOUT;
+		_layers[i]->_conf->LEARNING_RATE_DECAY = _conf->LEARNING_RATE_DECAY;
 	}
 }
 
@@ -163,6 +164,11 @@ void Network::train(BatchAllocator *train, BatchAllocator *CV, int epochs)
 
 		get_errors(train, "Train error: ");
 		get_errors(CV, "CV error: ");
+
+		_conf->LEARNING_RATE *= _conf->LEARNING_RATE_DECAY;
+		for(int i = 0; i < _layers.size(); i++)
+			_layers[i]->_conf->LEARNING_RATE *= _layers[i]->_conf->LEARNING_RATE_DECAY;
+
 	}
 }
 

@@ -51,5 +51,6 @@ void freemat(FloatMatrix *A){ cudaFree(A->data); free(A); }
 void wsortbykey(FloatMatrix *keys, FloatMatrix *values){ sortbykey<float>(keys, values); }
 
 void wprintmat(FloatMatrix *A, int rstart, int rend, int cstart, int cend){ printmat(A,rstart,rend,cstart,cend); }
+FloatMatrix *wget_view(FloatMatrix *A, int rstart, int rend){ return get_view(A, rstart, rend); }
 
 

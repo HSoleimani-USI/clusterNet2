@@ -69,6 +69,9 @@ extern "C"
 	FloatMatrix *fgetBatchY(FloatBatchAllocator *alloc){ return alloc->get_current_batchY(); }
 
 
+	FloatMatrix *fget_view(FloatMatrix *A, int rstart, int rend){ wget_view(A, rstart, rend); }
+
+
 	void frowMax(FloatMatrix *A, FloatMatrix *vout){ rowMax(A, vout); }
 	void frowSum(FloatMatrix *A, FloatMatrix *vout){ rowSum(A, vout); }
 	void frowMean(FloatMatrix *A, FloatMatrix *vout){ rowMean(A, vout); }

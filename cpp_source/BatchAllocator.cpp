@@ -6,6 +6,7 @@
  */
 
 #include "BatchAllocator.h"
+#include <Timer.cuh>
 
 
 BatchAllocator::BatchAllocator(){}

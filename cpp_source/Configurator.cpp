@@ -13,6 +13,8 @@ Configurator::Configurator()
 	LEARNING_RATE = 0.001f;
 	RMSPROP_MOMENTUM = 0.9f;
 	DROPOUT = 0.5f;
+
+	LEARNING_RATE_DECAY = 0.995f;
 }
 
 Configurator::~Configurator() {

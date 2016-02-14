@@ -309,7 +309,7 @@ template void reduceToCols<rsum>(Matrix<float> *A, Matrix<float> *vout);
 template void reduceToCols<rmean>(Matrix<float> *A, Matrix<float> *vout);
 template <int reduction> void reduceToCols(Matrix<float> *A, Matrix<float> *vout)
 {
-	kReduceToCols<reduction><<<A->cols > 1024 ? 1024 : A->cols, 256>>>(A->data, vout->data, A->rows, A->cols);
+	kReduceToCols<reduction><<<A->cols > 1024 ? 1024 : A->cols, 32>>>(A->data, vout->data, A->rows, A->cols);
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
@@ -367,8 +367,9 @@ template <int action> void WeightUpdate(Matrix<float> *RMS, Matrix<float> *grad,
 {
 	check_for_same_dimensions(RMS, grad);
 	check_for_same_dimensions(RMS, w);
-	int blocks = (RMS->size/THREADS_PER_BLOCKS) + 1;
-	kRMSprop<action><<<blocks,THREADS_PER_BLOCKS>>>(RMS->data, grad->data, w->data, RMS_multiplier, learning_rate, RMS->size);
+	int threads = 256;
+	int blocks = (RMS->size/threads) + 1;
+	kRMSprop<action><<<blocks,threads>>>(RMS->data, grad->data, w->data, RMS_multiplier, learning_rate, RMS->size);
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
@@ -506,4 +507,21 @@ void printmat(Matrix<float> *A, int start_row, int end_row, int start_col, int e
   free(m->data);
   free(m);
 
+}
+
+Matrix<float> *get_view(Matrix<float> *A, int rstart, int rend)
+{
+	assert(rstart < A->rows);
+	assert(rstart >= 0);
+	assert(rend <= A->rows);
+
+	Matrix<float> *ret = new Matrix<float>();
+	ret->rows = rend-rstart;
+	ret->cols = A->cols;
+	ret->size = ret->rows*ret->cols;
+	ret->bytes = sizeof(float)*ret->size;
+
+	ret->data = &(A->data)[rstart*A->cols];
+
+	return ret;
 }

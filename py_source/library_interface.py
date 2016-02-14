@@ -110,6 +110,8 @@ funcs.fsortbykey.restype = ct.c_void_p
 
 funcs.fscalar_mul.restype = ct.c_void_p
 
+funcs.fget_view.restype = ct.c_void_p
+
 
 
 

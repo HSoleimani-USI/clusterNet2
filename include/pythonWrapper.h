@@ -56,4 +56,5 @@ void freemat(FloatMatrix *A);
 void wsortbykey(FloatMatrix *keys, FloatMatrix *values);
 
 void wprintmat(FloatMatrix *A, int rstart, int rend, int cstart, int cend);
+FloatMatrix *wget_view(FloatMatrix *A, int rstart, int rend);
 

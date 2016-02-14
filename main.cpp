@@ -28,6 +28,7 @@ void test_timer()
 void test_neural_network()
 {
 
+	Timer t = Timer();
 	ClusterNet *gpu = new ClusterNet();
 
 	Matrix<float> *X = read_hdf5("/home/tim/data/mnist/distributed_X.hdf5");
@@ -35,6 +36,7 @@ void test_neural_network()
 
 	Matrix<float> *trainX = zeros<float>(60000,784);
 	Matrix<float> *trainy = zeros<float>(60000,1);
+	Matrix<float> *test_slice = zeros<float>(128,784);
 
 	Matrix<float> *cvX = zeros<float>(10000,784);
 	Matrix<float> *cvy = zeros<float>(10000,1);
@@ -47,13 +49,26 @@ void test_neural_network()
 	slice(y,cvy,60000,70000,0,1);
 
 
+
+	Matrix<float> *a = zeros<float>(128,784);
+
+	Matrix<float> *host = a->to_host();
+
+	t.tick();
+
+	to_gpu<float>(host->data, a);
+	t.tock();
+
+
+
+
 	BatchAllocator *b_train = new BatchAllocator(trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
-	BatchAllocator *b_cv= new BatchAllocator(cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,128);
+	BatchAllocator *b_cv= new BatchAllocator(cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
 
 	Network net = Network(gpu);
 
 	net._conf->LEARNING_RATE = 0.003f;
-	net._conf->RMSPROP_MOMENTUM = 0.9f;
+	net._conf->RMSPROP_MOMENTUM = 0.99f;
 
 	net.add(new FCLayer(784,Input));
 	net.add(new FCLayer(1024,Exponential_linear));
@@ -78,30 +93,25 @@ void test_neural_network()
 
 	*/
 
-	Timer t = Timer();
 
 	t.tick();
-	net.train(b_train, b_cv, 100);
+	net.train(b_train, b_cv, 20);
+
+	net._conf->DROPOUT = 0.25f;
+	net._conf->LEARNING_RATE *= 0.2f;
+	net._conf->LEARNING_RATE_DECAY = 0.95f;
+	net.copy_global_params_to_layers();
+	net._layers.front()->_conf->DROPOUT = 0.1f;
+
+	net.train(b_train, b_cv, 11);
+
 	t.tock();
 
-	//net.fit(b_train,200);
 }
 
 int main(int argc, char const *argv[]) {
 
 	test_neural_network();
-
-	Matrix<float> *A = empty<float>(10, 10);
-
-	Matrix<float> *C = fill_matrix<float>(10, 10, 17);
-
-	Matrix<float> *B = C->to_host();
-
-	Timer *t = new Timer();
-
-
-	test_timer();
-
 
 
 	return 0;

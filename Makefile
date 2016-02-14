@@ -14,7 +14,7 @@ FILES_OUT := $(wildcard $(BUILD_DIR)/*.o)
 COMPUTE_CAPABILITY := arch=compute_52,code=sm_52 
 SOURCES := $(shell find $(BUILD_DIR) -name '*.o')
 all:	
-	nvcc -gencode $(COMPUTE_CAPABILITY) -Xcompiler '-fPIC' -dc $(FILES) $(INCLUDE) $(LIB) $(FLAGS) --output-directory $(ROOT_DIR)/build
+	nvcc -gencode $(COMPUTE_CAPABILITY) -Xcompiler '-fPIC' -dc $(FILES) $(INCLUDE) $(LIB) $(FLAGS) --output-directory $(ROOT_DIR)/build 
 	nvcc -gencode $(COMPUTE_CAPABILITY) -Xcompiler '-fPIC' -dlink $(BUILD_DIR)/basicOps.o $(BUILD_DIR)/clusterKernels.o $(BUILD_DIR)/Timer.o -o $(BUILD_DIR)/link.o 
 	g++ -std=c++11 -shared -fPIC $(INCLUDE) $(wildcard $(BUILD_DIR)/*.o) $(FILES_CPP) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) $(FLAGS) 	
 test:

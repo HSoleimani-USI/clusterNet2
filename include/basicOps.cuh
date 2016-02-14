@@ -154,6 +154,8 @@ bool check_matrix_multiplication(Matrix<float> *A, Matrix<float> *B, Matrix<floa
 Matrix<float> *read_hdf5(const char *filepath);
 Matrix<float> *read_hdf5(const char *filepath, const char *tag);
 
+Matrix<float> *get_view(Matrix<float> *A, int rstart, int rend);
+
 
 void print_matrix(Matrix<float> *A, int end_rows, int end_cols);
 void print_matrix(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col);

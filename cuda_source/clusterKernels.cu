@@ -257,7 +257,7 @@ template __global__ void kReduceToCols<rmean>(float* A, float* out, const unsign
 template <int reduction>__global__ void kReduceToCols(float* A, float* out, const unsigned int rows, const unsigned int cols)
 {
 	float row_value = 0.0f;
-	__shared__ float row_reductions[256];
+	__shared__ float row_reductions[32];
 
 	for (unsigned int col = blockIdx.x; col < cols; col += gridDim.x)
 	{
@@ -482,9 +482,10 @@ template <int action> __global__ void kRMSprop(float *RMS, float *grad, float *w
 {
 	  const unsigned int numThreads = blockDim.x * gridDim.x;
 	  const int idx = (blockIdx.x * blockDim.x) + threadIdx.x;
-	  float grad_value = 0.0f;
+	  const float rms_reciprocal = 1.0f - RMS_multiplier;
+
 	  float RMS_value = 0.0f;
-	  float rms_reciprocal = 1.0f - RMS_multiplier;
+	  float grad_value = 0.0f;
 
 	  for (unsigned int i = idx;i < size; i += numThreads)
 	  {
@@ -494,7 +495,7 @@ template <int action> __global__ void kRMSprop(float *RMS, float *grad, float *w
 		  {
 		  	  case RMSProp:
 				  RMS_value = (RMS_multiplier*RMS[i]) + (powf(grad_value,2.0f)*rms_reciprocal);
-				  grad_value = learning_rate*fdividef(grad_value,(sqrtf(RMS_value)+1.0e-08f));
+				  grad_value = learning_rate*fdividef(grad_value,(__fsqrt_rn(RMS_value)+1.0e-08f));
 				  RMS[i] = RMS_value;
 				  w[i] -= grad_value;
 		  		  break;
