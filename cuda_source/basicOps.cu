@@ -7,15 +7,29 @@ template Matrix<float> *Matrix<float>::to_host();
 template <typename T> Matrix<T> *Matrix<T>::to_host()
 {
 	Matrix<T> *out = (Matrix<T>*)malloc(sizeof(Matrix<T>));
-	T *cpu_data;
+	T *cpu_data = (T*)malloc(bytes);
 
-	cpu_data = (T*)malloc(bytes);
-	CUDA_CHECK_RETURN(cudaMemcpy(cpu_data,data,bytes,cudaMemcpyDefault));
+	//this is a bit confusing; we assume that the host data is col major while it is row major
+	//that is why we tranpose the data if it is not transposed on the GPU
+	if(!isRowMajor)
+	{
+
+		Matrix<T> *helper = transpose(this);
+		CUDA_CHECK_RETURN(cudaMemcpy(cpu_data,helper->data,bytes,cudaMemcpyDefault));
+		CUDA_CHECK_RETURN(cudaFree(helper->data));
+		free(helper);
+	}
+	else
+	{
+		CUDA_CHECK_RETURN(cudaMemcpy(cpu_data,data,bytes,cudaMemcpyDefault));
+	}
+
 	out->rows = rows;
 	out->cols = cols;
 	out->bytes = bytes;
 	out->size = size;
 	out->data = cpu_data;
+	out->isRowMajor = true;
   
   return out;
 }
@@ -58,6 +72,7 @@ template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu, size_t by
 	out->rows = rows;
 	out->cols = cols;
 	out->data = pinned_ptr;
+	out->isRowMajor = true;
 
 	return out;
 }
@@ -90,6 +105,7 @@ template <typename T> Matrix<T> *empty(int rows, int cols)
   out->bytes = bytes;
   out->size = size;
   out->data = gpu_data;
+  out->isRowMajor = true;
 
   return out;
 }
@@ -100,6 +116,7 @@ template void to_gpu(float *cpu, Matrix<float> *gpu);
 template<typename T> void to_gpu(T *cpu, Matrix<T> *gpu)
 {
     CUDA_CHECK_RETURN(cudaMemcpy(gpu->data,cpu,gpu->bytes,cudaMemcpyDefault));
+
 }
 
 
@@ -178,6 +195,7 @@ template void to_col_major(Matrix<float> *A, Matrix<float> *out);
 template <typename T> void to_col_major(Matrix<T> *A, Matrix<T> *out)
 {
 	transpose<T>(A, out, A->cols,A->rows);
+	out->isRowMajor = false;
 }
 
 //the row major format has increasing indexes along its rows:
@@ -191,6 +209,7 @@ template <typename T> Matrix<T> *to_row_major(Matrix<T> *A)
 {
   Matrix<T> *out = empty<T>(A->rows,A->cols);
   transpose<T>(A, out, A->rows,A->cols);
+  out->isRowMajor = true;
 
   return out;
 }
@@ -399,6 +418,7 @@ Matrix<float> *read_hdf5(const char *filepath, const char *tag)
 	   out->bytes = bytes;
 	   out->data = data;
 	   out->size = (int)(dims[0]*dims[1]);
+	   out->isRowMajor = true;
 
 	   return out;
 }
@@ -514,6 +534,7 @@ Matrix<float> *get_view(Matrix<float> *A, int rstart, int rend)
 	assert(rstart < A->rows);
 	assert(rstart >= 0);
 	assert(rend <= A->rows);
+	assert(A->isRowMajor);
 
 	Matrix<float> *ret = new Matrix<float>();
 	ret->rows = rend-rstart;
@@ -522,6 +543,7 @@ Matrix<float> *get_view(Matrix<float> *A, int rstart, int rend)
 	ret->bytes = sizeof(float)*ret->size;
 
 	ret->data = &(A->data)[rstart*A->cols];
+	ret->isRowMajor = true;
 
 	return ret;
 }

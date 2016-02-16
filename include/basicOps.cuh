@@ -103,6 +103,7 @@ template<typename T> class Matrix
     size_t bytes;
     int size;
     T *data;
+    bool isRowMajor;
     Matrix<T> *to_host();
     void free_matrix();
 };

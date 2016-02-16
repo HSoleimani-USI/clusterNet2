@@ -33,6 +33,8 @@ void test_neural_network()
 	Timer t = Timer();
 	ClusterNet *gpu = new ClusterNet();
 
+	gpu->useNervanaGPU = false;
+
 	Matrix<float> *X = read_hdf5("/home/tim/data/mnist/distributed_X.hdf5");
 	Matrix<float> *y = read_hdf5("/home/tim/data/mnist/distributed_y.hdf5");
 
@@ -52,20 +54,8 @@ void test_neural_network()
 
 
 
-	Matrix<float> *a = zeros<float>(128,784);
-
-	Matrix<float> *host = a->to_host();
-
-	t.tick();
-
-	to_gpu<float>(host->data, a);
-	t.tock();
-
-
-
-
-	BatchAllocator *b_train = new BufferedBatchAllocator(trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
-	BatchAllocator *b_cv = new BufferedBatchAllocator(cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
+	BatchAllocator *b_train = new GPUBatchAllocator(trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
+	BatchAllocator *b_cv = new GPUBatchAllocator(cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
 
 	Network net = Network(gpu);
 

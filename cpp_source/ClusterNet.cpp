@@ -4,6 +4,7 @@
 #include <iostream>     // std::cout
 #include "json.hpp"
 #include <assert.h>
+#include <cublas_v2.h>
 
 
 #include <unistd.h>
@@ -24,15 +25,20 @@ ClusterNet::ClusterNet()
         exit(1);
     }
 
+    useNervanaGPU = true;
     if (!nervana_loadKernels("/usr/local/cuda/cubin/"))
     {
         std::cerr << "Couldn't load all kernels" << std::endl;
-        exit(1);
+        useNervanaGPU = false;
     }
 
 	//setRandomState(time(0));
     setRandomState(56564);
 
+
+	cublasHandle_t handle;
+	cublasCreate_v2(&handle);
+	m_handle = handle;
 
 	/*
 	leveldb::DB* db;
@@ -96,18 +102,42 @@ void ClusterNet::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, boo
 
 		check_matrix_multiplication(A, B, out, T1, T2);
 
-		bool success = nervana_sgemm(A->data, B->data, out->data, T1,T2,
-									 A_rows, B_cols, A_cols,
-									 A->cols,B->cols,out->cols,
-									 alpha,beta,
-									 NULL, false, false,0);
-
-
-		if (!success)
+		if(useNervanaGPU)
 		{
-			cout << "NERVANA ERROR" << endl;
-			throw "NERVANA ERROR";
+			bool success = nervana_sgemm(A->data, B->data, out->data, T1,T2,
+										 A_rows, B_cols, A_cols,
+										 A->cols,B->cols,out->cols,
+										 alpha,beta,
+										 NULL, false, false,0);
+
+
+			if (!success)
+			{
+				cout << "NERVANA ERROR" << endl;
+				throw "NERVANA ERROR";
+			}
+
 		}
+		else
+		{
+			cublasStatus_t status;
+			status = cublasSgemm_v2(m_handle,
+					T2 ? CUBLAS_OP_T : CUBLAS_OP_N,
+					T1 ? CUBLAS_OP_T : CUBLAS_OP_N,
+					B_cols, A_rows,	B_rows,
+					&alpha, B->data, B->cols, A->data, A->cols, &beta,
+					out->data, out->cols);
+
+			out->isRowMajor = true;
+
+			if (status != CUBLAS_STATUS_SUCCESS)
+			{
+				std::cout << "CUBLAS ERROR: Status " << status << std::endl;
+				throw "CUBLAS ERROR";
+
+			}
+		}
+
 }
 
 void ClusterNet::dropout(Matrix<float> *A, Matrix <float> *out, const float dropout)

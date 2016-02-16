@@ -54,6 +54,8 @@ class ClusterNet
 {
     public:
         ClusterNet();
+		bool useNervanaGPU;
+
   		void setRandomState(int seed);
   		Matrix<float> *rand(int rows, int cols);
   		Matrix<float> *randn(int rows, int cols);
@@ -64,8 +66,10 @@ class ClusterNet
   		void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
   		void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2);
   	    void dropout(Matrix<float> *A, Matrix <float> *out, const float dropout);
+
     private:
   		curandGenerator_t m_generator;
+  		cublasHandle_t m_handle;
 
 };
 

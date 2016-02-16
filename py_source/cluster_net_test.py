@@ -41,7 +41,20 @@ def test_dot():
     B3 = gpu.dot(B1,B2)
     C = B3.tocpu()
     
+    '''
+    gpu.printmat(B3)
+    print C
+    assert False
+    '''
+    
     t.assert_array_almost_equal(np.dot(A1,A2),C,4,"array.tocpu not equal to init array!")     
+    B1 = gpu.array(A1)
+    B2 = gpu.array(A2)
+    B3 = gpu.empty((2,2))    
+    
+    gpu.dot(B1,B2,B3)
+    
+    t.assert_array_almost_equal(np.dot(A1,A2),B3.tocpu(),4,"array.tocpu not equal to init array!")   
     
 
 def test_Transpose():
@@ -157,8 +170,7 @@ def slice_test():
     
 def softmax_test():   
     def softmax(X):
-        '''numerically stable softmax function
-        '''
+        #numerically stable softmax function        
         max_row_values = np.matrix(np.max(X,axis=1)).T
         result = np.exp(X - max_row_values)
         sums = np.matrix(np.sum(result,axis=1))        
@@ -369,20 +381,3 @@ def test_get_view():
     t.assert_equal(np.sqrt(Y[5:10]), A.tocpu()[5:10], "Partial application to view not working!")
     
     
-
-    
-    
-    
-'''
-def test_neural_net():
-    X = np.float32(np.load('train_small_X.npy'))
-    y = np.float32(np.load('train_small_y.npy'))  
-    t0 = time.time()
-    X = np.float32(np.load('/home/tim/data/mnist/train_X.npy'))
-    y = np.float32(np.load('/home/tim/data/mnist/train_y.npy')) 
-    net = NeuralNetwork(X, y)
-    
-    net.fit()
-    print time.time()-t0
-    #assert False
-'''
