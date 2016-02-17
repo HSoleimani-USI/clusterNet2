@@ -9,11 +9,11 @@ import cudanet as gpu2
 
 
 t = gpu.Timer()
-dim1 = 64
-dim_inner = 128
-dim_outer = 256
+dim1 = 16
+dim_inner = 1024
+dim_outer = 1024
 
-batch_first_mode = False
+batch_first_mode = True
 
 if batch_first_mode:
     input = gpu.rand(dim1,dim_inner)

@@ -26,7 +26,7 @@ class Table(object):
     def get(self, key):
         ret = None
         try:
-            ret = self.db.Get(join(self.name, key))
+            ret = self.db.Get(key)
         except KeyError:
             ret = None
             
@@ -40,7 +40,7 @@ class Table(object):
         
     
     def set(self, key, value):
-        self.db.Put(join(self.name,key),simplejson.dumps(value))
+        self.db.Put(key,simplejson.dumps(value))
         
     def post(self, key, value):
         if self.hasServer:

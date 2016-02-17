@@ -1,8 +1,6 @@
 #include "ClusterNet.h"
 #include <stdlib.h>
-#include "leveldb/db.h"
 #include <iostream>     // std::cout
-#include "json.hpp"
 #include <assert.h>
 #include <cublas_v2.h>
 
@@ -10,8 +8,6 @@
 #include <unistd.h>
 
 
-// for convenience
-using json = nlohmann::json;
 
 using std::cout;
 using std::endl;
@@ -40,26 +36,7 @@ ClusterNet::ClusterNet()
 	cublasCreate_v2(&handle);
 	m_handle = handle;
 
-	/*
-	leveldb::DB* db;
-	  leveldb::Options options;
-	  options.create_if_missing = true;
-	  leveldb::Status status = leveldb::DB::Open(options, "/home/tim/wiki/raw_pages", &db);
 
-	  std::string value;
-	  leveldb::Status s = db->Get(leveldb::ReadOptions(), "raw_pages/npydata", &value);
-
-	  cout << "print" << endl;
-	  cout << value << endl;
-	  auto j = json::parse(value);
-
-	  cout << j.is_array() << endl;
-
-	  float *data = (float*)j.get<double*>();
-
-	  for(int i = 0; i < 10; i ++)
-		  cout << data[i] << " ";
-	  */
 }
 
 

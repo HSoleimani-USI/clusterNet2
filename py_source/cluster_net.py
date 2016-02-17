@@ -4,46 +4,108 @@ import ctypes as ct
 from nltk.tokenize import WordPunctTokenizer
 from nltk.corpus import stopwords
 import string
-from os.path import join
+from os.path import join,isfile
 import cPickle as pickle
 import time
+from os import listdir
+import nltk
+import h5py
+
 
 
 class TextToIndex(object):
 	def __init__(self, path, output_dir):
-		self.vocab = {}		
+		self.vocab2freq = {}
+		self.vocab2idx = {}		
 		self.path = path
 		self.output_dir = output_dir
+		if isfile(path): self.files = [self.path]
+		else:
+			self.files =  [join(path,f) for f in listdir(path) if isfile(join(path, f))]
 		
 	def create_vocabulary(self, filter_stopwords=True, save_to_disk=True):
 		tokenizer = WordPunctTokenizer()
-		sent = "this is a foo bar, bar black sheep."
-		stop = stopwords.words('english') + string.punctuation
+		try:			
+			stop = stopwords.words('english') + list(string.punctuation)
+		except LookupError:
+			print "Stopwords not found! Please download them via the nltk interface and try again"
+			nltk.download()
+			exit()
 		t0 = time.time()
-		with open(self.path) as f:
-			for lineno, line in enumerate(f):
-				if lineno % 100000 == 0:
-					if lineno > 0:
-						print "Current line number is {0}. Operating at {1} lines per second".format(lineno, int(lineno/t0-time.time()))
-					
-				if filter_stopwords:
-					words = [word for word in tokenizer.tokenize(line.lower()) if word not in stop]
-				else:
-					words = [word for word in tokenizer.tokenize(line.lower())]
-					
-				for word in words:
-					if word not in self.vocab: self.vocab[word] = 0
-					self.vocab[word] +=1
-					
-					
+		current_idx = 0
+		for path in self.files:
+			with open(path) as f:
+				for lineno, line in enumerate(f):
+					if lineno % 10000 == 0:
+						if lineno > 0:
+							print "Current line number is {0}. Operating at {1} lines per second".format(lineno, int(lineno/(time.time()-t0)))
+						
+					if filter_stopwords:
+						words = [word for word in tokenizer.tokenize(line.lower()) if word not in stop]
+					else:
+						words = [word for word in tokenizer.tokenize(line.lower())]
+						
+					for word in words:
+						if word not in self.vocab2freq: 
+							self.vocab2freq[word] = 0
+							self.vocab2idx[word] = current_idx
+							current_idx+=1
+						self.vocab2freq[word] +=1
 					
 		if save_to_disk:
-			pickle.dump(self.vocab, join(self.output_dir, 'vocab.p'), pickle.HIGHEST_PROTOCOL)
+			pickle.dump(self.vocab2freq, open(join(self.output_dir, 'vocab2freq.p'),'wb'), pickle.HIGHEST_PROTOCOL)
+			pickle.dump(self.vocab2idx, open(join(self.output_dir, 'vocab2idx.p'),'wb'), pickle.HIGHEST_PROTOCOL)
+			
+	def create_idx_files(self):
+		tokenizer = WordPunctTokenizer()
+		try:			
+			sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
+		except LookupError:
+			print "English punct tokenizer not found! Please download them via the nltk interface and try again"
+			nltk.download()
+			exit()
+		t0 = time.time()
+		corpa = []
+		sent_idx = []
+		max_length = 0
+		i = 0
+		print 'parsing sentences...'
+		for path in self.files:
+			with open(path) as f:
+				corpa.append(f.readlines())
+		for buffer in corpa:		
+			text = "".join(buffer)					
+			sentences = sent_detector.tokenize(text.lower().strip())
+			for sent in sentences:
+				i+=1
+				if i % 10000 == 0:
+					if i > 0:
+						print "Sencente number: {0}. Operating at {1} sentences per second".format(i, int(i/(time.time()-t0)))
+				words = [word for word in tokenizer.tokenize(sent)]
+				
+				idx = []
+				for word in words:
+					if word not in self.vocab2idx: continue
+					idx.append(self.vocab2idx[word])
+				if len(idx) > max_length: 
+					max_length  = len(idx)
+					#print max_length, sent
+				sent_idx.append(idx)
+				
+		data = np.ones((i,max_length),np.int32)*-1
+		print data.shape		
+		for sentno, idx_values in enumerate(sent_idx):
+			for idxno, idx in enumerate(idx_values):
+				data[sentno,idxno] = idx
+				
+		save_hdf5_matrix(join(self.output_dir,'idx.hdf5'), data)
+			
+					
+				
+				
 					
 		
-				
 		
-		pass
 
 class NeuralNetwork(object):
 	
@@ -229,6 +291,18 @@ class array(object):
 
 	
 
+def save_hdf5_matrix(filename,x):    
+	file = h5py.File(filename,'w')
+	file.create_dataset("Default", data=x)        
+	file.close()
+	
+def load_hdf5_matrix(filename):    
+	f = h5py.File(filename,'r')
+	
+	z = f['Default'][:]
+	
+	f.close()
+	return z
 	
 def ones(shape, dtype=np.float32):
 	rows, cols = handle_shape(shape)

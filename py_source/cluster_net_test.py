@@ -360,7 +360,7 @@ def test_get_closest_index():
     t.assert_equal(np.array(results), results_gpu)
     
 def test_printmat():
-    X = np.float32(np.random.rand(10,10))
+    X = np.float32(np.random.rand(2,2))
     A = gpu.array(X)
     gpu.printmat(A)
     print X
@@ -379,5 +379,12 @@ def test_get_view():
     
     t.assert_equal(Y[0:5], A.tocpu()[0:5], "Partial application to view not working!")
     t.assert_equal(np.sqrt(Y[5:10]), A.tocpu()[5:10], "Partial application to view not working!")
+    
+    
+def test_TextToIdx():    
+    pass
+    txt2idx = gpu.TextToIndex('../data/NLP/', '../data/')
+    txt2idx.create_vocabulary()  
+    txt2idx.create_idx_files()  
     
     

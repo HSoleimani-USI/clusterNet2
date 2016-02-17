@@ -8,6 +8,10 @@
 #include <BufferedBatchAllocator.h>
 #include <ErrorHandler.h>
 #include <Configurator.h>
+#include <DeepLearningDB.h>
+#include <Table.h>
+#include <string>
+#include <map>
 
 using namespace std;
 
@@ -27,13 +31,62 @@ void test_timer()
 	t.tock();
 }
 
+void test_transfer_time()
+{
+	ClusterNet gpu = ClusterNet();
+	int batch_size = 32;
+	int time_steps = 100;
+
+	Matrix<float> *data = gpu.rand(128,batch_size*time_steps);
+	Matrix<float> *host = data->to_host();
+	Matrix<float> *pinned = to_pinned(128,batch_size*time_steps,data->data);
+
+
+	Matrix<float> *error = gpu.rand(batch_size*time_steps,256);
+	Matrix<float> *w = gpu.rand(128,256);
+
+	Timer t = Timer();
+
+	t.tick();
+	for(int i = 0; i < 100; i++)
+		to_gpu(host->data,data);
+	t.tock();
+
+	t.tick();
+	for(int i = 0; i < 100; i++)
+		to_gpu(pinned->data,data);
+	t.tock();
+
+
+	t.tick();
+	for(int i = 0; i < 100; i++)
+		gpu.dot(data,error,w);
+	t.tock();
+
+}
+
+void deeplearningdb_test()
+{
+	DeepLearningDB *db = new DeepLearningDB();
+
+	Table *tbl = db->get_table("Test");
+
+	std::map<std::string, int> dict = tbl->get_dictionary<std::string,int>("dict");
+
+	cout << dict["uden"] << endl;
+
+
+}
+
 void test_neural_network()
 {
+
+	test_transfer_time();
 
 	Timer t = Timer();
 	ClusterNet *gpu = new ClusterNet();
 
-	gpu->useNervanaGPU = false;
+	gpu->useNervanaGPU = true;
 
 	Matrix<float> *X = read_hdf5("/home/tim/data/mnist/distributed_X.hdf5");
 	Matrix<float> *y = read_hdf5("/home/tim/data/mnist/distributed_y.hdf5");
@@ -89,6 +142,12 @@ void test_neural_network()
 	t.tick();
 	net.train(b_train, b_cv, 20);
 
+	/*
+	b_train->BATCH_SIZE = 256;
+	b_train->BATCHES *= 0.5;
+	b_train->CURRENT_BATCH = 0;
+	*/
+
 	net._conf->DROPOUT = 0.25f;
 	net._conf->LEARNING_RATE *= 0.2f;
 	net._conf->LEARNING_RATE_DECAY = 0.95f;
@@ -103,7 +162,8 @@ void test_neural_network()
 
 int main(int argc, char const *argv[]) {
 
-	test_neural_network();
+	deeplearningdb_test();
+//	test_neural_network();
 
 
 	return 0;
