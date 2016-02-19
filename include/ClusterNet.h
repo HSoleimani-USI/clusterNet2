@@ -14,7 +14,8 @@
 
 typedef enum TransformerType_t
 {
-	DropoutTransform = 0
+	DropoutTransform = 0,
+	LookupTransform = 1
 } TransformerType_t;
 
 typedef enum WeightInitType_t

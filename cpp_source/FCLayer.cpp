@@ -12,13 +12,13 @@ FCLayer::FCLayer(int unitcount, Unittype_t unitType){ init(unitcount, unitType);
 
 void FCLayer::forward()
 {
-	if(!prev){ if(_transformer){ _transformer->transform(activation); } next->forward(); return; }
+	if(!prev){ apply_transformations(); next->forward(); return; }
 
 	GPU->dot(prev->get_forward_activation(),prev->w_next,activation);
 	vectorWise<kvadd>(activation, prev->b_next, activation);
 	_func->activation(activation,activation);
 
-	if(_transformer){ _transformer->transform(activation); }
+	apply_transformations();
 
     if(next){ next->forward(); }
 }

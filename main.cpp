@@ -197,8 +197,8 @@ void test_neural_network()
 int main(int argc, char const *argv[]) {
 
 	//test_LSTM_swapping();
-	deeplearningdb_test();
-//	test_neural_network();
+	//deeplearningdb_test();
+	test_neural_network();
 
 
 	return 0;

@@ -55,10 +55,13 @@ public:
 
 	void init(int unitcount, Unittype_t unitType);
 	Matrix<float> *get_forward_activation();
+	void apply_transformations();
+	void init_transformers(ClusterNet *gpu, Network *net);
+	void init_transformer_activations(int batch_size);
 
 	ActivationFunction *_func;
 
-	Transformer *_transformer;
+	std::vector< Transformer*> _transformer;
 
 	Configurator *_conf;
 

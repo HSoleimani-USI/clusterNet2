@@ -20,6 +20,8 @@ public:
 	~Transformer(){};
 
 	Matrix<float> *output;
+	Matrix<float> *vocab;
+	int embedding_size;
 
 	Matrix<float> *transform(Matrix<float> *input);
 

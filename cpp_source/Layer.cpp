@@ -32,10 +32,8 @@ void Layer::init(int unitcount, Unittype_t unitType)
 	_conf = new Configurator();
 	_func = new ActivationFunction(unitType);
 
-	if( unitType == Softmax)
-		_transformer = NULL;
-	else
-		_transformer = new Transformer(DropoutTransform, this);
+	if( unitType != Softmax)
+		_transformer.push_back(new Transformer(DropoutTransform, this));
 
 
 }
@@ -43,14 +41,67 @@ void Layer::init(int unitcount, Unittype_t unitType)
 
 Matrix<float> *Layer::get_forward_activation()
 {
-	if(_transformer)
+	if(!_transformer.empty())
 	{
-		if(_transformer->_ttype == DropoutTransform)
+		if(_transformer.back()->_ttype == DropoutTransform)
 		{
-			return _transformer->output;
+			return _transformer.back()->output;
 		}
 	}
 
 	return activation;
+}
+
+void Layer::apply_transformations()
+{
+	if(!_transformer.empty())
+	{
+		Matrix<float> *input = activation;
+		for(int i = 0; i < _transformer.size(); i++)
+		{
+			_transformer[i]->transform(input);
+			input = _transformer[i]->output;
+		}
+	}
+}
+
+
+void Layer::init_transformers(ClusterNet *gpu, Network *net)
+{
+	if(!_transformer.empty())
+	{
+		for(int i = 0; i < _transformer.size(); i++)
+		{
+			_transformer[i]->_gpu = gpu;
+			_transformer[i]->_net = net;
+		}
+	}
+}
+
+void Layer::init_transformer_activations(int batch_size)
+{
+
+	for(int i = 0; i < _transformer.size(); i++)
+	{
+		if(_transformer[i]->output != NULL && _transformer[i]->output->rows == batch_size){return;}
+		if(_transformer[i]->output != NULL){ _transformer[i]->output->free_matrix(); }
+
+		Matrix<float> *prev = NULL;
+		if(_transformer[i]->_ttype == DropoutTransform)
+		{
+			if(prev)
+				_transformer[i]->output = empty<float>(batch_size, prev->cols);
+			else
+				_transformer[i]->output = empty<float>(batch_size, UNITCOUNT);
+
+			prev = _transformer[i]->output;
+		}
+		else if(_transformer[i]->_ttype == LookupTransform)
+		{
+			_transformer[i]->output = empty<float>(batch_size, UNITCOUNT*_transformer[i]->embedding_size);
+			prev = _transformer[i]->output;
+		}
+
+	}
 }
 

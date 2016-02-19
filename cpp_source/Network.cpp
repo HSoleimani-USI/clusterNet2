@@ -28,8 +28,7 @@ void Network::add(Layer *layer)
 	_layers.push_back(layer);
 	layer->GPU = _gpu;
 	layer->_network = this;
-	if(layer->_transformer){ layer->_transformer->_gpu = _gpu; }
-	if(layer->_transformer){ layer->_transformer->_net = this; }
+	layer->init_transformers(_gpu, this);
 
 }
 
@@ -66,10 +65,11 @@ void Network::init_weights(WeightInitType_t wtype)
 
 void Network::init_activations(int batchsize)
 {
-	if(_layers.front()->_transformer){_layers.front()->_transformer->output = zeros<float>(batchsize, _layers.front()->UNITCOUNT);}
+	_layers.front()->init_transformer_activations(batchsize);
 
 	for(int i = 1; i < _layers.size(); i++)
 	{
+		_layers[i]->init_transformer_activations(batchsize);
 		if(_layers[i]->activation != NULL && _layers[i]->activation->rows == batchsize){ return; }
 
 		if(_layers[i]->activation != NULL)
@@ -78,14 +78,12 @@ void Network::init_activations(int batchsize)
 			_layers[i]->activation_grad->free_matrix();
 			_layers[i]->error->free_matrix();
 			if(i == _layers.size()-1){ _layers[i]->target_matrix->free_matrix(); }
-			if(_layers[i]->_transformer){ _layers[i]->_transformer->output->free_matrix(); }
 		}
 
 		_layers[i]->activation = zeros<float>(batchsize, _layers[i]->UNITCOUNT);
 		_layers[i]->activation_grad = zeros<float>(batchsize, _layers[i]->UNITCOUNT);
 		_layers[i]->error = zeros<float>(batchsize, _layers[i]->UNITCOUNT);
 		if(i == _layers.size()-1){ _layers[i]->target_matrix = zeros<float>(batchsize, _layers[i]->UNITCOUNT);}
-		if(_layers[i]->_transformer){ _layers[i]->_transformer->output = zeros<float>(batchsize, _layers[i]->UNITCOUNT); }
 	}
 
 }
