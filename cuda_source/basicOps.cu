@@ -392,8 +392,18 @@ template <int action> void WeightUpdate(Matrix<float> *RMS, Matrix<float> *grad,
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
-Matrix<float> *read_hdf5(const char *filepath){ return read_hdf5(filepath,"/Default"); }
-Matrix<float> *read_hdf5(const char *filepath, const char *tag)
+
+template<typename T> struct switch_value {};
+template<> struct switch_value<int>{ enum { value = 1 }; };
+template<> struct switch_value<float>{enum { value = 2 }; };
+
+template Matrix<int> *read_hdf5(const char *filepath);
+template Matrix<int> *read_hdf5(const char *filepath, const char *tag);
+template Matrix<float> *read_hdf5(const char *filepath);
+template Matrix<float> *read_hdf5(const char *filepath, const char *tag);
+
+template <typename T> Matrix<T> *read_hdf5(const char *filepath){ return read_hdf5<T>(filepath,"/Default"); }
+template <typename T> Matrix<T> *read_hdf5(const char *filepath, const char *tag)
 {
 	   hid_t       file_id, dataset_id;
 
@@ -403,16 +413,24 @@ Matrix<float> *read_hdf5(const char *filepath, const char *tag)
 	   hid_t dspace = H5Dget_space(dataset_id);
 	   hsize_t dims[2];
 	   H5Sget_simple_extent_dims(dspace, dims, NULL);
-	   size_t bytes = sizeof(float)*dims[0]*dims[1];
+	   size_t bytes = sizeof(T)*dims[0]*dims[1];
 
-	   float *data;
+	   T *data;
 	   CUDA_CHECK_RETURN(cudaHostAlloc(&data, bytes, cudaHostAllocPortable));
 
-	   H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+	   switch(switch_value<T>::value)
+	   {
+		   case 1:
+			   H5Dread(dataset_id, H5T_NATIVE_INT32, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+			   break;
+		   case 2:
+			   H5Dread(dataset_id, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, data);
+			   break;
+	   }
 	   H5Dclose(dataset_id);
 	   H5Fclose(file_id);
 
-	   Matrix<float> *out = (Matrix<float>*)malloc(sizeof(Matrix<float>));
+	   Matrix<T> *out = (Matrix<T>*)malloc(sizeof(Matrix<T>));
 	   out->rows = (int)dims[0];
 	   out->cols= (int)dims[1];
 	   out->bytes = bytes;

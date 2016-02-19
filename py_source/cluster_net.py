@@ -10,15 +10,19 @@ import time
 from os import listdir
 import nltk
 import h5py
+import leveldbX
 
 
 
 class TextToIndex(object):
-	def __init__(self, path, output_dir):
+	def __init__(self, name, path, output_dir):
 		self.vocab2freq = {}
 		self.vocab2idx = {}		
 		self.path = path
 		self.output_dir = output_dir
+		self.db = leveldbX.LevelDBX()
+		self.tbl = self.db.get_table('vocab')
+		self.name = name
 		if isfile(path): self.files = [self.path]
 		else:
 			self.files =  [join(path,f) for f in listdir(path) if isfile(join(path, f))]
@@ -51,12 +55,14 @@ class TextToIndex(object):
 							self.vocab2idx[word] = current_idx
 							current_idx+=1
 						self.vocab2freq[word] +=1
-					
+			
+		self.tbl.set(join(self.name,'vocab2freq'), self.vocab2freq)
+		self.tbl.set(join(self.name,'vocab2idx'), self.vocab2idx)		
 		if save_to_disk:
 			pickle.dump(self.vocab2freq, open(join(self.output_dir, 'vocab2freq.p'),'wb'), pickle.HIGHEST_PROTOCOL)
 			pickle.dump(self.vocab2idx, open(join(self.output_dir, 'vocab2idx.p'),'wb'), pickle.HIGHEST_PROTOCOL)
 			
-	def create_idx_files(self):
+	def create_idx_files(self, save_to_disk=True):
 		tokenizer = WordPunctTokenizer()
 		try:			
 			sent_detector = nltk.data.load('tokenizers/punkt/english.pickle')
@@ -98,7 +104,9 @@ class TextToIndex(object):
 			for idxno, idx in enumerate(idx_values):
 				data[sentno,idxno] = idx
 				
-		save_hdf5_matrix(join(self.output_dir,'idx.hdf5'), data)
+		self.tbl.set(join(self.name,'idx'),data)
+		if save_to_disk:
+			save_hdf5_matrix(join(self.output_dir,'idx.hdf5'), data)
 			
 					
 				

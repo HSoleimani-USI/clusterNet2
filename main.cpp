@@ -69,13 +69,47 @@ void deeplearningdb_test()
 {
 	DeepLearningDB *db = new DeepLearningDB();
 
-	Table *tbl = db->get_table("Test");
+	Table *tbl = db->get_table("vocab");
 
-	std::map<std::string, int> dict = tbl->get_dictionary<std::string,int>("dict");
+	std::map<std::string, int> dict = tbl->get_dictionary<std::string,int>("brown/vocab2idx");
 
-	cout << dict["uden"] << endl;
+	cout << dict["car"] << endl;
 
 
+	Matrix<int> *arr = tbl->get_data<int>("brown/idx");
+	cout << "post" << endl;
+	for(int i = 0; i < 100; i++)
+		cout << arr->data[i] << endl;
+
+
+}
+
+void test_LSTM_swapping()
+{
+
+	ClusterNet gpu = ClusterNet();
+
+	int hidden = 256;
+	int timesteps = 1000;
+	int batch_size = 32;
+	int stack_size = 4;
+
+	Matrix<float> *R = gpu.rand(hidden,hidden*stack_size);
+	Matrix<float> *inputR = gpu.rand(hidden,batch_size);
+	Matrix<float> *errorsR = gpu.rand(batch_size,hidden*stack_size);
+
+	Timer t = Timer();
+
+
+	for(int i = 0; i < 1000; i++)
+		gpu.dot(inputR,errorsR,R);
+
+	t.tick();
+
+	for(int i = 0; i < 10000; i++)
+		gpu.dot(inputR,errorsR,R);
+
+	t.tock();
 }
 
 void test_neural_network()
@@ -88,8 +122,8 @@ void test_neural_network()
 
 	gpu->useNervanaGPU = true;
 
-	Matrix<float> *X = read_hdf5("/home/tim/data/mnist/distributed_X.hdf5");
-	Matrix<float> *y = read_hdf5("/home/tim/data/mnist/distributed_y.hdf5");
+	Matrix<float> *X = read_hdf5<float>("/home/tim/data/mnist/distributed_X.hdf5");
+	Matrix<float> *y = read_hdf5<float>("/home/tim/data/mnist/distributed_y.hdf5");
 
 	Matrix<float> *trainX = zeros<float>(60000,784);
 	Matrix<float> *trainy = zeros<float>(60000,1);
@@ -162,6 +196,7 @@ void test_neural_network()
 
 int main(int argc, char const *argv[]) {
 
+	//test_LSTM_swapping();
 	deeplearningdb_test();
 //	test_neural_network();
 

@@ -11,8 +11,23 @@ import urllib2
 from threading import Thread
 from os.path import expanduser
 from dateutil import parser
+import os
+import numpy as np
+import h5py
 home = expanduser("~")
 
+def save_hdf5_matrix(filename,x):    
+    file = h5py.File(filename,'w')
+    file.create_dataset("Default", data=x)        
+    file.close()
+    
+def load_hdf5_matrix(filename):    
+    f = h5py.File(filename,'r')
+    
+    z = f['Default'][:]
+    
+    f.close()
+    return z
 
 
 class Table(object):
@@ -22,6 +37,8 @@ class Table(object):
         self.hasServer = hasServer
         self.db = leveldb.LevelDB(join(path,name))
         self.address = address
+        self.hdf5_path = join(path,name,'hdf5')
+        if not exists(self.hdf5_path): os.makedirs(self.hdf5_path)
         
     def get(self, key):
         ret = None
@@ -36,11 +53,18 @@ class Table(object):
             self.set(key, value)
             return value
         else:
-            return ret
+            if ret == "hdf5":
+                return load_hdf5_matrix(join(self.hdf5_path, key.replace('/','_')+ ".hdf5"))
+            else:
+                return simplejson.loads(ret)
         
     
     def set(self, key, value):
-        self.db.Put(key,simplejson.dumps(value))
+        if isinstance(value, np.ndarray):     
+            self.db.Put(key,"hdf5")
+            save_hdf5_matrix(join(self.hdf5_path, key.replace('/','_')+ ".hdf5"), value)
+        else:
+            self.db.Put(key,simplejson.dumps(value))
         
     def post(self, key, value):
         if self.hasServer:

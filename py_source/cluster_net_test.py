@@ -381,10 +381,12 @@ def test_get_view():
     t.assert_equal(np.sqrt(Y[5:10]), A.tocpu()[5:10], "Partial application to view not working!")
     
     
-def test_TextToIdx():    
-    pass
-    txt2idx = gpu.TextToIndex('../data/NLP/', '../data/')
+def test_TextToIdx():   
+    txt2idx = gpu.TextToIndex('brown', '../data/NLP/', '../data/')
     txt2idx.create_vocabulary()  
     txt2idx.create_idx_files()  
+    assert len(txt2idx.tbl.get('brown/vocab2freq').keys()) > 5000
+    assert len(txt2idx.tbl.get('brown/vocab2idx').keys()) > 5000
+    assert isinstance(txt2idx.tbl.get('brown/idx'), np.ndarray)
     
     

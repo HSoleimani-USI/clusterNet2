@@ -152,8 +152,9 @@ bool check_matrix_vector_op(Matrix<float> *A, Matrix<float> *vec);
 bool check_for_same_dimensions(Matrix<float> *A, Matrix<float> *B);
 bool check_matrix_multiplication(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2);
 
-Matrix<float> *read_hdf5(const char *filepath);
-Matrix<float> *read_hdf5(const char *filepath, const char *tag);
+
+template <typename T> Matrix<T> *read_hdf5(const char *filepath);
+template <typename T> Matrix<T> *read_hdf5(const char *filepath, const char *tag);
 
 Matrix<float> *get_view(Matrix<float> *A, int rstart, int rend);
 
