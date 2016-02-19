@@ -14,8 +14,7 @@
 
 typedef enum TransformerType_t
 {
-	DropoutTransform = 0,
-	LookupTransform = 1
+	DropoutTransform = 0
 } TransformerType_t;
 
 typedef enum WeightInitType_t
@@ -32,6 +31,7 @@ typedef enum Unittype_t
 	Linear = 3,
 	Input = 4,
 	Exponential_linear = 5
+
 } Unittype_t;
 
 typedef enum DataPropagationType_t

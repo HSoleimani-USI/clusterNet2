@@ -96,11 +96,6 @@ void Layer::init_transformer_activations(int batch_size)
 
 			prev = _transformer[i]->output;
 		}
-		else if(_transformer[i]->_ttype == LookupTransform)
-		{
-			_transformer[i]->output = empty<float>(batch_size, UNITCOUNT*_transformer[i]->embedding_size);
-			prev = _transformer[i]->output;
-		}
 
 	}
 }

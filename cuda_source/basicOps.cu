@@ -90,6 +90,7 @@ template <typename T> Matrix<T> *ones(int rows, int cols)
 	return fill_matrix<T>(rows, cols, (T)1.0f);
 }
 
+template Matrix<unsigned int> *empty<unsigned int>(int rows, int cols);
 template Matrix<int> *empty<int>(int rows, int cols);
 template Matrix<float> *empty<float>(int rows, int cols);
 template <typename T> Matrix<T> *empty(int rows, int cols)
@@ -248,6 +249,7 @@ template void elementWise<kpow>(Matrix<float> *A, Matrix<float>*out, float scala
 template void elementWise<ksmul>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWise<kssub>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void elementWise<ksgt>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void elementWise<kmod>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template <int action> void elementWise(Matrix<float> *A, Matrix<float>*out, float scalar)
 {
   check_for_same_dimensions(A,out);
@@ -364,6 +366,7 @@ template <int reduction> float reduceToValue(Matrix<float> *A, Matrix<float> *vo
     return retValue;
 }
 
+
 //this softmax is numerically stable
 void softmax(Matrix<float> *A, Matrix<float> *out)
 {
@@ -377,6 +380,16 @@ void argmax(Matrix<float> *A, Matrix<float> *out)
 {
 	check_matrix_vector_op(A, out);
     kArgmax<<<A->rows > 1024 ? 1024 : A->rows, 256>>>(A->data, out->data, A->rows, A->cols);
+    CUDA_CHECK_RETURN(cudaPeekAtLastError());
+}
+
+template void lookup<Concatenated >(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out);
+template void lookup<RowWise>(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out);
+template <int lookup_type> void lookup(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out)
+{
+	assert(embedding->cols <=1024);
+	dim3 grid(idx_batch->rows, idx_batch->cols,1);
+	kEmbeddingLookup<lookup_type><<<grid, embedding->cols>>>(embedding->data, idx_batch->data, out->data, idx_batch->rows, idx_batch->cols, embedding->cols);
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 

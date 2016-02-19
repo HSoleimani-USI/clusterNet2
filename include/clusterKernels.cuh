@@ -36,4 +36,5 @@ __global__ void kArgmax(float* A, float* vout, const unsigned int rows, const un
 
 
 template <int action> __global__ void kRMSprop (float *RMS, float *grad, float *w, float RMS_multiplier, float learning_rate, int size);
+template <int lookup_type> __global__ void kEmbeddingLookup(float *embeddings, float *idx_batch, float *out, int rows, int cols, int embeddings_cols);
 #endif

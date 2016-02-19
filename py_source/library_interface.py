@@ -113,6 +113,9 @@ funcs.fscalar_mul.restype = ct.c_void_p
 
 funcs.fget_view.restype = ct.c_void_p
 
+funcs.flookup_rows.restype = ct.c_void_p
+funcs.flookup_concat.restype = ct.c_void_p
+
 
 
 

@@ -545,4 +545,10 @@ def tocpu(A, out):
 def printmat(A, rstart=None, rend=None, cstart=None,cend=None):
 	if rstart and rend and cstart and cend: lib.funcs.fprintmat(A.pt, rstart, rend, cstart, cend)
 	else: lib.funcs.fprintmat(A.pt, 0, int(A.shape[0]), 0, int(A.shape[1]))
+	
+def lookup_rowwise(embedding, idx_batch, out=None):
+	if not out: out = empty((idx_batch.shape[0]*idx_batch.shape[1],embedding.shape[1]))
+	lib.funcs.flookup_rows(embedding.pt, idx_batch.pt, out.pt)
+	return out
+	
 

@@ -112,6 +112,46 @@ void test_LSTM_swapping()
 	t.tock();
 }
 
+void test_lookup_time()
+{
+
+	ClusterNet gpu = ClusterNet();
+
+	int embedding_rows = 10000;
+	int embedding_cols = 256;
+	int batch_size = 128;
+	int batch_cols = 1024;
+
+	Matrix<float> *embedding = gpu.rand(embedding_rows,embedding_cols);
+	Matrix<float> *batch = gpu.rand(batch_size*batch_cols,embedding_cols);
+	Matrix<float> *batch1 = gpu.rand(batch_size*batch_cols,embedding_cols);
+
+	Timer t = Timer();
+	t.tick();
+	for(int i = 0; i < 1000; i++)
+		cudaMemcpy(batch1->data, batch->data,batch->bytes,cudaMemcpyDeviceToDevice);
+	t.tock();
+
+	/*
+
+	Matrix<float> *inputR = gpu.rand(hidden,batch_size);
+	Matrix<float> *errorsR = gpu.rand(batch_size,hidden*stack_size);
+
+	Timer t = Timer();
+
+
+	for(int i = 0; i < 1000; i++)
+		gpu.dot(inputR,errorsR,R);
+
+	t.tick();
+
+	for(int i = 0; i < 10000; i++)
+		gpu.dot(inputR,errorsR,R);
+
+	t.tock();
+	*/
+}
+
 void test_neural_network()
 {
 
@@ -199,6 +239,7 @@ int main(int argc, char const *argv[]) {
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
 	test_neural_network();
+	//test_lookup_time();
 
 
 	return 0;

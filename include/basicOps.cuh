@@ -46,6 +46,12 @@ typedef enum WeightUpdateType_t
 	RMSPropInit = 3
 } WeightUpdateType_t;
 
+typedef enum LookupType_t
+{
+	RowWise = 0,
+	Concatenated = 1
+} LookupType_t;
+
 typedef enum Operations_t
 {
 	kabs = 0,
@@ -83,6 +89,7 @@ typedef enum Operations_t
 	kssub = 26,
 	kELU = 27,
 	kELU_grad = 28,
+	kmod = 29,
 
 } Operations_t;
 
@@ -136,9 +143,13 @@ template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matri
 template <int action> void vectorWise(Matrix<float> *v, Matrix<float>*out);
 template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out);
 
+
 void slice(Matrix<float> *A, Matrix<float>*out, int rstart, int rend, int cstart, int cend);
 void softmax(Matrix<float> *A, Matrix<float> *out);
 void argmax(Matrix<float> *A, Matrix<float> *out);
+
+
+template <int lookup_type> void lookup(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out);
 
 template <int action> void WeightUpdate(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
 

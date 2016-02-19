@@ -4,7 +4,7 @@ import numpy as np
 import numpy.testing as t
 import time
 from scipy.spatial.distance import cdist
-from cluster_net import NeuralNetwork
+from cluster_net import NeuralNetwork, Timer
 import time
 
 
@@ -380,13 +380,51 @@ def test_get_view():
     t.assert_equal(Y[0:5], A.tocpu()[0:5], "Partial application to view not working!")
     t.assert_equal(np.sqrt(Y[5:10]), A.tocpu()[5:10], "Partial application to view not working!")
     
+def test_lookup():
+    embedding_cols = 128
+    batch_size = 32
+    batch_cols = 10
     
-def test_TextToIdx():   
+    embeddings = np.float32(np.random.rand(1000,embedding_cols))
+    batch = np.random.randint(0,1000,size=(batch_size,batch_cols))
+    out_concat = np.zeros((batch_size,batch_cols*embedding_cols))
+    out_rowwise = np.zeros((batch_size*batch_cols, embedding_cols))
+    
+    for row, vec in enumerate(batch):
+        for col, num in enumerate(vec):
+            out_concat[row,col*embeddings.shape[1]:(col+1)*embeddings.shape[1]] = embeddings[num]
+            out_rowwise[(row*batch_cols) + col] = embeddings[num]
+            
+    embeddings = gpu.array(embeddings)
+    batch = gpu.array(np.float32(batch))
+    
+    out = gpu.empty((batch_size, batch_cols*embedding_cols))
+    out2 = gpu.empty((batch_size, batch_cols*embedding_cols))
+    
+    out_rows_gpu = gpu.lookup_rowwise(embeddings, batch)
+    gpu.lookup_rowwise(embeddings, batch,out)
+    gpu.copy(out, out2)
+    #t.assert_array_equal(out_rows_gpu.tocpu(), out_rowwise,"Lookup not working!")
+    #t.assert_array_equal(out.tocpu(), out_concat,"Lookup not working!")
+    '''
+    timer = Timer()
+    timer.tick()
+    for i in range(1000):
+        gpu.lookup_rowwise(embeddings, batch,out)
+    timer.tock()
+    timer.tick()
+    for i in range(1000):
+        gpu.copy(out, out2)
+    timer.tock()
+    '''
+    
+    
+'''
+def test_TextToIdx():
     txt2idx = gpu.TextToIndex('brown', '../data/NLP/', '../data/')
     txt2idx.create_vocabulary()  
     txt2idx.create_idx_files()  
     assert len(txt2idx.tbl.get('brown/vocab2freq').keys()) > 5000
     assert len(txt2idx.tbl.get('brown/vocab2idx').keys()) > 5000
     assert isinstance(txt2idx.tbl.get('brown/idx'), np.ndarray)
-    
-    
+'''

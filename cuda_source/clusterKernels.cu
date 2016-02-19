@@ -73,6 +73,7 @@ template __global__ void kElementWise<ksmul>(const float *A, const float *B, flo
 template __global__ void kElementWise<kssub>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<ksgt>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<kcopy>(const float *A, const float *B, float *out, const float scalar, int size);
+template __global__ void kElementWise<kmod>(const float *A, const float *B, float *out, const float scalar, int size);
 template<int operation> __global__ void kElementWise(const float *A, const float *B, float *out, const float scalar, int size)
 {
   const unsigned int numThreads = blockDim.x * gridDim.x;
@@ -112,6 +113,7 @@ template<int operation> __global__ void kElementWise(const float *A, const float
 
 
        	   case ksgt: out[i] = (float)(A[i] > scalar); break;
+       	   case kmod: out[i] = (float)((int)A[i] % (int)scalar); break;
 	   }
   }
 }
@@ -136,7 +138,6 @@ template <int operation > __global__ void kVectorWise(float *A, float *v, float 
 		}
 	}
 }
-
 //for column major data
 __global__ void kSlice(float *A, float *out, int rows_A, int cols_A, int rstart, int rend, int cstart, int cend)
 {
@@ -511,4 +512,25 @@ template <int action> __global__ void kRMSprop(float *RMS, float *grad, float *w
 	  }
 }
 
+template __global__ void kEmbeddingLookup<RowWise>(float *embeddings, float *idx_batch, float *out, int rows, int cols, int embeddings_cols);
+template __global__ void kEmbeddingLookup<Concatenated>(float *embeddings, float *idx_batch, float *out, int rows, int cols, int embeddings_cols);
+template <int lookup_type> __global__ void kEmbeddingLookup(float *embeddings, float *idx_batch, float *out, int rows, int cols, int embeddings_cols)
+{
+	for (unsigned int row = blockIdx.x; row < rows; row += gridDim.x)
+	{
+		for (unsigned int col = blockIdx.y; col < cols; col += gridDim.y)
+		{
+			int embedding_start_idx = ((int)idx_batch[(cols*row) + col])*embeddings_cols;
+			switch(lookup_type)
+			{
+				case RowWise:
+					out[(((row*cols) + col)*embeddings_cols) + threadIdx.x] = embeddings[embedding_start_idx + threadIdx.x];
+				break;
+				case Concatenated:
+					out[(((row*cols) + col)*embeddings_cols)  + threadIdx.x] = embeddings[embedding_start_idx + threadIdx.x];
+				break;
+			}
+		}
+	}
+}
 
