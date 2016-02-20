@@ -94,9 +94,9 @@ void test_LSTM_swapping()
 	int batch_size = 32;
 	int stack_size = 4;
 
-	Matrix<float> *R = gpu.rand(hidden,hidden*stack_size);
-	Matrix<float> *inputR = gpu.rand(hidden,batch_size);
-	Matrix<float> *errorsR = gpu.rand(batch_size,hidden*stack_size);
+	Matrix<float> *R = gpu.rand(hidden*stack_size,hidden);
+	Matrix<float> *inputR = gpu.rand(batch_size*stack_size,hidden);
+	Matrix<float> *errorsR = gpu.rand(batch_size*stack_size,hidden);
 
 	Timer t = Timer();
 

@@ -30,7 +30,8 @@ typedef enum Unittype_t
 	Softmax = 2,
 	Linear = 3,
 	Input = 4,
-	Exponential_linear = 5
+	Exponential_linear = 5,
+	Output
 
 } Unittype_t;
 
@@ -53,7 +54,10 @@ typedef enum Costfunction_t
 typedef enum Layer_t
 {
 	FullyConnected = 0,
-	Lookup = 1
+	LSTM = 1,
+	Lookup = 2,
+	InputLayer = 3,
+	OutputLayer = 4
 } Layer_t;
 
 class ClusterNet

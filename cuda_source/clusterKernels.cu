@@ -57,6 +57,8 @@ template __global__ void kElementWise<kdiv>(const float *A, const float *B, floa
 template __global__ void kElementWise<kmul>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<klogistic>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<klogistic_grad>(const float *A, const float *B, float *out, const float scalar, int size);
+template __global__ void kElementWise<ktanh>(const float *A, const float *B, float *out, const float scalar, int size);
+template __global__ void kElementWise<ktanh_grad>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<kELU>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<kELU_grad>(const float *A, const float *B, float *out, const float scalar, int size);
 template __global__ void kElementWise<krectified>(const float *A, const float *B, float *out, const float scalar, int size);
@@ -114,6 +116,9 @@ template<int operation> __global__ void kElementWise(const float *A, const float
 
        	   case ksgt: out[i] = (float)(A[i] > scalar); break;
        	   case kmod: out[i] = (float)((int)A[i] % (int)scalar); break;
+
+       	   case ktanh: out[i] = tanhf(A[i]); break;
+       	   case ktanh_grad: out[i] = 1.0f - (A[i]*A[i]); break;
 	   }
   }
 }

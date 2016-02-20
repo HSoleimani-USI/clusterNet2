@@ -85,6 +85,8 @@ typedef enum Operations_t
 	kELU = 27,
 	kELU_grad = 28,
 	kmod = 29,
+	ktanh = 30,
+	ktanh_grad = 31
 
 } Operations_t;
 
