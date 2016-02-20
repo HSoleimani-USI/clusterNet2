@@ -511,25 +511,16 @@ template <int action> __global__ void kRMSprop(float *RMS, float *grad, float *w
 
 	  }
 }
-
-template __global__ void kEmbeddingLookup<RowWise>(float *embeddings, float *idx_batch, float *out, int rows, int cols, int embeddings_cols);
-template __global__ void kEmbeddingLookup<Concatenated>(float *embeddings, float *idx_batch, float *out, int rows, int cols, int embeddings_cols);
-template <int lookup_type> __global__ void kEmbeddingLookup(float *embeddings, float *idx_batch, float *out, int rows, int cols, int embeddings_cols)
+__global__ void kEmbeddingLookup(float *embeddings, float *idx_batch, float *out, int rows, int cols, int embeddings_cols)
 {
 	for (unsigned int row = blockIdx.x; row < rows; row += gridDim.x)
 	{
 		for (unsigned int col = blockIdx.y; col < cols; col += gridDim.y)
 		{
 			int embedding_start_idx = ((int)idx_batch[(cols*row) + col])*embeddings_cols;
-			switch(lookup_type)
-			{
-				case RowWise:
-					out[(((row*cols) + col)*embeddings_cols) + threadIdx.x] = embeddings[embedding_start_idx + threadIdx.x];
-				break;
-				case Concatenated:
-					out[(((row*cols) + col)*embeddings_cols)  + threadIdx.x] = embeddings[embedding_start_idx + threadIdx.x];
-				break;
-			}
+			out[(((row*cols) + col)*embeddings_cols)  + threadIdx.x] = embeddings[embedding_start_idx + threadIdx.x];
+
+
 		}
 	}
 }

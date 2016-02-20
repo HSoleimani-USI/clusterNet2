@@ -30,11 +30,12 @@ template <int reduction>__global__ void kReduceToCols(float* A, float* out, cons
 
 template<int action> __device__ float reduction_action(float a, float b);
 template <int action> __device__ void reduceByValue(float* sdata, const unsigned int tid, const unsigned int threads);
+
 __device__ void reduceToArgmax(float *skeys, float* svalues, const unsigned int tid, const unsigned int threads);
 __global__ void kSoftMax(float* A, float* out, const unsigned int rows, const unsigned int cols);
 __global__ void kArgmax(float* A, float* vout, const unsigned int rows, const unsigned int cols);
+__global__ void kEmbeddingLookup(float *embeddings, float *idx_batch, float *out, int rows, int cols, int embeddings_cols);
 
 
 template <int action> __global__ void kRMSprop (float *RMS, float *grad, float *w, float RMS_multiplier, float learning_rate, int size);
-template <int lookup_type> __global__ void kEmbeddingLookup(float *embeddings, float *idx_batch, float *out, int rows, int cols, int embeddings_cols);
 #endif

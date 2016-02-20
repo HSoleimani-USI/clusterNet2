@@ -99,7 +99,6 @@ extern "C"
 	void fprintmat(FloatMatrix *A, int rstart, int rend, int cstart, int cend){ wprintmat(A,rstart,rend,cstart,cend); }
 
 
-	void flookup_rows(FloatMatrix *embedding, FloatMatrix *idx_batch, FloatMatrix *out){ wlookup_rows(embedding,idx_batch,out); }
-	void flookup_concat(FloatMatrix *embedding, FloatMatrix *idx_batch, FloatMatrix *out) { wlookup_concat(embedding,idx_batch,out); }
+	void flookup(FloatMatrix *embedding, FloatMatrix *idx_batch, FloatMatrix *out){ wlookup(embedding,idx_batch,out); }
 
 }

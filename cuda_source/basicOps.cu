@@ -383,13 +383,11 @@ void argmax(Matrix<float> *A, Matrix<float> *out)
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
-template void lookup<Concatenated >(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out);
-template void lookup<RowWise>(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out);
-template <int lookup_type> void lookup(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out)
+void lookup(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out)
 {
 	assert(embedding->cols <=1024);
 	dim3 grid(idx_batch->rows, idx_batch->cols,1);
-	kEmbeddingLookup<lookup_type><<<grid, embedding->cols>>>(embedding->data, idx_batch->data, out->data, idx_batch->rows, idx_batch->cols, embedding->cols);
+	kEmbeddingLookup<<<grid, embedding->cols>>>(embedding->data, idx_batch->data, out->data, idx_batch->rows, idx_batch->cols, embedding->cols);
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 

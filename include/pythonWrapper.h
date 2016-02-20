@@ -62,7 +62,6 @@ void wsortbykey(FloatMatrix *keys, FloatMatrix *values);
 void wprintmat(FloatMatrix *A, int rstart, int rend, int cstart, int cend);
 FloatMatrix *wget_view(FloatMatrix *A, int rstart, int rend);
 
-void wlookup_rows(FloatMatrix *embedding, FloatMatrix *idx_batch, FloatMatrix *out);
-void wlookup_concat(FloatMatrix *embedding, FloatMatrix *idx_batch, FloatMatrix *out);
+void wlookup(FloatMatrix *embedding, FloatMatrix *idx_batch, FloatMatrix *out);
 
 

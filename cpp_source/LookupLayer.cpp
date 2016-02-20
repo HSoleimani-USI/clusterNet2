@@ -27,6 +27,8 @@ LookupLayer::LookupLayer(int unitcount, std::map<std::string,int> vocab2idx)
 void LookupLayer::forward()
 {
 
+	lookup(_embeddings, prev->get_forward_activation(), activation);
+
 }
 
 

@@ -46,11 +46,6 @@ typedef enum WeightUpdateType_t
 	RMSPropInit = 3
 } WeightUpdateType_t;
 
-typedef enum LookupType_t
-{
-	RowWise = 0,
-	Concatenated = 1
-} LookupType_t;
 
 typedef enum Operations_t
 {
@@ -149,7 +144,7 @@ void softmax(Matrix<float> *A, Matrix<float> *out);
 void argmax(Matrix<float> *A, Matrix<float> *out);
 
 
-template <int lookup_type> void lookup(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out);
+void lookup(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out);
 
 template <int action> void WeightUpdate(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
 

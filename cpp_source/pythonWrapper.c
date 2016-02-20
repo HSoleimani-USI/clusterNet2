@@ -34,8 +34,7 @@ void vadd(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out){ vectorWise<kvadd>(A
 void vsub(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out){ vectorWise<kvsub>(A, v, out); }
 void tmatrix(FloatMatrix *v, FloatMatrix *out){ vectorWise<ktmatrix>(v, out); }
 
-void wlookup_rows(FloatMatrix *embedding, FloatMatrix *idx_batch, FloatMatrix *out){ lookup<RowWise>(embedding,idx_batch,out); }
-void wlookup_concat(FloatMatrix *embedding, FloatMatrix *idx_batch, FloatMatrix *out) { lookup<Concatenated>(embedding,idx_batch,out); }
+void wlookup(FloatMatrix *embedding, FloatMatrix *idx_batch, FloatMatrix *out){ lookup(embedding,idx_batch,out); }
 
 void rowMax(FloatMatrix *A, FloatMatrix *vout){ reduceToRows<rmax>(A, vout); }
 void rowSum(FloatMatrix *A, FloatMatrix *vout){ reduceToRows<rsum>(A, vout); }

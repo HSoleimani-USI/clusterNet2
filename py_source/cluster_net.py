@@ -548,7 +548,7 @@ def printmat(A, rstart=None, rend=None, cstart=None,cend=None):
 	
 def lookup_rowwise(embedding, idx_batch, out=None):
 	if not out: out = empty((idx_batch.shape[0]*idx_batch.shape[1],embedding.shape[1]))
-	lib.funcs.flookup_rows(embedding.pt, idx_batch.pt, out.pt)
+	lib.funcs.flookup(embedding.pt, idx_batch.pt, out.pt)
 	return out
 	
 
