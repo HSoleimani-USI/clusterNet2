@@ -50,6 +50,11 @@ typedef enum Costfunction_t
 	Misclassification = 4
 } Costfunction_t;
 
+typedef enum Layer_t
+{
+	FullyConnected = 0,
+	Lookup = 1
+} Layer_t;
 
 class ClusterNet
 {

@@ -8,7 +8,7 @@ using std::endl;
 using std::string;
 using std::vector;
 
-FCLayer::FCLayer(int unitcount, Unittype_t unitType){ init(unitcount, unitType); }
+FCLayer::FCLayer(int unitcount, Unittype_t unitType){ init(unitcount, unitType, FullyConnected); }
 
 void FCLayer::forward()
 {

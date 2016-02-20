@@ -58,6 +58,7 @@ void Network::init_weights(WeightInitType_t wtype)
 		prev->b_grad_next = zeros<float>(1,_layers[i]->UNITCOUNT);
 		prev->b_rms_next = zeros<float>(1,_layers[i]->UNITCOUNT);
 
+
 		prev = _layers[i];
 	}
 
@@ -101,34 +102,21 @@ void Network::copy_global_params_to_layers()
 
 void Network::fit_partial(BatchAllocator *b, int batches)
 {
-	//cout << "init" << endl;
 	init_activations(b->BATCH_SIZE);
 	_isTrainTime = true;
 
 	for(int i = 0; i < batches; i++)
 	{
-		//cout << "replace" << endl;
 		b->replace_current_with_next_batch();
-		//cout << "allocate" << endl;
 		b->allocate_next_batch_async();
-		//cout << "front" << endl;
-		//cout << _layers.size() << endl;
-		//cout << _layers.front() << endl;
 
 		_layers.front()->activation = b->get_current_batchX();
-		//cout << "back" << endl;
 		_layers.back()->target = b->get_current_batchY();
 
-		//cout << "forward" << endl;
 		_layers.front()->forward();
-		//cout << "add error" << endl;
 		_errorhandler->add_error(_layers.back()->activation, _layers.back()->target);
-		//cout << "errors" << endl;
 		_layers.front()->backward_errors();
-		//cout << "grads" << endl;
-		//_layers.front()->backward_grads();
 
-		//cout << "weight update" << endl;
 		for(int j = 0; j < _layers.size()-1; j++)
 		{
 			_opt->weight_update(_layers[j]->w_rms_next, _layers[j]->w_next,_layers[j]->w_grad_next,_conf->RMSPROP_MOMENTUM,_conf->LEARNING_RATE);

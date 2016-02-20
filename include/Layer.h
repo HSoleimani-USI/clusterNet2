@@ -18,7 +18,7 @@ public:
 	Layer *next;
 	Layer *prev;
 
-	std::string _LayerType;
+	Layer_t _LayerType;
 
 	Matrix<float> *b_grad_next;
 	Matrix<float>* w_grad_next;
@@ -53,7 +53,7 @@ public:
 	virtual void backward_errors() = 0;
 	virtual void backward_grads() = 0;
 
-	void init(int unitcount, Unittype_t unitType);
+	void init(int unitcount, Unittype_t unitType, Layer_t layerType);
 	Matrix<float> *get_forward_activation();
 	void apply_transformations();
 	void init_transformers(ClusterNet *gpu, Network *net);

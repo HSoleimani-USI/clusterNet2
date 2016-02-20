@@ -145,6 +145,7 @@ void argmax(Matrix<float> *A, Matrix<float> *out);
 
 
 void lookup(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out);
+void embeddingUpdate(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *grad, Matrix<float> *RMS, float RMS_momentum, float learning_rate);
 
 template <int action> void WeightUpdate(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
 

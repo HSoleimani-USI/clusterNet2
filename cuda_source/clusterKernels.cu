@@ -525,3 +525,25 @@ __global__ void kEmbeddingLookup(float *embeddings, float *idx_batch, float *out
 	}
 }
 
+
+__global__ void kEmbeddingUpdate(float *embeddings, float *idx_batch, float *grad, float *RMS,
+								 float RMS_multiplier, float learning_rate, int rows, int cols, int embeddings_cols)
+{
+	const float rms_reciprocal = 1.0f - RMS_multiplier;
+	float RMS_value = 0.0f;
+	float grad_value = 0.0f;
+	for (unsigned int row = blockIdx.x; row < rows; row += gridDim.x)
+	{
+		for (unsigned int col = blockIdx.y; col < cols; col += gridDim.y)
+		{
+			int embedding_start_idx = ((int)idx_batch[(cols*row) + col])*embeddings_cols;
+			grad_value =  grad[(((row*cols) + col)*embeddings_cols)  + threadIdx.x];
+			RMS_value = (RMS_multiplier*RMS[embedding_start_idx + threadIdx.x]) + (powf(grad_value,2.0f)*rms_reciprocal);
+
+			grad_value = learning_rate*fdividef(grad_value,(__fsqrt_rn(RMS_value)+1.0e-08f));
+			RMS[embedding_start_idx + threadIdx.x] = RMS_value;
+			embeddings[embedding_start_idx + threadIdx.x] -= grad_value;
+		}
+	}
+}
+

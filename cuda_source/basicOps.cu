@@ -391,6 +391,15 @@ void lookup(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *o
     CUDA_CHECK_RETURN(cudaPeekAtLastError());
 }
 
+void embeddingUpdate(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *grad, Matrix<float> *RMS, float RMS_momentum, float learning_rate)
+{
+	assert(embedding->cols <=1024);
+	dim3 grid(idx_batch->rows, idx_batch->cols,1);
+	kEmbeddingUpdate<<<grid, embedding->cols>>>(embedding->data, idx_batch->data, grad->data, RMS->data,
+												  RMS_momentum, learning_rate, idx_batch->rows, idx_batch->cols, embedding->cols);
+    CUDA_CHECK_RETURN(cudaPeekAtLastError());
+}
+
 template void WeightUpdate<RMSProp>(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
 template void WeightUpdate<RMSPropInit>(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
 template <int action> void WeightUpdate(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate)

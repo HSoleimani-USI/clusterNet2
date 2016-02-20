@@ -9,7 +9,7 @@ using std::string;
 using std::vector;
 
 
-void Layer::init(int unitcount, Unittype_t unitType)
+void Layer::init(int unitcount, Unittype_t unitType, Layer_t layerType)
 {
 	next = NULL;
 	prev = NULL;
@@ -26,6 +26,7 @@ void Layer::init(int unitcount, Unittype_t unitType)
 	error = NULL;
 
 	UNITCOUNT = unitcount;
+	_LayerType = layerType;
 
 	Layer_ID = 0;
 

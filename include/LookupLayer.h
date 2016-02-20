@@ -23,12 +23,19 @@ public:
 	~LookupLayer(){};
 
 
+
+	void init_embeddings();
+	void init_embeddings(Matrix<float> *embeddings);
+
+
 	void forward();
-	void backward_errors(){};
-	void backward_grads(){};
+	void backward_errors();
+	void backward_grads();
+	void update_embeddings();
 private:
 	std::map<std::string, int> _vocab2idx;
 	Matrix<float> *_embeddings;
+	Matrix<float> *_rms_embedding;
 };
 
 #endif /* LOOKUPLAYER_H_ */
