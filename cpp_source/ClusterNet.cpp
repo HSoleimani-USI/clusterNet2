@@ -124,3 +124,14 @@ void ClusterNet::dropout(Matrix<float> *A, Matrix <float> *out, const float drop
 }
 
 
+
+Matrix<float> *ClusterNet::get_uniformsqrt_weight(int input, int output)
+{
+	Matrix<float> *out = rand(input,output);
+	float range = 8.0f*sqrtf(6.0f/((float)input + output));
+	elementWise<ksmul>(out,out,range);
+	elementWise<kssub>(out,out,range/2.0f);
+
+	return out;
+}
+

@@ -7,17 +7,35 @@
 
 #include "LSTMLayer.h"
 #include <boost/swap.hpp>
-
-
+#include <RecurrentNetwork.h>
+#include <ActivationFunction.h>
+#include <Configurator.h>
+#include <Transformer.h>
 
 
 void LSTMLayer::forward()
 {
 	if(!prev){  next->forward(); return; }
-	GPU->dot(prev->get_forward_activation(), prev->w_next_input, activations_input_full);
-	GPU->dot(prev->get_forward_activation(), prev->w_next_input_gate, activations_input_gate_full);
-	GPU->dot(prev->get_forward_activation(), prev->w_next_forget_gate, activations_forget_gate_full);
-	GPU->dot(prev->get_forward_activation(), prev->w_next_output_gate, activations_output_gate_full);
+	GPU->dot(prev->output_full, prev->w_next_input, activations_input_full);
+	GPU->dot(prev->output_full, prev->w_next_input_gate, activations_input_gate_full);
+	GPU->dot(prev->output_full, prev->w_next_forget_gate, activations_forget_gate_full);
+	GPU->dot(prev->output_full, prev->w_next_output_gate, activations_output_gate_full);
+
+
+	if(prev != input)
+	{
+		//use skip connections to forward input
+		GPU->dot(input->output_full, input->skip_weights[Layer_ID-1], skip_activations_full);
+		GPU->dot(input->output_full, input->skip_weights_input_gate[Layer_ID-1], skip_activations_input_gate_full);
+		GPU->dot(input->output_full, input->skip_weights_forget_gate[Layer_ID-1], skip_activations_forget_gate_full);
+		GPU->dot(input->output_full, input->skip_weights_output_gate[Layer_ID-1], skip_activations_output_gate_full);
+
+		//pool
+		elementWise<kadd>(activations_input_full,skip_activations_full,activations_input_full);
+		elementWise<kadd>(activations_input_gate_full,skip_activations_input_gate_full,activations_input_gate_full);
+		elementWise<kadd>(activations_forget_gate_full,skip_activations_forget_gate_full,activations_forget_gate_full);
+		elementWise<kadd>(activations_output_gate_full,skip_activations_output_gate_full,activations_output_gate_full);
+	}
 
 	vectorWise<kvadd>(activations_input_full, prev->bw_next_input, activations_input_full);
 	vectorWise<kvadd>(activations_input_gate_full, prev->bw_next_input_gate, activations_input_gate_full);
@@ -47,7 +65,7 @@ void LSTMLayer::forward()
 		elementWise<kmul>(activations_cell_batch[i-1],activations_forget_gate_batch[i], activations_cell_batch[i]);
 		elementWise<kadd>(activations_cell_batch[i],activation_cell_buffer, activations_cell_batch[i]);
 
-		activation_output = get_view(activation_output_full, i,i+1);
+		//activation_output = get_view(activation_output_full, i,i+1);
 		elementWise<ktanh>(output_batch[i], output_batch[i]);
 		elementWise<kmul>(output_batch[i],activations_output_gate_batch[i], output_batch[i]);
 
@@ -159,8 +177,8 @@ void LSTMLayer::backward_grads()
 
 void LSTMLayer::forward_to_output()
 {
-	GPU->dot(activation_output_full, w_output, output->activation_full);
-	vectorWise<kvadd>(activation_output_full, b_output, activation_output_full);
+	//GPU->dot(activation_output_full, w_output, output->activation_full);
+	//vectorWise<kvadd>(activation_output_full, b_output, activation_output_full);
 }
 
 
@@ -168,4 +186,21 @@ void LSTMLayer::forward_to_skip_connections()
 {
 	//GPU->dot(activation_output_full, w_output, output->activation_full);
 	//vectorWise<kvadd>(activation_output_full, b_output, activation_output_full);
+}
+
+Matrix<float> *LSTMLayer::get_forward_activation()
+{
+	/*
+	if(Layer_ID == 0)
+	{
+		//just the inputs
+		return input->output_full;
+	}
+	else
+	{
+		//output + skip connection input
+		output_full
+	}
+	*/
+	return NULL;
 }

@@ -15,6 +15,12 @@ using std::vector;
 #ifndef LSTMLAYER_H_
 #define LSTMLAYER_H_
 
+class RecurrentNetwork;
+class ActivationFunction;
+class Configurator;
+class Transformer;
+
+
 class LSTMLayer
 {
 public:
@@ -22,17 +28,35 @@ public:
 	~LSTMLayer(){};
 
 
+	LSTMLayer *input;
 	LSTMLayer *next;
 	LSTMLayer *prev;
 	LSTMLayer *output;
 
-	vector<Matrix<float*> > output_weights;
-	vector<Matrix<float*> > output_weights_rms;
-	vector<Matrix<float*> > output_weights_grad;
 
-	vector<Matrix<float*> > output_biases;
-	vector<Matrix<float*> > output_biases_rms;
-	vector<Matrix<float*> > output_biases_grad;
+	vector<Matrix<float> * > skip_weights;
+	vector<Matrix<float> * > skip_weights_rms;
+	vector<Matrix<float> * > skip_weights_grad;
+
+	vector<Matrix<float> * > skip_weights_input_gate;
+	vector<Matrix<float> * > skip_weights_input_gate_rms;
+	vector<Matrix<float> * > skip_weights_input_gate_grad;
+
+	vector<Matrix<float> * > skip_weights_forget_gate;
+	vector<Matrix<float> * > skip_weights_forget_gate_rms;
+	vector<Matrix<float> * > skip_weights_forget_gate_grad;
+
+	vector<Matrix<float> * > skip_weights_output_gate;
+	vector<Matrix<float> * > skip_weights_output_gate_rms;
+	vector<Matrix<float> * > skip_weights_output_gate_grad;
+
+	vector<Matrix<float> * > output_weights;
+	vector<Matrix<float> * > output_weights_rms;
+	vector<Matrix<float> * > output_weights_grad;
+
+	vector<Matrix<float> * > output_biases;
+	vector<Matrix<float> * > output_biases_rms;
+	vector<Matrix<float> * > output_biases_grad;
 
 	Matrix<float>* w_grad_next_input;
 	Matrix<float> *w_next_input;
@@ -84,55 +108,62 @@ public:
 	Matrix<float> *bw_next_output_gate;
 
 
-	Matrix <float*> activation_R_input_batch;
-	Matrix <float*> activation_R_input_gate_batch;
-	Matrix <float*> activation_R_forget_gate_batch;
-	Matrix <float*> activation_R_output_gate_batch;
+	Matrix <float> * activation_R_input_batch;
+	Matrix <float> * activation_R_input_gate_batch;
+	Matrix <float> * activation_R_forget_gate_batch;
+	Matrix <float> * activation_R_output_gate_batch;
 
-	Matrix <float*> output_full;
-	Matrix <float*> activations_input_full;
-	Matrix <float*> activations_input_gate_full;
-	Matrix <float*> activations_forget_gate_full;
-	Matrix <float*> activations_output_gate_full;
-	Matrix <float*> activations_cell_full;
-	Matrix <float*> activations_post_cell_full;
+	Matrix <float> * skip_activations_full;
+	Matrix <float> * skip_activations_input_gate_full;
+	Matrix <float> * skip_activations_forget_gate_full;
+	Matrix <float> * skip_activations_output_gate_full;
 
-	Matrix <float*> grad_input_full;
-	Matrix <float*> grad_input_gate_full;
-	Matrix <float*> grad_forget_gate_full;
-	Matrix <float*> grad_output_gate_full;
-	Matrix <float*> grad_cell_full;
+	Matrix <float> * output_full;
+	Matrix <float> * activations_input_full;
+	Matrix <float> * activations_input_gate_full;
+	Matrix <float> * activations_forget_gate_full;
+	Matrix <float> * activations_output_gate_full;
+	Matrix <float> * activations_cell_full;
+	Matrix <float> * activations_post_cell_full;
 
-	Matrix <float*> error_input_full;
-	Matrix <float*> error_input_gate_full;
-	Matrix <float*> error_forget_gate_full;
-	Matrix <float*> error_output_gate_full;
-	Matrix <float*> error_output_full;
+	Matrix <float> * grad_input_full;
+	Matrix <float> * grad_input_gate_full;
+	Matrix <float> * grad_forget_gate_full;
+	Matrix <float> * grad_output_gate_full;
+	Matrix <float> * grad_cell_full;
 
-	Matrix <float*> activation_cell_buffer;
-	Matrix <float*> error_cell_prev;
-	Matrix <float*> error_cell_current;
-	Matrix <float*> error_cell_buffer;
+	Matrix <float> * error_input_full;
+	Matrix <float> * error_input_gate_full;
+	Matrix <float> * error_forget_gate_full;
+	Matrix <float> * error_output_gate_full;
+	Matrix <float> * error_output_full;
 
-	vector<Matrix <float*> > output_batch;
-	vector<Matrix <float*> > activations_input_batch;
-	vector<Matrix <float*> > activations_input_gate_batch;
-	vector<Matrix <float*> > activations_forget_gate_batch;
-	vector<Matrix <float*> > activations_output_gate_batch;
-	vector<Matrix <float*> > activations_cell_batch;
-	vector<Matrix <float*> > activations_cell_tanh_batch;
+	Matrix <float> * activation_cell_buffer;
+	Matrix <float> * error_cell_prev;
+	Matrix <float> * error_cell_current;
+	Matrix <float> * error_cell_buffer;
 
-	vector<Matrix <float*> > grad_input_batch;
-	vector<Matrix <float*> > grad_input_gate_batch;
-	vector<Matrix <float*> > grad_forget_gate_batch;
-	vector<Matrix <float*> > grad_output_gate_batch;
-	vector<Matrix <float*> > grad_cell_tanh_batch;
+	vector<Matrix <float> *> skip_activations_batch;
 
-	vector<Matrix <float*> > error_input_batch;
-	vector<Matrix <float*> > error_input_gate_batch;
-	vector<Matrix <float*> > error_forget_gate_batch;
-	vector<Matrix <float*> > error_output_gate_batch;
-	vector<Matrix <float*> > error_output_batch;
+	vector<Matrix <float> * > output_batch;
+	vector<Matrix <float> * > activations_input_batch;
+	vector<Matrix <float> * > activations_input_gate_batch;
+	vector<Matrix <float> * > activations_forget_gate_batch;
+	vector<Matrix <float> * > activations_output_gate_batch;
+	vector<Matrix <float> * > activations_cell_batch;
+	vector<Matrix <float> * > activations_cell_tanh_batch;
+
+	vector<Matrix <float> * > grad_input_batch;
+	vector<Matrix <float> * > grad_input_gate_batch;
+	vector<Matrix <float> * > grad_forget_gate_batch;
+	vector<Matrix <float> * > grad_output_gate_batch;
+	vector<Matrix <float> * > grad_cell_tanh_batch;
+
+	vector<Matrix <float> * > error_input_batch;
+	vector<Matrix <float> * > error_input_gate_batch;
+	vector<Matrix <float> * > error_forget_gate_batch;
+	vector<Matrix <float> * > error_output_gate_batch;
+	vector<Matrix <float> * > error_output_batch;
 
 	Layer_t layer_type;
 
@@ -155,7 +186,7 @@ public:
 	int UNITCOUNT;
 	int BATCH_SIZE;
 	int Layer_ID;
-	Network *_network;
+	RecurrentNetwork *_network;
 
 	Matrix<float> *get_forward_activation();
 

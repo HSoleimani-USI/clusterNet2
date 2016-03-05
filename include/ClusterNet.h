@@ -71,11 +71,14 @@ class ClusterNet
   		Matrix<float> *randn(int rows, int cols);
   		Matrix<float> *normal(int rows, int cols, float mean, float std);
 
+  	    Matrix<float> *get_uniformsqrt_weight(int input, int output);
+
   		void Tdot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
   		void dotT(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
   		void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
   		void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2);
   	    void dropout(Matrix<float> *A, Matrix <float> *out, const float dropout);
+
 
     private:
   		curandGenerator_t m_generator;
