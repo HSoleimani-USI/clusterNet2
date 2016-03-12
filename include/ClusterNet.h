@@ -63,26 +63,23 @@ typedef enum Layer_t
 class ClusterNet
 {
     public:
-        ClusterNet();
+        ClusterNet(){};
+        ~ClusterNet(){};
 		bool useNervanaGPU;
 
-  		void setRandomState(int seed);
-  		Matrix<float> *rand(int rows, int cols);
-  		Matrix<float> *randn(int rows, int cols);
-  		Matrix<float> *normal(int rows, int cols, float mean, float std);
+  		virtual void setRandomState(int seed) = 0;
+  		virtual Matrix<float> *rand(int rows, int cols) = 0;
+  		virtual Matrix<float> *randn(int rows, int cols) = 0;
+  		virtual Matrix<float> *normal(int rows, int cols, float mean, float std) = 0;
 
-  	    Matrix<float> *get_uniformsqrt_weight(int input, int output);
+  		virtual Matrix<float> *get_uniformsqrt_weight(int input, int output) = 0;
 
-  		void Tdot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
-  		void dotT(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
-  		void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
-  		void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2);
-  	    void dropout(Matrix<float> *A, Matrix <float> *out, const float dropout);
+  		virtual void Tdot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
+  		virtual void dotT(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
+  		virtual void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
+  		virtual void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2) = 0;
+  		virtual void dropout(Matrix<float> *A, Matrix <float> *out, const float dropout) = 0;
 
-
-    private:
-  		curandGenerator_t m_generator;
-  		cublasHandle_t m_handle;
 
 };
 

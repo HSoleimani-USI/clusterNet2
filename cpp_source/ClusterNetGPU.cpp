@@ -1,4 +1,4 @@
-#include "ClusterNet.h"
+#include "ClusterNetGPU.h"
 #include <stdlib.h>
 #include <iostream>     // std::cout
 #include <assert.h>
@@ -12,7 +12,7 @@
 using std::cout;
 using std::endl;
 
-ClusterNet::ClusterNet()
+ClusterNetGPU::ClusterNetGPU()
 {
     cudaError_t res = cudaFree(0);
     if (res != cudaSuccess)
@@ -41,14 +41,14 @@ ClusterNet::ClusterNet()
 
 
 
-void ClusterNet::setRandomState(int seed)
+void ClusterNetGPU::setRandomState(int seed)
 {
 	curandCreateGenerator(&m_generator, CURAND_RNG_PSEUDO_DEFAULT);
 	curandSetPseudoRandomGeneratorSeed(m_generator, seed);
 	curandSetGeneratorOffset(m_generator, 100);
 }
 
-Matrix<float> *ClusterNet::rand(int rows, int cols)
+Matrix<float> *ClusterNetGPU::rand(int rows, int cols)
 {
 	Matrix<float> *out = empty<float>(rows, cols);
 	curandGenerateUniform(m_generator, out->data, rows * cols);
@@ -56,8 +56,8 @@ Matrix<float> *ClusterNet::rand(int rows, int cols)
 	return out;
 }
 
-Matrix<float> *ClusterNet::randn(int rows, int cols){ return normal(rows, cols, 0.0f, 1.0f); }
-Matrix<float> *ClusterNet::normal(int rows, int cols, float mean, float std)
+Matrix<float> *ClusterNetGPU::randn(int rows, int cols){ return normal(rows, cols, 0.0f, 1.0f); }
+Matrix<float> *ClusterNetGPU::normal(int rows, int cols, float mean, float std)
 {
 	Matrix<float> *out = empty<float>(rows, cols);
 	curandGenerateNormal(m_generator, out->data, out->size, mean, std);
@@ -66,10 +66,10 @@ Matrix<float> *ClusterNet::normal(int rows, int cols, float mean, float std)
 }
 
 
-void ClusterNet::Tdot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ dot(A,B,out,true,false); }
-void ClusterNet::dotT(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ dot(A,B,out,false,true); }
-void ClusterNet::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ dot(A,B,out,false,false); }
-void ClusterNet::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2)
+void ClusterNetGPU::Tdot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ dot(A,B,out,true,false); }
+void ClusterNetGPU::dotT(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ dot(A,B,out,false,true); }
+void ClusterNetGPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ dot(A,B,out,false,false); }
+void ClusterNetGPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2)
 {
 		const float alpha = 1.0f;
 		const float beta = 0.0f;
@@ -117,7 +117,7 @@ void ClusterNet::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, boo
 
 }
 
-void ClusterNet::dropout(Matrix<float> *A, Matrix <float> *out, const float dropout)
+void ClusterNetGPU::dropout(Matrix<float> *A, Matrix <float> *out, const float dropout)
 {
 	curandGenerateUniform(m_generator, out->data, out->size);
 	elementWise<kdropout>(A, out, out, dropout);
@@ -125,7 +125,7 @@ void ClusterNet::dropout(Matrix<float> *A, Matrix <float> *out, const float drop
 
 
 
-Matrix<float> *ClusterNet::get_uniformsqrt_weight(int input, int output)
+Matrix<float> *ClusterNetGPU::get_uniformsqrt_weight(int input, int output)
 {
 	Matrix<float> *out = rand(input,output);
 	float range = 8.0f*sqrtf(6.0f/((float)input + output));

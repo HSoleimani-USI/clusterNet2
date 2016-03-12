@@ -1,4 +1,5 @@
 #include "ClusterNet.h"
+#include <ClusterNetGPU.h>
 #include "Timer.cuh"
 #include "Network.h"
 #include <Optimizer.h>
@@ -18,32 +19,32 @@ using namespace std;
 
 void test_timer()
 {
-	ClusterNet gpu = ClusterNet();
-	Matrix<float> *A = gpu.rand(100,100);
-	Matrix<float> *B = gpu.rand(100,100);
-	Matrix<float> *C = gpu.rand(100,100);
+	ClusterNet *gpu = new ClusterNetGPU();
+	Matrix<float> *A = gpu->rand(100,100);
+	Matrix<float> *B = gpu->rand(100,100);
+	Matrix<float> *C = gpu->rand(100,100);
 
 	Timer t = Timer();
 
 	t.tick();
 	for(int i = 0; i < 10000; i++)
-		gpu.dot(A,B,C);
+		gpu->dot(A,B,C);
 	t.tock();
 }
 
 void test_transfer_time()
 {
-	ClusterNet gpu = ClusterNet();
+	ClusterNet *gpu = new ClusterNetGPU();
 	int batch_size = 32;
 	int time_steps = 100;
 
-	Matrix<float> *data = gpu.rand(128,batch_size*time_steps);
+	Matrix<float> *data = gpu->rand(128,batch_size*time_steps);
 	Matrix<float> *host = data->to_host();
 	Matrix<float> *pinned = to_pinned(128,batch_size*time_steps,data->data);
 
 
-	Matrix<float> *error = gpu.rand(batch_size*time_steps,256);
-	Matrix<float> *w = gpu.rand(128,256);
+	Matrix<float> *error = gpu->rand(batch_size*time_steps,256);
+	Matrix<float> *w = gpu->rand(128,256);
 
 	Timer t = Timer();
 
@@ -60,7 +61,7 @@ void test_transfer_time()
 
 	t.tick();
 	for(int i = 0; i < 100; i++)
-		gpu.dot(data,error,w);
+		gpu->dot(data,error,w);
 	t.tock();
 
 }
@@ -87,27 +88,27 @@ void deeplearningdb_test()
 void test_LSTM_swapping()
 {
 
-	ClusterNet gpu = ClusterNet();
+	ClusterNet *gpu = new ClusterNetGPU();
 
 	int hidden = 256;
 	int timesteps = 1000;
 	int batch_size = 32;
 	int stack_size = 4;
 
-	Matrix<float> *R = gpu.rand(hidden*stack_size,hidden);
-	Matrix<float> *inputR = gpu.rand(batch_size*stack_size,hidden);
-	Matrix<float> *errorsR = gpu.rand(batch_size*stack_size,hidden);
+	Matrix<float> *R = gpu->rand(hidden*stack_size,hidden);
+	Matrix<float> *inputR = gpu->rand(batch_size*stack_size,hidden);
+	Matrix<float> *errorsR = gpu->rand(batch_size*stack_size,hidden);
 
 	Timer t = Timer();
 
 
 	for(int i = 0; i < 1000; i++)
-		gpu.dot(inputR,errorsR,R);
+		gpu->dot(inputR,errorsR,R);
 
 	t.tick();
 
 	for(int i = 0; i < 10000; i++)
-		gpu.dot(inputR,errorsR,R);
+		gpu->dot(inputR,errorsR,R);
 
 	t.tock();
 }
@@ -115,16 +116,16 @@ void test_LSTM_swapping()
 void test_lookup_time()
 {
 
-	ClusterNet gpu = ClusterNet();
+	ClusterNet *gpu = new ClusterNetGPU();
 
 	int embedding_rows = 10000;
 	int embedding_cols = 256;
 	int batch_size = 128;
 	int batch_cols = 1024;
 
-	Matrix<float> *embedding = gpu.rand(embedding_rows,embedding_cols);
-	Matrix<float> *batch = gpu.rand(batch_size*batch_cols,embedding_cols);
-	Matrix<float> *batch1 = gpu.rand(batch_size*batch_cols,embedding_cols);
+	Matrix<float> *embedding = gpu->rand(embedding_rows,embedding_cols);
+	Matrix<float> *batch = gpu->rand(batch_size*batch_cols,embedding_cols);
+	Matrix<float> *batch1 = gpu->rand(batch_size*batch_cols,embedding_cols);
 
 	Timer t = Timer();
 	t.tick();
@@ -134,19 +135,19 @@ void test_lookup_time()
 
 	/*
 
-	Matrix<float> *inputR = gpu.rand(hidden,batch_size);
-	Matrix<float> *errorsR = gpu.rand(batch_size,hidden*stack_size);
+	Matrix<float> *inputR = gpu->rand(hidden,batch_size);
+	Matrix<float> *errorsR = gpu->rand(batch_size,hidden*stack_size);
 
 	Timer t = Timer();
 
 
 	for(int i = 0; i < 1000; i++)
-		gpu.dot(inputR,errorsR,R);
+		gpu->dot(inputR,errorsR,R);
 
 	t.tick();
 
 	for(int i = 0; i < 10000; i++)
-		gpu.dot(inputR,errorsR,R);
+		gpu->dot(inputR,errorsR,R);
 
 	t.tock();
 	*/
@@ -158,26 +159,34 @@ void test_neural_network()
 	test_transfer_time();
 
 	Timer t = Timer();
-	ClusterNet *gpu = new ClusterNet();
+	ClusterNet *gpu = new ClusterNetGPU();
 
 	gpu->useNervanaGPU = true;
 
 	Matrix<float> *X = read_hdf5<float>("/home/tim/data/mnist/distributed_X.hdf5");
 	Matrix<float> *y = read_hdf5<float>("/home/tim/data/mnist/distributed_y.hdf5");
 
-	Matrix<float> *trainX = zeros<float>(60000,784);
-	Matrix<float> *trainy = zeros<float>(60000,1);
-	Matrix<float> *test_slice = zeros<float>(128,784);
 
-	Matrix<float> *cvX = zeros<float>(10000,784);
-	Matrix<float> *cvy = zeros<float>(10000,1);
+	//Matrix<float> *X = read_hdf5<float>("/home/tim/data/astro/X.hdf5");
+	//Matrix<float> *y = read_hdf5<float>("/home/tim/data/astro/y.hdf5");
 
-	slice(X,trainX,0,60000,0,784);
-	slice(y,trainy,0,60000,0,1);
+	int samples = X->rows;
+	int cv = 10000;
+	int dim = X->cols;
+	int classes = 10;
+
+	Matrix<float> *trainX = zeros<float>(samples-cv,dim);
+	Matrix<float> *trainy = zeros<float>(samples-cv,1);
+
+	Matrix<float> *cvX = zeros<float>(cv,dim);
+	Matrix<float> *cvy = zeros<float>(cv,1);
+
+	slice(X,trainX,0,samples-cv,0,dim);
+	slice(y,trainy,0,samples-cv,0,1);
 
 
-	slice(X,cvX,60000,70000,0,784);
-	slice(y,cvy,60000,70000,0,1);
+	slice(X,cvX,samples-cv,samples,0,dim);
+	slice(y,cvy,samples-cv,samples,0,1);
 
 
 
@@ -204,12 +213,9 @@ void test_neural_network()
 	/*
 	net._opt->_updatetype = RMSPropInit;
 	net._conf->RMSPROP_MOMENTUM = 0.0f;
-
 	net.fit_partial(b_train,10);
-
 	net._conf->RMSPROP_MOMENTUM = 0.99f;
 	net._opt->_updatetype = RMSProp;
-
 	*/
 
 
