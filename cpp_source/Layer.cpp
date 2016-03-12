@@ -85,7 +85,7 @@ void Layer::init_transformer_activations(int batch_size)
 	for(int i = 0; i < _transformer.size(); i++)
 	{
 		if(_transformer[i]->output != NULL && _transformer[i]->output->rows == batch_size){return;}
-		if(_transformer[i]->output != NULL){ _transformer[i]->output->free_matrix(); }
+		if(_transformer[i]->output != NULL){free_matrix( _transformer[i]->output); }
 
 		Matrix<float> *prev = NULL;
 		if(_transformer[i]->_ttype == DropoutTransform)

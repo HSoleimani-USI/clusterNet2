@@ -3,6 +3,7 @@
 #include <cuda.h>
 #include <thrust/device_ptr.h>
 #include <thrust/sort.h>
+#include <Matrix.h>
 
 
 using std::cout;
@@ -36,15 +37,6 @@ using std::endl;
     exit(1);                              \
   } }
 
-
-
-typedef enum WeightUpdateType_t
-{
-	RMSProp = 0,
-	Momentum = 1,
-	PlainSGD = 2,
-	RMSPropInit = 3
-} WeightUpdateType_t;
 
 
 typedef enum Operations_t
@@ -91,6 +83,7 @@ typedef enum Operations_t
 } Operations_t;
 
 
+
 typedef enum Reduction_t
 {
 	rmax,
@@ -99,20 +92,18 @@ typedef enum Reduction_t
 
 } Reduction_t;
 
-template<typename T> class Matrix
+typedef enum WeightUpdateType_t
 {
-  public:
-    int rows;
-    int cols;
-    size_t bytes;
-    int size;
-    T *data;
-    bool isRowMajor;
-    Matrix<T> *to_host();
-    void free_matrix();
-};
+	RMSProp = 0,
+	Momentum = 1,
+	PlainSGD = 2,
+	RMSPropInit = 3
+} WeightUpdateType_t;
 
 
+
+template <typename T> Matrix<T> *to_host(Matrix<T> *in);
+template <typename T> void free_matrix(Matrix<T> *in);
 template<typename T> Matrix<T> *fill_matrix(int rows, int cols, T fill_value);
 template<typename T> Matrix<T> *empty(int rows, int cols);
 template<typename T> Matrix<T> *zeros(int rows, int cols);

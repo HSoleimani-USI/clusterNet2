@@ -6,7 +6,7 @@
  */
 
 #include <cuda_runtime_api.h>
-#include <basicOps.cuh>
+#include <BasicOpsCUDA.cuh>
 #include <boost/swap.hpp>
 
 

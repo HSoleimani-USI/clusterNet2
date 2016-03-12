@@ -1,46 +1,48 @@
-#include <basicOps.cuh>
+#include <BasicOpsCUDA.cuh>
 #include <clusterKernels.cuh>
 #include <hdf5.h>
 
-template Matrix<int> *Matrix<int>::to_host();
-template Matrix<float> *Matrix<float>::to_host();
-template <typename T> Matrix<T> *Matrix<T>::to_host()
+template Matrix<int> *to_host(Matrix<int> *in);
+template Matrix<float> *to_host(Matrix<float> *in);
+template <typename T> Matrix<T> *to_host(Matrix<T> *in)
 {
 	Matrix<T> *out = (Matrix<T>*)malloc(sizeof(Matrix<T>));
-	T *cpu_data = (T*)malloc(bytes);
+	T *cpu_data = (T*)malloc(in->bytes);
 
 	//this is a bit confusing; we assume that the host data is col major while it is row major
 	//that is why we tranpose the data if it is not transposed on the GPU
-	if(!isRowMajor)
+	if(!in->isRowMajor)
 	{
 
-		Matrix<T> *helper = transpose(this);
-		CUDA_CHECK_RETURN(cudaMemcpy(cpu_data,helper->data,bytes,cudaMemcpyDefault));
+		Matrix<T> *helper = transpose(in);
+		CUDA_CHECK_RETURN(cudaMemcpy(cpu_data,helper->data,in->bytes,cudaMemcpyDefault));
 		CUDA_CHECK_RETURN(cudaFree(helper->data));
 		free(helper);
 	}
 	else
 	{
-		CUDA_CHECK_RETURN(cudaMemcpy(cpu_data,data,bytes,cudaMemcpyDefault));
+		CUDA_CHECK_RETURN(cudaMemcpy(cpu_data,in->data,in->bytes,cudaMemcpyDefault));
 	}
 
-	out->rows = rows;
-	out->cols = cols;
-	out->bytes = bytes;
-	out->size = size;
+	out->rows = in->rows;
+	out->cols = in->cols;
+	out->bytes = in->bytes;
+	out->size = in->size;
 	out->data = cpu_data;
 	out->isRowMajor = true;
-  
+
   return out;
 }
 
 
-template void Matrix<float>::free_matrix();
-template <typename T> void Matrix<T>::free_matrix()
+template void free_matrix(Matrix<float> *in);
+template <typename T> void free_matrix(Matrix<T> *in)
 {
-	CUDA_CHECK_RETURN(cudaFree(data));
-	free(this);
+	CUDA_CHECK_RETURN(cudaFree(in->data));
+	free(in);
 }
+
+
 
 //to host where we already have created a gpu buffer
 template void to_host(Matrix<int> *gpu, int *cpu);
@@ -533,7 +535,7 @@ void print_matrix(Matrix<float> *A, int start_row, int end_row, int start_col, i
 
 void printmat(Matrix<float> *A)
 {
-  Matrix<float> * m = A->to_host();
+  Matrix<float> * m = to_host(A);
   print_matrix(m,A->rows,A->cols);
   free(m->data);
   free(m);
@@ -553,7 +555,7 @@ void printsum(Matrix<float> *A)
 void printhostmat(Matrix<float> *A){ print_matrix(A,A->rows,A->cols); }
 void printmat(Matrix<float> *A, int end_rows, int end_cols)
 {
-  Matrix<float> * m = A->to_host();
+  Matrix<float> * m = to_host(A);
   print_matrix(m, end_rows, end_cols);
   free(m->data);
   free(m);
@@ -562,7 +564,7 @@ void printmat(Matrix<float> *A, int end_rows, int end_cols)
 
 void printmat(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col)
 {
-  Matrix<float> * m = A->to_host();
+  Matrix<float> * m = to_host(A);
   print_matrix(m, start_row, end_row, start_col, end_col);
   free(m->data);
   free(m);

@@ -39,7 +39,7 @@ void test_transfer_time()
 	int time_steps = 100;
 
 	Matrix<float> *data = gpu->rand(128,batch_size*time_steps);
-	Matrix<float> *host = data->to_host();
+	Matrix<float> *host = to_host(data);
 	Matrix<float> *pinned = to_pinned(128,batch_size*time_steps,data->data);
 
 

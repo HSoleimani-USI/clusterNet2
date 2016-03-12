@@ -6,7 +6,7 @@
  */
 
 #include "ErrorHandler.h"
-#include <basicOps.cuh>
+#include <BasicOpsCUDA.cuh>
 #include <cmath>
 #include <iomanip>
 

@@ -72,10 +72,10 @@ void Network::init_activations(int batchsize)
 
 		if(_layers[i]->activation != NULL)
 		{
-			_layers[i]->activation->free_matrix();
-			_layers[i]->activation_grad->free_matrix();
-			_layers[i]->error->free_matrix();
-			if(i == _layers.size()-1){ _layers[i]->target_matrix->free_matrix(); }
+			free_matrix(_layers[i]->activation);
+			free_matrix(_layers[i]->activation_grad);
+			free_matrix(_layers[i]->error);
+			if(i == _layers.size()-1){ free_matrix(_layers[i]->target_matrix); }
 		}
 
 		_layers[i]->activation = zeros<float>(batchsize, _layers[i]->UNITCOUNT);

@@ -11,7 +11,7 @@
 #include "leveldb/db.h"
 #include <string>
 #include <map>
-#include <basicOps.cuh>
+#include <BasicOpsCUDA.cuh>
 
 
 class Table

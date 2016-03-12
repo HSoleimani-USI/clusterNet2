@@ -19,7 +19,7 @@ LookupLayer::LookupLayer(int embedding_columns, std::map<std::string,int> vocab2
 }
 void LookupLayer::init_embeddings(Matrix<float> *embeddings)
 {
-	if(!_embeddings){ _embeddings->free_matrix(); }
+	if(!_embeddings){ free_matrix(_embeddings); }
 	_embeddings = embeddings;
 }
 

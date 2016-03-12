@@ -2,7 +2,7 @@
 #define Network_H
 
 #include <ClusterNet.h>
-#include <basicOps.cuh>
+#include <BasicOpsCUDA.cuh>
 #include <vector>
 #include <string>
 

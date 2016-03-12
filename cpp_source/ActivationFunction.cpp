@@ -1,5 +1,5 @@
 #include <ActivationFunction.h>
-#include <basicOps.cuh>
+#include <BasicOpsCUDA.cuh>
 
 
 using std::cout;

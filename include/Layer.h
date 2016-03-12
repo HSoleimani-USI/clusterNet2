@@ -1,7 +1,7 @@
 #include <stdlib.h>
 #include <vector>
 #include <cstdlib>
-#include <basicOps.cuh>
+#include <BasicOpsCUDA.cuh>
 #include <ClusterNet.h>
 
 #ifndef Layer_H

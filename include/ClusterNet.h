@@ -1,7 +1,7 @@
 #include <boost/thread.hpp>
 #include <boost/date_time.hpp>
 #include <iostream>
-#include <basicOps.cuh>
+#include <BasicOpsCUDA.cuh>
 #include <cublas_v2.h>
 #include <curand.h>
 #include <cuda.h>
@@ -59,6 +59,8 @@ typedef enum Layer_t
 	InputLayer = 3,
 	OutputLayer = 4
 } Layer_t;
+
+
 
 class ClusterNet
 {

@@ -1,4 +1,4 @@
-#include <basicOps.cuh>
+#include <BasicOpsCUDA.cuh>
 #include <ClusterNet.h>
 #include <ClusterNetGPU.h>
 #include <BatchAllocator.h>

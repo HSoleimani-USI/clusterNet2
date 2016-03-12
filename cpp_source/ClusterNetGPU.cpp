@@ -12,6 +12,9 @@
 using std::cout;
 using std::endl;
 
+
+
+
 ClusterNetGPU::ClusterNetGPU()
 {
     cudaError_t res = cudaFree(0);

@@ -1,6 +1,6 @@
 #include <clusterKernels.cuh>
 #include <math.h>
-#include <basicOps.cuh>
+#include <BasicOpsCUDA.cuh>
 
 template __global__ void kTranspose<float>(const float *A, float *out, int width, int height);
 template __global__ void kTranspose<int>(const int *A, int *out, int width, int height);
