@@ -61,6 +61,58 @@ public:
 	void printmat(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col);
 
 
+	void abs(Matrix<float> *A, Matrix<float> *out);
+	void log(Matrix<float> *A, Matrix<float> *out);
+	void sqrt(Matrix<float> *A, Matrix<float> *out);
+	void logistic(Matrix<float> *A, Matrix<float> *out);
+	void logistic_grad(Matrix<float> *A, Matrix<float> *out);
+	void tanh(Matrix<float> *A, Matrix<float> *out);
+	void tanh_grad(Matrix<float> *A, Matrix<float> *out);
+	void ELU(Matrix<float> *A, Matrix<float> *out);
+	void ELU_grad(Matrix<float> *A, Matrix<float> *out);
+	void rectified(Matrix<float> *A, Matrix<float> *out);
+	void rectified_grad(Matrix<float> *A, Matrix<float> *out);
+	void copy(Matrix<float> *A, Matrix<float> *out);
+
+
+	void pow(Matrix<float> *A, Matrix<float> *out, float scalar);
+	void mul(Matrix<float> *A, Matrix<float> *out, float scalar);
+	void sub(Matrix<float> *A, Matrix<float> *out, float scalar);
+	void greater_than(Matrix<float> *A, Matrix<float> *out, float scalar);
+	void mod(Matrix<float> *A, Matrix<float> *out, float scalar);
+
+
+	void add(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+	void sub(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+	void div(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+	void mul(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+	void equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+	void less_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+	void greater_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+	void less_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+	void not_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+	void squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+
+	void dropout(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar);
+
+	void vadd(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out);
+	void vsub(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out);
+	void get_t_matrix(Matrix<float> *v, Matrix<float> *out);
+
+	void WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
+
+	void mean_of_cols(Matrix<float> *A, Matrix<float> *vout);
+	void sum_of_cols(Matrix<float> *A, Matrix<float> *vout);
+	void max_of_cols(Matrix<float> *A, Matrix<float> *vout);
+	void mean_of_rows(Matrix<float> *A, Matrix<float> *vout);
+	void sum_of_rows(Matrix<float> *A, Matrix<float> *vout);
+	void max_of_rows(Matrix<float> *A, Matrix<float> *vout);
+
+	float mean(Matrix<float> *A);
+	float sum(Matrix<float> *A);
+	float max(Matrix<float> *A);
+
+
 };
 
 #endif /* BASICOPSWRAPPERGPU_H_ */
