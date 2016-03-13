@@ -26,15 +26,12 @@ public:
 	virtual Matrix<float> *to_pinned(int rows, int cols, float *cpu) = 0;
 	virtual Matrix<float> *to_pinned(int rows, int cols, float *cpu, size_t bytes_to_copy) = 0;
 
-
-	virtual void sortbykey(Matrix<float> *keys, Matrix<float> *values) = 0;
-	virtual float sum(Matrix<float> *A) = 0;
-
 	virtual void transpose(Matrix<float> *A, Matrix<float> *out, int rows, int cols) = 0;
 	virtual Matrix<float> *to_col_major(Matrix<float> *A) = 0;
 	virtual void to_col_major(Matrix<float> *A, Matrix<float> *out) = 0;
 	virtual Matrix<float> *to_row_major(Matrix<float> *A) = 0;
 	virtual Matrix<float> *transpose(Matrix<float> *A) = 0;
+
 
 	/*
 	template <int action> void elementWise(Matrix<float> *A, Matrix<float>*out) = 0;
@@ -55,6 +52,7 @@ public:
 	virtual void lookup(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out) = 0;
 	virtual void embeddingUpdate(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *grad, Matrix<float> *RMS, float RMS_momentum, float learning_rate) = 0;
 
+
 	/*
 	template <int action> void WeightUpdate(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate) = 0;
 
@@ -65,17 +63,16 @@ public:
 	*/
 
 
+
 	virtual bool check_matrix_vector_op(Matrix<float> *A, Matrix<float> *vec) = 0;
 	virtual bool check_for_same_dimensions(Matrix<float> *A, Matrix<float> *B) = 0;
 	virtual bool check_matrix_multiplication(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2) = 0;
-
-
-	virtual Matrix<float> *read_hdf5(const char *filepath) = 0;
-	virtual Matrix<float> *read_hdf5(const char *filepath, const char *tag) = 0;
-
 	virtual Matrix<float> *get_view(Matrix<float> *A, int rstart, int rend) = 0;
 
 
+	//map those to util file
+	virtual Matrix<float> *read_hdf5(const char *filepath) = 0;
+	virtual Matrix<float> *read_hdf5(const char *filepath, const char *tag) = 0;
 	virtual void print_matrix(Matrix<float> *A, int end_rows, int end_cols) = 0;
 	virtual void print_matrix(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col) = 0;
 	virtual void printmat(Matrix<float> *A) = 0;
@@ -84,6 +81,7 @@ public:
 	virtual void printsum(Matrix<float> *A) = 0;
 	virtual void printmat(Matrix<float> *A, int end_rows, int end_cols) = 0;
 	virtual void printmat(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col) = 0;
+
 
 };
 

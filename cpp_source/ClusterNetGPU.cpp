@@ -3,6 +3,7 @@
 #include <iostream>     // std::cout
 #include <assert.h>
 #include <cublas_v2.h>
+#include <clusterKernels.cuh>
 
 
 #include <unistd.h>
@@ -11,9 +12,6 @@
 
 using std::cout;
 using std::endl;
-
-
-
 
 ClusterNetGPU::ClusterNetGPU()
 {
