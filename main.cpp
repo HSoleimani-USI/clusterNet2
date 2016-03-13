@@ -5,6 +5,7 @@
 #include <Optimizer.h>
 #include <FCLayer.h>
 #include <BatchAllocator.h>
+#include <CPUBatchAllocator.h>
 #include <GPUBatchAllocator.h>
 #include <BufferedBatchAllocator.h>
 #include <ErrorHandler.h>
@@ -39,8 +40,8 @@ void test_transfer_time()
 	int time_steps = 100;
 
 	Matrix<float> *data = gpu->rand(128,batch_size*time_steps);
-	Matrix<float> *host = to_host(data);
-	Matrix<float> *pinned = to_pinned(128,batch_size*time_steps,data->data);
+	Matrix<float> *host = gpu->OPS->to_host(data);
+	Matrix<float> *pinned = gpu->OPS->to_pinned(128,batch_size*time_steps,data->data);
 
 
 	Matrix<float> *error = gpu->rand(batch_size*time_steps,256);
@@ -50,12 +51,12 @@ void test_transfer_time()
 
 	t.tick();
 	for(int i = 0; i < 100; i++)
-		to_gpu(host->data,data);
+		gpu->OPS->to_gpu(host->data,data);
 	t.tock();
 
 	t.tick();
 	for(int i = 0; i < 100; i++)
-		to_gpu(pinned->data,data);
+		gpu->OPS->to_gpu(pinned->data,data);
 	t.tock();
 
 
@@ -76,11 +77,12 @@ void deeplearningdb_test()
 
 	cout << dict["car"] << endl;
 
-
+	/*
 	Matrix<int> *arr = tbl->get_data<int>("brown/idx");
 	cout << "post" << endl;
 	for(int i = 0; i < 100; i++)
 		cout << arr->data[i] << endl;
+		*/
 
 
 }
@@ -163,8 +165,8 @@ void test_neural_network()
 
 	gpu->useNervanaGPU = true;
 
-	Matrix<float> *X = read_hdf5<float>("/home/tim/data/mnist/distributed_X.hdf5");
-	Matrix<float> *y = read_hdf5<float>("/home/tim/data/mnist/distributed_y.hdf5");
+	Matrix<float> *X = gpu->OPS->read_hdf5("/home/tim/data/mnist/distributed_X.hdf5");
+	Matrix<float> *y = gpu->OPS->read_hdf5("/home/tim/data/mnist/distributed_y.hdf5");
 
 
 	//Matrix<float> *X = read_hdf5<float>("/home/tim/data/astro/X.hdf5");
@@ -175,23 +177,23 @@ void test_neural_network()
 	int dim = X->cols;
 	int classes = 10;
 
-	Matrix<float> *trainX = zeros<float>(samples-cv,dim);
-	Matrix<float> *trainy = zeros<float>(samples-cv,1);
+	Matrix<float> *trainX = gpu->OPS->zeros(samples-cv,dim);
+	Matrix<float> *trainy = gpu->OPS->zeros(samples-cv,1);
 
-	Matrix<float> *cvX = zeros<float>(cv,dim);
-	Matrix<float> *cvy = zeros<float>(cv,1);
+	Matrix<float> *cvX = gpu->OPS->zeros(cv,dim);
+	Matrix<float> *cvy = gpu->OPS->zeros(cv,1);
 
-	slice(X,trainX,0,samples-cv,0,dim);
-	slice(y,trainy,0,samples-cv,0,1);
-
-
-	slice(X,cvX,samples-cv,samples,0,dim);
-	slice(y,cvy,samples-cv,samples,0,1);
+	gpu->OPS->slice(X,trainX,0,samples-cv,0,dim);
+	gpu->OPS->slice(y,trainy,0,samples-cv,0,1);
 
 
+	gpu->OPS->slice(X,cvX,samples-cv,samples,0,dim);
+	gpu->OPS->slice(y,cvy,samples-cv,samples,0,1);
 
-	BatchAllocator *b_train = new GPUBatchAllocator(trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
-	BatchAllocator *b_cv = new GPUBatchAllocator(cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
+
+
+	BatchAllocator *b_train = new GPUBatchAllocator(gpu, trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
+	BatchAllocator *b_cv = new GPUBatchAllocator(gpu, cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
 
 	Network net = Network(gpu);
 
@@ -206,7 +208,7 @@ void test_neural_network()
 	net.copy_global_params_to_layers();
 	net._layers.front()->_conf->DROPOUT = 0.2f;
 
-	net._opt = new Optimizer(RMSProp);
+	net._opt = new Optimizer(gpu, RMSProp);
 	net.init_weights(UniformSqrt);
 
 

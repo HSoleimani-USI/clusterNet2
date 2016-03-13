@@ -19,7 +19,7 @@ LookupLayer::LookupLayer(int embedding_columns, std::map<std::string,int> vocab2
 }
 void LookupLayer::init_embeddings(Matrix<float> *embeddings)
 {
-	if(!_embeddings){ free_matrix(_embeddings); }
+	if(!_embeddings){ GPU->OPS->free_matrix(_embeddings); }
 	_embeddings = embeddings;
 }
 
@@ -30,7 +30,7 @@ void LookupLayer::forward()
 
 	if(!prev){ apply_transformations(); next->forward(); return; }
 
-	lookup(_embeddings, prev->get_forward_activation(), activation);
+	GPU->OPS->lookup(_embeddings, prev->get_forward_activation(), activation);
 	apply_transformations();
 
     if(next){ next->forward(); }
@@ -46,12 +46,12 @@ void LookupLayer::backward_grads()
 {
 	GPU->Tdot(activation, next->error, w_grad_next);
 	if(!next->target){ next->backward_grads(); }
-	reduceToCols<rmean>(next->error,b_grad_next);
+	GPU->OPS->mean_of_rows(next->error,b_grad_next);
 }
 
 
 void LookupLayer::update_embeddings()
 {
-	embeddingUpdate(_embeddings, prev->get_forward_activation(), error, _rms_embedding, _conf->RMSPROP_MOMENTUM, _conf->LEARNING_RATE);
+	GPU->OPS->embeddingUpdate(_embeddings, prev->get_forward_activation(), error, _rms_embedding, _conf->RMSPROP_MOMENTUM, _conf->LEARNING_RATE);
 }
 

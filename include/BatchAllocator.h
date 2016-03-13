@@ -6,18 +6,21 @@
  */
 
 #include <cuda_runtime_api.h>
-#include <BasicOpsCUDA.cuh>
+#include <BasicOpsWrapper.h>
 #include <boost/swap.hpp>
+#include <ClusterNet.h>
 
 
 #ifndef BatchAllocator_H_
 #define BatchAllocator_H_
 
-class BatchAllocator {
+class BatchAllocator
+{
 public:
 	BatchAllocator(){};
 	virtual ~BatchAllocator(){};
 
+	ClusterNet *GPU;
 	Matrix<float> *batch_bufferX;
 	Matrix<float> *batch_bufferY;
 	Matrix<float> *batchX;
@@ -40,6 +43,7 @@ public:
 
 	virtual void allocate_next_batch_async() = 0;
 	virtual void replace_current_with_next_batch() = 0;
+
 };
 
 #endif /* BatchAllocator_H_ */

@@ -1,6 +1,7 @@
-#include <BasicOpsCUDA.cuh>
+#include <BasicOpsWrapper.h>
 #include <ClusterNet.h>
 #include <ClusterNetGPU.h>
+#include <ClusterNetCPU.h>
 #include <BatchAllocator.h>
 #include <CPUBatchAllocator.h>
 #include <GPUBatchAllocator.h>
@@ -13,55 +14,62 @@ typedef GPUBatchAllocator FloatGPUBatchAllocator;
 
 ClusterNet *get_clusterNet();
 
-FloatMatrix *fill_matrix(int rows, int cols, float fill_value);
-FloatMatrix *empty(int rows, int cols);
-void to_host(FloatMatrix *gpu, float *cpu);
-void to_gpu(float *cpu, FloatMatrix *gpu);
-void abs(FloatMatrix *A, FloatMatrix *out);
-void log(FloatMatrix *A, FloatMatrix *out);
-void sqrt(FloatMatrix *A, FloatMatrix *out);
-void pow(FloatMatrix *A, FloatMatrix *out, float scalar);
-void logistic(FloatMatrix *A, FloatMatrix *out);
-void logistic_grad(FloatMatrix *A, FloatMatrix *out);
-void rectified(FloatMatrix *A, FloatMatrix *out);
-void rectified_grad(FloatMatrix *A, FloatMatrix *out);
-void wcopy(FloatMatrix *A, FloatMatrix *out);
+FloatMatrix *fill_matrix(ClusterNet *gpu, int rows, int cols, float fill_value);
+FloatMatrix *empty(ClusterNet *gpu, int rows, int cols);
+void to_host(ClusterNet *gpu, FloatMatrix *gpumat, float *cpu);
+void to_gpu(ClusterNet *gpu, float *cpu, FloatMatrix *gpumat);
+void abs(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out);
+void log(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out);
+void sqrt(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out);
+void pow(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out, float scalar);
+void logistic(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out);
+void logistic_grad(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out);
+void rectified(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out);
+void rectified_grad(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out);
+void wcopy(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out);
+void *wtranspose(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out);
+FloatMatrix *wT(ClusterNet *gpu, FloatMatrix * A);
 
-void add(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
-void sub(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
-void div(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
-void mul(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
-void scalar_mul(FloatMatrix *A, FloatMatrix *out, float scalar);
-void eq(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
-void lt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
-void gt(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
-void ge(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
-void le(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
-void ne(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
-void squared_diff(FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void add(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void sub(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void div(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void mul(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void scalar_mul(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out, float scalar);
+void eq(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void lt(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void gt(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void ge(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void le(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void ne(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
+void squared_diff(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *B, FloatMatrix *out);
 
 
-void vadd(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out);
-void vsub(FloatMatrix *A, FloatMatrix *v, FloatMatrix *out);
-void tmatrix(FloatMatrix *v, FloatMatrix *out);
+void vadd(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *v, FloatMatrix *out);
+void vsub(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *v, FloatMatrix *out);
+void tmatrix(ClusterNet *gpu, FloatMatrix *v, FloatMatrix *out);
 
-void rowMax(FloatMatrix *A, FloatMatrix *vout);
-void rowSum(FloatMatrix *A, FloatMatrix *vout);
-void rowMean(FloatMatrix *A, FloatMatrix *vout);
-void colMax(FloatMatrix *A, FloatMatrix *vout);
-void colSum(FloatMatrix *A, FloatMatrix *vout);
-void colMean(FloatMatrix *A, FloatMatrix *vout);
+void rowMax(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout);
+void rowSum(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout);
+void rowMean(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout);
+void colMax(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout);
+void colSum(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout);
+void colMean(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout);
 
-float wMax(FloatMatrix *A);
-float wSum(FloatMatrix *A);
-float wMean(FloatMatrix *A);
+float wMax(ClusterNet *gpu, FloatMatrix *A);
+float wSum(ClusterNet *gpu, FloatMatrix *A);
+float wMean(ClusterNet *gpu, FloatMatrix *A);
 void freemat(FloatMatrix *A);
 
-void wsortbykey(FloatMatrix *keys, FloatMatrix *values);
+void wsortbykey(ClusterNet *gpu, FloatMatrix *keys, FloatMatrix *values);
 
-void wprintmat(FloatMatrix *A, int rstart, int rend, int cstart, int cend);
-FloatMatrix *wget_view(FloatMatrix *A, int rstart, int rend);
+void wprintmat(ClusterNet *gpu, FloatMatrix *A, int rstart, int rend, int cstart, int cend);
+FloatMatrix *wget_view(ClusterNet *gpu, FloatMatrix *A, int rstart, int rend);
 
-void wlookup(FloatMatrix *embedding, FloatMatrix *idx_batch, FloatMatrix *out);
+void wlookup(ClusterNet *gpu, FloatMatrix *embedding, FloatMatrix *idx_batch, FloatMatrix *out);
+
+void wslice(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out, int rstart, int rend, int cstart, int cend);
+
+void wsoftmax(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out);
+void wargmax(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out);
 
 

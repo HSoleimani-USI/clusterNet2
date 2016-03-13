@@ -5,14 +5,16 @@
 #include <Optimizer.h>
 #include <Configurator.h>
 #include <Transformer.h>
+#include <ActivationFunction.h>
 
 
 Network::Network(ClusterNet *gpu)
 {
 	_isTrainTime = true;
 	_gpu = gpu;
-	_errorhandler = new ErrorHandler();
+	_errorhandler = new ErrorHandler(gpu);
 	_conf = new Configurator();
+	_opt = new Optimizer(gpu, RMSProp);
 }
 
 void Network::add(Layer *layer)
@@ -29,6 +31,7 @@ void Network::add(Layer *layer)
 	layer->GPU = _gpu;
 	layer->_network = this;
 	layer->init_transformers(_gpu, this);
+	layer->_func->GPU = _gpu;
 
 }
 
@@ -48,12 +51,12 @@ void Network::init_weights(WeightInitType_t wtype)
 			prev->w_next = _gpu->get_uniformsqrt_weight(prev->UNITCOUNT,_layers[i]->UNITCOUNT);
 		}
 
-		prev->w_rms_next = zeros<float>(prev->UNITCOUNT,_layers[i]->UNITCOUNT);
-		prev->w_grad_next = zeros<float>(prev->UNITCOUNT,_layers[i]->UNITCOUNT);
+		prev->w_rms_next = _gpu->OPS->zeros(prev->UNITCOUNT,_layers[i]->UNITCOUNT);
+		prev->w_grad_next = _gpu->OPS->zeros(prev->UNITCOUNT,_layers[i]->UNITCOUNT);
 
-		prev->b_next = zeros<float>(1,_layers[i]->UNITCOUNT);
-		prev->b_grad_next = zeros<float>(1,_layers[i]->UNITCOUNT);
-		prev->b_rms_next = zeros<float>(1,_layers[i]->UNITCOUNT);
+		prev->b_next = _gpu->OPS->zeros(1,_layers[i]->UNITCOUNT);
+		prev->b_grad_next = _gpu->OPS->zeros(1,_layers[i]->UNITCOUNT);
+		prev->b_rms_next = _gpu->OPS->zeros(1,_layers[i]->UNITCOUNT);
 
 
 		prev = _layers[i];
@@ -72,16 +75,16 @@ void Network::init_activations(int batchsize)
 
 		if(_layers[i]->activation != NULL)
 		{
-			free_matrix(_layers[i]->activation);
-			free_matrix(_layers[i]->activation_grad);
-			free_matrix(_layers[i]->error);
-			if(i == _layers.size()-1){ free_matrix(_layers[i]->target_matrix); }
+			_gpu->OPS->free_matrix(_layers[i]->activation);
+			_gpu->OPS->free_matrix(_layers[i]->activation_grad);
+			_gpu->OPS->free_matrix(_layers[i]->error);
+			if(i == _layers.size()-1){ _gpu->OPS->free_matrix(_layers[i]->target_matrix); }
 		}
 
-		_layers[i]->activation = zeros<float>(batchsize, _layers[i]->UNITCOUNT);
-		_layers[i]->activation_grad = zeros<float>(batchsize, _layers[i]->UNITCOUNT);
-		_layers[i]->error = zeros<float>(batchsize, _layers[i]->UNITCOUNT);
-		if(i == _layers.size()-1){ _layers[i]->target_matrix = zeros<float>(batchsize, _layers[i]->UNITCOUNT);}
+		_layers[i]->activation = _gpu->OPS->zeros(batchsize, _layers[i]->UNITCOUNT);
+		_layers[i]->activation_grad = _gpu->OPS->zeros(batchsize, _layers[i]->UNITCOUNT);
+		_layers[i]->error = _gpu->OPS->zeros(batchsize, _layers[i]->UNITCOUNT);
+		if(i == _layers.size()-1){ _layers[i]->target_matrix = _gpu->OPS->zeros(batchsize, _layers[i]->UNITCOUNT);}
 	}
 
 }

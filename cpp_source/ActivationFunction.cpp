@@ -1,13 +1,14 @@
 #include <ActivationFunction.h>
-#include <BasicOpsCUDA.cuh>
+#include <BasicOpsWrapper.h>
 
 
 using std::cout;
 using std::endl;
 
-ActivationFunction::ActivationFunction(Unittype_t unitType)
+ActivationFunction::ActivationFunction(Unittype_t unitType, ClusterNet *gpu)
 {
 	_unitType = unitType;
+	GPU = gpu;
 }
 
 void ActivationFunction::activation(Matrix<float> *in, Matrix<float> *out)
@@ -15,16 +16,16 @@ void ActivationFunction::activation(Matrix<float> *in, Matrix<float> *out)
 	switch(_unitType)
 		{
 			case Logistic:
-				elementWise<klogistic>(in, out);
+				GPU->OPS->logistic(in, out);
 				break;
 			case Rectified_Linear:
-				elementWise<krectified>(in, out);
+				GPU->OPS->rectified(in, out);
 				break;
 			case Exponential_linear:
-				elementWise<kELU>(in, out);
+				GPU->OPS->ELU(in, out);
 				break;
 			case Softmax:
-				softmax(in,out);
+				GPU->OPS->softmax(in, out);
 				break;
 			case Linear:
 				break;
@@ -39,13 +40,13 @@ void ActivationFunction::activation_gradient(Matrix<float> *in, Matrix<float> *o
 	switch(_unitType)
 	{
 		case Logistic:
-			elementWise<klogistic>(in, out);
+			GPU->OPS->logistic_grad(in, out);
 			break;
 		case Rectified_Linear:
-			elementWise<krectified_grad>(in, out);
+			GPU->OPS->rectified_grad(in, out);
 			break;
 		case Exponential_linear:
-			elementWise<kELU_grad>(in, out);
+			GPU->OPS->ELU_grad(in, out);
 			break;
 		case Softmax:
 			break;

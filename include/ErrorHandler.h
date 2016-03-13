@@ -9,13 +9,14 @@
 #define ERRORHANDLER_H_
 #include <string>
 #include <vector>
+#include <ClusterNet.h>
 
 template <typename T> class Matrix;
 
 class ErrorHandler
 {
 public:
-	ErrorHandler();
+	ErrorHandler(ClusterNet *gpu);
 	~ErrorHandler(){};
 
 
@@ -31,6 +32,8 @@ public:
 	void add_error(Matrix<float> *predictions, Matrix<float> *labels);
 	void print_error(std::string message);
 	void init_buffers(Matrix<float> *predictions, Matrix<float> *labels);
+
+	ClusterNet *GPU;
 
 protected:
 	Matrix <float> *result;

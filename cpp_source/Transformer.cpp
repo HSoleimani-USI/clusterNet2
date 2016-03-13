@@ -29,7 +29,7 @@ Matrix<float> *Transformer::transform(Matrix<float> *input)
 	}
 	else
 	{
-		elementWise<ksmul>(input,output,(1.0f-_layer->_conf->DROPOUT));
+		_gpu->OPS->mul(input,output,(1.0f-_layer->_conf->DROPOUT));
 	}
 
 	return output;

@@ -32,11 +32,13 @@
     exit(1);                              \
   } }
 
+void BasicOpsWrapperGPU::free_matrix(Matrix<float> *A){ ::free_matrix(A); }
 Matrix<float> *BasicOpsWrapperGPU::fill_matrix(int rows, int cols, float fill_value){ return ::fill_matrix<float>(rows, cols, fill_value); }
 Matrix<float> *BasicOpsWrapperGPU::empty(int rows, int cols){ return ::empty<float>(rows, cols); }
 Matrix<float> *BasicOpsWrapperGPU::zeros(int rows, int cols){ return ::zeros<float>(rows, cols); }
 Matrix<float> *BasicOpsWrapperGPU::ones(int rows, int cols){ return ::ones<float>(rows, cols); }
 void BasicOpsWrapperGPU::to_host(Matrix<float> *gpu, float *cpu){ ::to_host<float>(gpu, cpu); }
+Matrix<float> *BasicOpsWrapperGPU::to_host(Matrix<float> *gpu){ return ::to_host<float>(gpu); }
 void BasicOpsWrapperGPU::to_gpu(float *cpu, Matrix<float> *gpu){ ::to_gpu<float>(cpu, gpu); }
 Matrix<float> *BasicOpsWrapperGPU::to_pinned(int rows, int cols, float *cpu){ return ::to_pinned<float>(rows, cols, cpu); }
 Matrix<float> *BasicOpsWrapperGPU::to_pinned(int rows, int cols, float *cpu, size_t bytes_to_copy){ return ::to_pinned<float>(rows, cols, cpu, bytes_to_copy); }
@@ -102,6 +104,7 @@ void BasicOpsWrapperGPU::mul(Matrix<float> *A, Matrix<float> *B, Matrix<float> *
 void BasicOpsWrapperGPU::equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ elementWise<keq>(A, B, out); }
 void BasicOpsWrapperGPU::less_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ elementWise<klt>(A, B, out); }
 void BasicOpsWrapperGPU::greater_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ elementWise<kgt>(A, B, out); }
+void BasicOpsWrapperGPU::greater_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ elementWise<kge>(A, B, out); }
 void BasicOpsWrapperGPU::less_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ elementWise<kle>(A, B, out); }
 void BasicOpsWrapperGPU::not_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ elementWise<kne>(A, B, out); }
 void BasicOpsWrapperGPU::squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out){ elementWise<ksquared_diff>(A, B, out); }

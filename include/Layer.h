@@ -1,11 +1,14 @@
-#include <stdlib.h>
-#include <vector>
-#include <cstdlib>
-#include <BasicOpsCUDA.cuh>
-#include <ClusterNet.h>
+
 
 #ifndef Layer_H
 #define Layer_H
+
+#include <stdlib.h>
+#include <vector>
+#include <cstdlib>
+#include <BasicOpsWrapper.h>
+#include <ClusterNet.h>
+#include <Matrix.h>
 
 class Network;
 class ActivationFunction;

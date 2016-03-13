@@ -9,12 +9,12 @@ class ActivationFunction
 {
 
 public:
-	ActivationFunction(Unittype_t unitType);
+	ActivationFunction(Unittype_t unitType, ClusterNet *gpu);
 	~ActivationFunction(){};
 	void activation(Matrix<float> *in, Matrix<float> *out);
 	void activation_gradient(Matrix<float> *in, Matrix<float> *out);
 	Unittype_t _unitType;
-private:
+	ClusterNet *GPU;
 
 };
 

@@ -13,13 +13,14 @@
 class Optimizer
 {
 public:
-	Optimizer(WeightUpdateType_t updatetype);
+	Optimizer(ClusterNet *gpu, WeightUpdateType_t updatetype);
 	~Optimizer(){};
 
 	void weight_update(Matrix<float> *accelerator, Matrix<float> *weight, Matrix<float> *grad,
 				       float accelerator_value, float learning_rate);
 
 	WeightUpdateType_t _updatetype;
+	ClusterNet *GPU;
 
 };
 

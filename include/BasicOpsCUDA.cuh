@@ -4,6 +4,7 @@
 #include <thrust/device_ptr.h>
 #include <thrust/sort.h>
 #include <Matrix.h>
+#include <BasicOpsWrapper.h>
 
 
 using std::cout;
@@ -36,6 +37,7 @@ using std::endl;
         cudaGetErrorString(_m_cudaStat), __LINE__, __FILE__);   \
     exit(1);                              \
   } }
+
 
 
 
@@ -91,15 +93,6 @@ typedef enum Reduction_t
 	rmean
 
 } Reduction_t;
-
-typedef enum WeightUpdateType_t
-{
-	RMSProp = 0,
-	Momentum = 1,
-	PlainSGD = 2,
-	RMSPropInit = 3
-} WeightUpdateType_t;
-
 
 
 template <typename T> Matrix<T> *to_host(Matrix<T> *in);

@@ -17,11 +17,14 @@ public:
 	BasicOpsWrapperGPU(){};
 	~BasicOpsWrapperGPU(){};
 
+
+	void free_matrix(Matrix<float> *A);
 	Matrix<float> *fill_matrix(int rows, int cols, float fill_value);
 	Matrix<float> *empty(int rows, int cols);
 	Matrix<float> *zeros(int rows, int cols);
 	Matrix<float> *ones(int rows, int cols);
 	void to_host(Matrix<float> *gpu, float *cpu);
+	Matrix<float> *to_host(Matrix<float> *gpu);
 	void to_gpu(float *cpu, Matrix<float> *gpu);
 	Matrix<float> *to_pinned(int rows, int cols, float *cpu);
 	Matrix<float> *to_pinned(int rows, int cols, float *cpu, size_t bytes_to_copy);
@@ -89,6 +92,7 @@ public:
 	void equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
 	void less_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
 	void greater_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+	void greater_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
 	void less_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
 	void not_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
 	void squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);

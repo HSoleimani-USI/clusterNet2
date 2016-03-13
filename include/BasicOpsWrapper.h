@@ -5,11 +5,20 @@
  *      Author: tim
  */
 
-#include <BasicOpsCUDA.cuh>
-
-
 #ifndef BASICOPSWRAPPER_H_
 #define BASICOPSWRAPPER_H_
+
+#include <Matrix.h>
+
+
+
+typedef enum WeightUpdateType_t
+{
+	RMSProp = 0,
+	Momentum = 1,
+	PlainSGD = 2,
+	RMSPropInit = 3
+} WeightUpdateType_t;
 
 class BasicOpsWrapper
 {
@@ -17,20 +26,23 @@ public:
 	BasicOpsWrapper(){};
 	~BasicOpsWrapper(){};
 
+	virtual void free_matrix(Matrix<float> *A) = 0;
+
 	virtual Matrix<float> *fill_matrix(int rows, int cols, float fill_value) = 0;
 	virtual Matrix<float> *empty(int rows, int cols) = 0;
 	virtual Matrix<float> *zeros(int rows, int cols) = 0;
 	virtual Matrix<float> *ones(int rows, int cols) = 0;
+	virtual Matrix<float> *to_host(Matrix<float> *gpu) = 0;
 	virtual void to_host(Matrix<float> *gpu, float *cpu) = 0;
 	virtual void to_gpu(float *cpu, Matrix<float> *gpu) = 0;
 	virtual Matrix<float> *to_pinned(int rows, int cols, float *cpu) = 0;
 	virtual Matrix<float> *to_pinned(int rows, int cols, float *cpu, size_t bytes_to_copy) = 0;
 
+	virtual Matrix<float> *transpose(Matrix<float> *A) = 0;
 	virtual void transpose(Matrix<float> *A, Matrix<float> *out, int rows, int cols) = 0;
 	virtual Matrix<float> *to_col_major(Matrix<float> *A) = 0;
 	virtual void to_col_major(Matrix<float> *A, Matrix<float> *out) = 0;
 	virtual Matrix<float> *to_row_major(Matrix<float> *A) = 0;
-	virtual Matrix<float> *transpose(Matrix<float> *A) = 0;
 
 
 	virtual void abs(Matrix<float> *A, Matrix<float> *out) = 0;
@@ -59,6 +71,7 @@ public:
 	virtual void equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
 	virtual void less_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
 	virtual void greater_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
+	virtual void greater_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
 	virtual void less_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
 	virtual void not_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
 	virtual void squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;

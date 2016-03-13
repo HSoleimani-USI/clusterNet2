@@ -3,6 +3,7 @@
 #include <Transformer.h>
 #include <Configurator.h>
 
+
 using std::cout;
 using std::endl;
 using std::string;
@@ -31,7 +32,7 @@ void Layer::init(int unitcount, Unittype_t unitType, Layer_t layerType)
 	Layer_ID = 0;
 
 	_conf = new Configurator();
-	_func = new ActivationFunction(unitType);
+	_func = new ActivationFunction(unitType, GPU);
 
 	if( unitType != Softmax)
 		_transformer.push_back(new Transformer(DropoutTransform, this));
@@ -85,15 +86,15 @@ void Layer::init_transformer_activations(int batch_size)
 	for(int i = 0; i < _transformer.size(); i++)
 	{
 		if(_transformer[i]->output != NULL && _transformer[i]->output->rows == batch_size){return;}
-		if(_transformer[i]->output != NULL){free_matrix( _transformer[i]->output); }
+		if(_transformer[i]->output != NULL){ GPU->OPS->free_matrix( _transformer[i]->output); }
 
 		Matrix<float> *prev = NULL;
 		if(_transformer[i]->_ttype == DropoutTransform)
 		{
 			if(prev)
-				_transformer[i]->output = empty<float>(batch_size, prev->cols);
+				_transformer[i]->output = GPU->OPS->empty(batch_size, prev->cols);
 			else
-				_transformer[i]->output = empty<float>(batch_size, UNITCOUNT);
+				_transformer[i]->output = GPU->OPS->empty(batch_size, UNITCOUNT);
 
 			prev = _transformer[i]->output;
 		}

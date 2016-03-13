@@ -1,7 +1,7 @@
 #include <boost/thread.hpp>
 #include <boost/date_time.hpp>
 #include <iostream>
-#include <BasicOpsCUDA.cuh>
+#include <BasicOpsWrapper.h>
 #include <cublas_v2.h>
 #include <curand.h>
 #include <cuda.h>
@@ -81,6 +81,8 @@ class ClusterNet
   		virtual void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
   		virtual void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2) = 0;
   		virtual void dropout(Matrix<float> *A, Matrix <float> *out, const float dropout) = 0;
+
+  		BasicOpsWrapper *OPS;
 
 
 };
