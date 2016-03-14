@@ -16,7 +16,7 @@ SOURCES := $(shell find $(BUILD_DIR) -name '*.o')
 all:	
 	nvcc -gencode $(COMPUTE_CAPABILITY) -Xcompiler '-fPIC' -dc $(FILES) $(INCLUDE) $(LIB) -lnervana $(FLAGS) --output-directory $(ROOT_DIR)/build 
 	nvcc -gencode $(COMPUTE_CAPABILITY) -Xcompiler '-fPIC' -dlink $(BUILD_DIR)/Matrix.o $(BUILD_DIR)/BasicOpsCUDA.o $(BUILD_DIR)/clusterKernels.o $(BUILD_DIR)/Timer.o -o $(BUILD_DIR)/link.o 
-	g++ -std=c++11 -shared -fPIC $(INCLUDE) $(wildcard $(BUILD_DIR)/*.o) $(FILES_CPP) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) -lnervana $(FLAGS) ++
+	g++ -std=c++11 -shared -fPIC $(INCLUDE) $(wildcard $(BUILD_DIR)/*.o) $(FILES_CPP) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) -lnervana $(FLAGS)
 kepler:
 	nvcc -gencode arch=compute_30,code=sm_30 -Xcompiler '-fPIC' -dc $(FILES) $(INCLUDE) $(LIB) $(FLAGS) --output-directory $(ROOT_DIR)/build 
 	nvcc -gencode arch=compute_30,code=sm_30 -Xcompiler '-fPIC' -dlink $(BUILD_DIR)/Matrix.o $(BUILD_DIR)/BasicOpsCUDA.o $(BUILD_DIR)/clusterKernels.o $(BUILD_DIR)/Timer.o -o $(BUILD_DIR)/link.o 
