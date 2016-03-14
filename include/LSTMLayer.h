@@ -7,7 +7,7 @@
 
 
 #include <ClusterNet.h>
-#include <BasicOpsCUDA.cuh>
+#include <BasicOpsWrapper.h>
 #include <vector>
 
 using std::vector;

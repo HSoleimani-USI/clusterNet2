@@ -13,6 +13,15 @@
 #include <Configurator.h>
 
 
+RecurrentNetwork::RecurrentNetwork(ClusterNet *gpu)
+{
+	_isTrainTime = true;
+	_gpu = gpu;
+	_errorhandler = new ErrorHandler(gpu);
+	_conf = new Configurator();
+	_opt = new Optimizer(gpu, RMSProp);
+}
+
 void RecurrentNetwork::add(LSTMLayer *layer)
 {
 	LSTMLayer *prev;

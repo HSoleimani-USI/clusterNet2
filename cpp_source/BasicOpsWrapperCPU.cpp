@@ -7,12 +7,3 @@
 
 #include "BasicOpsWrapperCPU.h"
 
-BasicOpsWrapperCPU::BasicOpsWrapperCPU() {
-	// TODO Auto-generated constructor stub
-
-}
-
-BasicOpsWrapperCPU::~BasicOpsWrapperCPU() {
-	// TODO Auto-generated destructor stub
-}
-

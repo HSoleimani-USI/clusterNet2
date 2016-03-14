@@ -64,6 +64,7 @@ bool replace(std::string& str, const std::string& from, const std::string& to) {
     return true;
 }
 
+/*
 template Matrix<float> *Table::get_data(std::string key);
 template Matrix<int> *Table::get_data(std::string key);
 template <typename T> Matrix<T>*Table::get_data(std::string key)
@@ -74,3 +75,4 @@ template <typename T> Matrix<T>*Table::get_data(std::string key)
 
 	return ret;
 }
+*/

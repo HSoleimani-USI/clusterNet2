@@ -11,7 +11,8 @@
 #include "leveldb/db.h"
 #include <string>
 #include <map>
-#include <BasicOpsCUDA.cuh>
+#include <BasicOpsWrapper.h>
+#include <ClusterNet.h>
 
 
 class Table
@@ -21,7 +22,7 @@ public:
 	~Table(){};
 
 	template <typename K,typename V> std::map<K,V> get_dictionary(std::string key);
-	template <typename T> Matrix<T>*get_data(std::string key);
+	//template <typename T> Matrix<T>*get_data(std::string key);
 
 private:
 	std::string mypath;

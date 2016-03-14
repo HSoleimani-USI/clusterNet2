@@ -1,6 +1,7 @@
 #include <BasicOpsCUDA.cuh>
 #include <clusterKernels.cuh>
 #include <hdf5.h>
+#include <assert.h>
 
 template Matrix<int> *to_host(Matrix<int> *in);
 template Matrix<float> *to_host(Matrix<float> *in);

@@ -8,11 +8,16 @@
 #include "BufferedBatchAllocator.h"
 #include <Timer.cuh>
 #include <tinydir.h>
+#include <stdio.h>
+#include <iostream>
 
+using std::endl;
+using std::cout;
 
-BufferedBatchAllocator::BufferedBatchAllocator(){}
-BufferedBatchAllocator::BufferedBatchAllocator(float *X, float *y, int rows, int colsX, int colsY, int batch_size, std::string dir_path)
+BufferedBatchAllocator::BufferedBatchAllocator(ClusterNet *gpu){ GPU = gpu;}
+BufferedBatchAllocator::BufferedBatchAllocator(ClusterNet *gpu, float *X, float *y, int rows, int colsX, int colsY, int batch_size, std::string dir_path)
 {
+	GPU = gpu;
 	tinydir_dir dir;
 	tinydir_open(&dir, "/home/tim/git/clusterNet2/include/");
 
@@ -32,16 +37,16 @@ BufferedBatchAllocator::BufferedBatchAllocator(float *X, float *y, int rows, int
 	BATCH_SIZE = batch_size;
 	BATCHES = rows/batch_size;
 
-	batch_bufferX = to_pinned<float>(BATCHES*batch_size,colsX, X, sizeof(float)*BATCHES*batch_size*colsX);
-	batch_bufferY = to_pinned<float>(BATCHES*batch_size,colsY, y,sizeof(float)*BATCHES*batch_size*colsY);
+	batch_bufferX = GPU->OPS->to_pinned(BATCHES*batch_size,colsX, X, sizeof(float)*BATCHES*batch_size*colsX);
+	batch_bufferY = GPU->OPS->to_pinned(BATCHES*batch_size,colsY, y,sizeof(float)*BATCHES*batch_size*colsY);
 	CURRENT_BATCH = 0;
 	EPOCH = 0;
 
-	batchX = empty<float>(BATCH_SIZE, colsX);
-	batchY = empty<float>(BATCH_SIZE, colsY);
+	batchX = GPU->OPS->empty(BATCH_SIZE, colsX);
+	batchY = GPU->OPS->empty(BATCH_SIZE, colsY);
 
-	nextbatchX = empty<float>(BATCH_SIZE, colsX);
-	nextbatchY = empty<float>(BATCH_SIZE, colsY);
+	nextbatchX = GPU->OPS->empty(BATCH_SIZE, colsX);
+	nextbatchY = GPU->OPS->empty(BATCH_SIZE, colsY);
 
 	cudaStreamCreate(&streamX);
 	cudaStreamCreate(&streamY);

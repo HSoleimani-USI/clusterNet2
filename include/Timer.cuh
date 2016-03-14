@@ -1,6 +1,6 @@
 #ifndef Timer_H
 #define Timer_H
-#include <BasicOpsCUDA.cuh>
+#include <BasicOpsWrapper.h>
 #include <string>
 #include <map>
 

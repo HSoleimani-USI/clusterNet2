@@ -6,7 +6,7 @@
  */
 
 #include "ErrorHandler.h"
-#include <BasicOpsCUDA.cuh>
+#include <BasicOpsWrapper.h>
 #include <cmath>
 #include <iomanip>
 
@@ -14,7 +14,7 @@
 using std::cout;
 using std::endl;
 
-ErrorHandler::ErrorHandler()
+ErrorHandler::ErrorHandler(ClusterNet *gpu)
 {
 	RUNNING_MEAN = 0.0f;
 	RUNNING_ERROR = 0.0f;
@@ -24,6 +24,7 @@ ErrorHandler::ErrorHandler()
 	RUNNING_BATCHES = 0.0f;
 	result = NULL;
 	eq = NULL;
+	GPU = gpu;
 
 	_errors = std::vector<float>();
 }
@@ -33,13 +34,13 @@ void ErrorHandler::init_buffers(Matrix<float> *predictions, Matrix<float> *label
 
 	if(!eq)
 	{
-		result = zeros<float>(labels->rows,labels->cols);
-		eq = zeros<float>(labels->rows, labels->cols);
+		result = GPU->OPS->zeros(labels->rows,labels->cols);
+		eq = GPU->OPS->zeros(labels->rows, labels->cols);
 	}
 	else if(labels->rows != result->rows || labels->cols != result->cols)
 	{
-		result = zeros<float>(labels->rows,labels->cols);
-		eq = zeros<float>(labels->rows, labels->cols);
+		result = GPU->OPS->zeros(labels->rows,labels->cols);
+		eq = GPU->OPS->zeros(labels->rows, labels->cols);
 	}
 
 
@@ -60,9 +61,9 @@ void ErrorHandler::reset()
 void ErrorHandler::add_error(Matrix<float> *predictions, Matrix<float> *labels)
 {
 	if(_errors.size() == 0){ init_buffers(predictions, labels); }
-	argmax(predictions, result);
-	elementWise<keq>(result,labels,eq);
-	float sum_value = reduceToValue<rsum>(eq);
+	GPU->OPS->argmax(predictions, result);
+	GPU->OPS->equal(result,labels,eq);
+	float sum_value = GPU->OPS->sum(eq);
 	_errors.push_back(((predictions->rows  - sum_value)/(float)predictions->rows));
 	RUNNING_ERROR += (predictions->rows  - sum_value);
 	RUNNING_SAMPLE_SIZE += predictions->rows;

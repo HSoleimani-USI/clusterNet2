@@ -1,5 +1,13 @@
 #include <Timer.cuh>
 #include <assert.h>
+#include <stdio.h>
+#include <iostream>
+
+using std::endl;
+using std::cout;
+
+
+
 
 void Timer::tick()
 {

@@ -3,6 +3,8 @@
 #include <iostream>     // std::cout
 #include <assert.h>
 #include <cublas_v2.h>
+#include <clusterKernels.cuh>
+#include <BasicOpsWrapperGPU.h>
 
 
 #include <unistd.h>
@@ -11,9 +13,6 @@
 
 using std::cout;
 using std::endl;
-
-
-
 
 ClusterNetGPU::ClusterNetGPU()
 {
@@ -39,6 +38,8 @@ ClusterNetGPU::ClusterNetGPU()
 	cublasCreate_v2(&handle);
 	m_handle = handle;
 
+	OPS = new BasicOpsWrapperGPU();
+
 
 }
 
@@ -53,7 +54,7 @@ void ClusterNetGPU::setRandomState(int seed)
 
 Matrix<float> *ClusterNetGPU::rand(int rows, int cols)
 {
-	Matrix<float> *out = empty<float>(rows, cols);
+	Matrix<float> *out = OPS->empty(rows, cols);
 	curandGenerateUniform(m_generator, out->data, rows * cols);
 
 	return out;
@@ -62,7 +63,7 @@ Matrix<float> *ClusterNetGPU::rand(int rows, int cols)
 Matrix<float> *ClusterNetGPU::randn(int rows, int cols){ return normal(rows, cols, 0.0f, 1.0f); }
 Matrix<float> *ClusterNetGPU::normal(int rows, int cols, float mean, float std)
 {
-	Matrix<float> *out = empty<float>(rows, cols);
+	Matrix<float> *out = OPS->empty(rows, cols);
 	curandGenerateNormal(m_generator, out->data, out->size, mean, std);
 
 	return out;
@@ -80,7 +81,7 @@ void ClusterNetGPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, 
 		if (T1){ A_rows = A->cols; A_cols = A->rows; }
 		if (T2){ B_cols = B->rows; B_rows = B->cols; }
 
-		check_matrix_multiplication(A, B, out, T1, T2);
+		OPS->check_matrix_multiplication(A, B, out, T1, T2);
 
 		if(useNervanaGPU)
 		{
@@ -123,7 +124,7 @@ void ClusterNetGPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, 
 void ClusterNetGPU::dropout(Matrix<float> *A, Matrix <float> *out, const float dropout)
 {
 	curandGenerateUniform(m_generator, out->data, out->size);
-	elementWise<kdropout>(A, out, out, dropout);
+	OPS->dropout(A, out, out, dropout);
 }
 
 
@@ -132,8 +133,8 @@ Matrix<float> *ClusterNetGPU::get_uniformsqrt_weight(int input, int output)
 {
 	Matrix<float> *out = rand(input,output);
 	float range = 8.0f*sqrtf(6.0f/((float)input + output));
-	elementWise<ksmul>(out,out,range);
-	elementWise<kssub>(out,out,range/2.0f);
+	OPS->mul(out,out,range);
+	OPS->sub(out,out,range/2.0f);
 
 	return out;
 }

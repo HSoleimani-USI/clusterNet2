@@ -6,10 +6,16 @@
  */
 
 #include "Optimizer.h"
+#include <stdio.h>
+#include <iostream>
 
-Optimizer::Optimizer(WeightUpdateType_t updatetype)
+using std::endl;
+using std::cout;
+
+Optimizer::Optimizer(ClusterNet *gpu, WeightUpdateType_t updatetype)
 {
 	_updatetype = updatetype;
+	GPU = gpu;
 }
 
 void Optimizer::weight_update(Matrix<float> *accelerator, Matrix<float> *weight, Matrix<float> *grad, float accelerator_value, float learning_rate)
@@ -19,14 +25,15 @@ void Optimizer::weight_update(Matrix<float> *accelerator, Matrix<float> *weight,
 	switch(_updatetype)
 	{
 		case RMSProp:
-			WeightUpdate<RMSProp>(accelerator,grad,weight,accelerator_value,learning_rate);
+			GPU->OPS->WeightUpdate_RMSProp(accelerator,grad,weight,accelerator_value,learning_rate);
 			break;
 		case RMSPropInit:
-			WeightUpdate<RMSPropInit>(accelerator,grad,weight,accelerator_value,learning_rate);
+			cout << "Not implemented yet!" << endl;
+			throw "Not implemented yet!";
 			break;
 		case PlainSGD:
-			elementWise<ksmul>(grad,grad,learning_rate);
-			elementWise<ksub>(weight,grad,weight);
+			cout << "Not implemented yet!" << endl;
+			throw "Not implemented yet!";
 			break;
 		default:
 			cout << "Unknown update type!" << endl;
