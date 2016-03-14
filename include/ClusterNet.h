@@ -74,12 +74,18 @@ class ClusterNet
   		virtual Matrix<float> *randn(int rows, int cols) = 0;
   		virtual Matrix<float> *normal(int rows, int cols, float mean, float std) = 0;
 
+        //  initializing the weight of network
   		virtual Matrix<float> *get_uniformsqrt_weight(int input, int output) = 0;
 
+  		//  matrix multliplication A*B = out
   		virtual void Tdot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
   		virtual void dotT(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
+  		// nothing transpose
   		virtual void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out) = 0;
+  		//  define if the first and second are transpose
   		virtual void dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2) = 0;
+  		//  for regularization , using random numbers
+  		//  getting the simplest model ...random between 0 and 1 , matrix
   		virtual void dropout(Matrix<float> *A, Matrix <float> *out, const float dropout) = 0;
 
 
