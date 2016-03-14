@@ -231,13 +231,13 @@ class BatchAllocator(object):
 		self.epoch = 0
 		self.batches = X.shape[0]/batch_size
 		if buffertype == 'CPU':
-			self.pt = lib.funcs.fget_CPUBatchAllocator(
+			self.pt = lib.funcs.fget_CPUBatchAllocator(lib.pt_clusterNet, 
 						X.ctypes.data_as(ct.POINTER(ct.c_float)),
 						y.ctypes.data_as(ct.POINTER(ct.c_float)),
 						int(X.shape[0]), int(X.shape[1]), int(y.shape[1]),
 						int(batch_size))
 		elif buffertype == 'GPU':
-			self.pt = lib.funcs.fget_GPUBatchAllocator(
+			self.pt = lib.funcs.fget_GPUBatchAllocator(lib.pt_clusterNet, 
 						X.ctypes.data_as(ct.POINTER(ct.c_float)),
 						y.ctypes.data_as(ct.POINTER(ct.c_float)),
 						int(X.shape[0]), int(X.shape[1]), int(y.shape[1]),
