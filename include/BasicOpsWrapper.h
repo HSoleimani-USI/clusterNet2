@@ -42,8 +42,6 @@ public:
 	virtual Matrix<float> *to_pinned(int rows, int cols, float *cpu, size_t bytes_to_copy) = 0;
 
 
-	virtual void sortbykey(Matrix<float> *keys, Matrix<float> *values) = 0;
-	virtual float sum(Matrix<float> *A) = 0;
 
 	virtual Matrix<float> *transpose(Matrix<float> *A) = 0;
 
@@ -113,7 +111,7 @@ public:
 	/*
 	template <int action> void WeightUpdate(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate) = 0;
 
-    
+
 	template <int reduction> void reduceToCols(Matrix<float> *A, Matrix<float> *vout) = 0;
 	template <int reduction> void reduceToRows(Matrix<float> *A, Matrix<float> *vout) = 0;
 	template <int reduction> float reduceToValue(Matrix<float> *A) = 0;
@@ -138,7 +136,6 @@ public:
 	virtual bool check_matrix_vector_op(Matrix<float> *A, Matrix<float> *vec) = 0;
 	virtual bool check_for_same_dimensions(Matrix<float> *A, Matrix<float> *B) = 0;
 	virtual bool check_matrix_multiplication(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2) = 0;
-	virtual Matrix<float> *get_view(Matrix<float> *A, int rstart, int rend) = 0;
 
 
 	//map those to util file
