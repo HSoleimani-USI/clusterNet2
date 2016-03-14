@@ -231,13 +231,13 @@ class BatchAllocator(object):
 		self.epoch = 0
 		self.batches = X.shape[0]/batch_size
 		if buffertype == 'CPU':
-			self.pt = lib.funcs.fget_CPUBatchAllocator(
+			self.pt = lib.funcs.fget_CPUBatchAllocator(lib.pt_clusterNet, 
 						X.ctypes.data_as(ct.POINTER(ct.c_float)),
 						y.ctypes.data_as(ct.POINTER(ct.c_float)),
 						int(X.shape[0]), int(X.shape[1]), int(y.shape[1]),
 						int(batch_size))
 		elif buffertype == 'GPU':
-			self.pt = lib.funcs.fget_GPUBatchAllocator(
+			self.pt = lib.funcs.fget_GPUBatchAllocator(lib.pt_clusterNet, 
 						X.ctypes.data_as(ct.POINTER(ct.c_float)),
 						y.ctypes.data_as(ct.POINTER(ct.c_float)),
 						int(X.shape[0]), int(X.shape[1]), int(y.shape[1]),
@@ -280,10 +280,10 @@ class array(object):
 			if len(numpy_array.shape) > 2: raise Exception("Array must be one or two dimensional!")
 			self.shape = numpy_array.shape
 			if len(self.shape) == 1:
-				self.pt = lib.funcs.fempty(numpy_array.shape[0], 1)
+				self.pt = lib.funcs.fempty(lib.pt_clusterNet, numpy_array.shape[0], 1)
 			else:
-				self.pt = lib.funcs.fempty(numpy_array.shape[0], numpy_array.shape[1])
-			lib.funcs.fto_gpu(numpy_array.ctypes.data_as(ct.POINTER(ct.c_float)), self.pt)
+				self.pt = lib.funcs.fempty(lib.pt_clusterNet, numpy_array.shape[0], numpy_array.shape[1])
+			lib.funcs.fto_gpu(lib.pt_clusterNet, numpy_array.ctypes.data_as(ct.POINTER(ct.c_float)), self.pt)
 		
 		self.cpu_arr = numpy_array
 		
@@ -291,11 +291,11 @@ class array(object):
 
 	def tocpu(self):
 		if self.cpu_arr == None: self.cpu_arr = np.empty(self.shape, dtype=np.float32)
-		lib.funcs.fto_host(self.pt,self.cpu_arr.ctypes.data_as(ct.POINTER(ct.c_float)))
+		lib.funcs.fto_host(lib.pt_clusterNet, self.pt,self.cpu_arr.ctypes.data_as(ct.POINTER(ct.c_float)))
 		return self.cpu_arr
 	
 	@property
-	def T(self): return array(None, lib.funcs.fT(self.pt), self.shape[::-1])
+	def T(self): return array(None, lib.funcs.fT(lib.pt_clusterNet, self.pt), self.shape[::-1])
 
 	
 
@@ -314,11 +314,11 @@ def load_hdf5_matrix(filename):
 	
 def ones(shape, dtype=np.float32):
 	rows, cols = handle_shape(shape)
-	return array(None, lib.funcs.ffill_matrix(rows,cols,ct.c_float(1.0)), shape)
+	return array(None, lib.funcs.ffill_matrix(lib.pt_clusterNet, rows,cols,ct.c_float(1.0)), shape)
 
 def empty(shape, dtype=np.float32):
 	rows, cols = handle_shape(shape)
-	return array(None, lib.funcs.fempty(rows,cols), shape)
+	return array(None, lib.funcs.fempty(lib.pt_clusterNet, rows,cols), shape)
 
 
 def setRandomState(seed): lib.funcs.fsetRandomState(lib.pt_clusterNet, seed)
@@ -339,182 +339,183 @@ def dot(A,B,out=None):
 
 def abs(A, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.ffabs(A.pt, out.pt)
+	lib.funcs.ffabs(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def log(A, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.flog(A.pt, out.pt)
+	lib.funcs.flog(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def sqrt(A, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fsqrt(A.pt, out.pt)
+	lib.funcs.fsqrt(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def pow(A, power, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fpow(A.pt, out.pt, ct.c_float(power))
+	lib.funcs.fpow(lib.pt_clusterNet, A.pt, out.pt, ct.c_float(power))
 	return out
 
 def logistic(A, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.flogistic(A.pt, out.pt)
+	lib.funcs.flogistic(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def rectified_linear(A, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.frectified(A.pt, out.pt)
+	lib.funcs.frectified(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def logistic_grad(A, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.flogistic_grad(A.pt, out.pt)
+	lib.funcs.flogistic_grad(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def rectified_linear_grad(A, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.frectified_grad(A.pt, out.pt)
+	lib.funcs.frectified_grad(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def copy(A, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fcopy(A.pt, out.pt)
+	lib.funcs.fcopy(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def add(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fadd(A.pt, B.pt, out.pt)
+	lib.funcs.fadd(lib.pt_clusterNet, A.pt, B.pt, out.pt)
 	return out
 
 def sub(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fsub(A.pt, B.pt, out.pt)
+	lib.funcs.fsub(lib.pt_clusterNet, A.pt, B.pt, out.pt)
 	return out
 
 def div(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fdiv(A.pt, B.pt, out.pt)
+	lib.funcs.fdiv(lib.pt_clusterNet, A.pt, B.pt, out.pt)
 	return out
 
 def mul(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fmul(A.pt, B.pt, out.pt)
+	lib.funcs.fmul(lib.pt_clusterNet, A.pt, B.pt, out.pt)
 	return out
 
 def equal(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.feq(A.pt, B.pt, out.pt)
+	lib.funcs.feq(lib.pt_clusterNet, A.pt, B.pt, out.pt)
 	return out
 
 def less(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.flt(A.pt, B.pt, out.pt)
+	lib.funcs.flt(lib.pt_clusterNet, A.pt, B.pt, out.pt)
 	return out
 
 def greater(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fgt(A.pt, B.pt, out.pt)
+	lib.funcs.fgt(lib.pt_clusterNet, A.pt, B.pt, out.pt)
 	return out
 
 def less_equal(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fle(A.pt, B.pt, out.pt)
+	lib.funcs.fle(lib.pt_clusterNet, A.pt, B.pt, out.pt)
 	return out
 
 def greater_equal(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fge(A.pt, B.pt, out.pt)
+	lib.funcs.fge(lib.pt_clusterNet, A.pt, B.pt, out.pt)
 	return out
 
 def not_equal(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fne(A.pt, B.pt, out.pt)
+	lib.funcs.fne(lib.pt_clusterNet, A.pt, B.pt, out.pt)
 	return out
 
 def squared_difference(A, B, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fsquared_diff(A.pt, B.pt, out.pt)
+	lib.funcs.fsquared_diff(lib.pt_clusterNet, A.pt, B.pt, out.pt)
 	return out
 
 def vector_add(A, v, out=None):	
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fvadd(A.pt, v.pt, out.pt)
+	lib.funcs.fvadd(lib.pt_clusterNet, A.pt, v.pt, out.pt)
 	return out
 
 def vector_sub(A, v, out=None):	
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fvsub(A.pt, v.pt, out.pt)
+	lib.funcs.fvsub(lib.pt_clusterNet, A.pt, v.pt, out.pt)
 	return out
 
 def create_t_matrix(v, max_value, out=None):		
 	if not out: out = empty((v.shape[0],max_value+1))
-	lib.funcs.ftmatrix(v.pt, out.pt)
+	lib.funcs.ftmatrix(lib.pt_clusterNet, v.pt, out.pt)
 	return out
 
 def slice(A, rstart, rend, cstart, cend, out=None):
 	if not out: out = empty((rend-rstart,cend-cstart))
-	lib.funcs.fslice(A.pt, out.pt, rstart, rend, cstart, cend)
+	lib.funcs.fslice(lib.pt_clusterNet, A.pt, out.pt, rstart, rend, cstart, cend)
 	return out
 
 def softmax(A, out=None):
 	if not out: out = empty((A.shape[0],A.shape[1]))
-	lib.funcs.fsoftmax(A.pt, out.pt)
+	lib.funcs.fsoftmax(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def argmax(A, out=None):
 	if not out: out = empty((A.shape[0],1))
-	lib.funcs.fargmax(A.pt, out.pt)
+	lib.funcs.fargmax(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
+'''
 def to_pinned(X):
-	pt = lib.funcs.fto_pinned(X.shape[0], X.shape[1],
+	pt = lib.funcs.fto_pinned(lib.pt_clusterNet, X.shape[0], X.shape[1],
 						X.ctypes.data_as(ct.POINTER(ct.c_float)))
 	buffer = np.core.multiarray.int_asbuffer(ct.addressof(pt.contents), 4*X.size)
 	return np.frombuffer(buffer, np.float32).reshape(X.shape)
-
+'''
 def row_sum(A, out=None):
 	if not out: out = empty((A.shape[0],1))
-	lib.funcs.frowSum(A.pt, out.pt)
+	lib.funcs.frowSum(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def row_max(A, out=None):
 	if not out: out = empty((A.shape[0],1))
-	lib.funcs.frowMax(A.pt, out.pt)
+	lib.funcs.frowMax(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def row_mean(A, out=None):
 	if not out: out = empty((A.shape[0],1))
-	lib.funcs.frowMean(A.pt, out.pt)
+	lib.funcs.frowMean(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def col_sum(A, out=None):
 	if not out: out = empty((A.shape[1],1))
-	lib.funcs.fcolSum(A.pt, out.pt)
+	lib.funcs.fcolSum(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def col_max(A, out=None):
 	if not out: out = empty((A.shape[1],1))
-	lib.funcs.fcolMax(A.pt, out.pt)
+	lib.funcs.fcolMax(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def col_mean(A, out=None):
 	if not out: out = empty((A.shape[1],1))
-	lib.funcs.fcolMean(A.pt, out.pt)
+	lib.funcs.fcolMean(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
 def transpose(A, out=None):
 	if not out: out = empty((A.shape[1],A.shape[0]))
-	lib.funcs.ftranspose(A.pt, out.pt)
+	lib.funcs.ftranspose(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
-def max(A): return lib.funcs.ffmax(A.pt)
-def sum(A): return lib.funcs.ffsum(A.pt)
-def mean(A): return lib.funcs.ffmean(A.pt)
+def max(A): return lib.funcs.ffmax(lib.pt_clusterNet, A.pt)
+def sum(A): return lib.funcs.ffsum(lib.pt_clusterNet, A.pt)
+def mean(A): return lib.funcs.ffmean(lib.pt_clusterNet, A.pt)
 
 def get_view(A, rstart=0, rend=None):	
 	if rend == None: rend = A.shape[0]
-	return array(None, lib.funcs.fget_view(A.pt,rstart, rend), (rend-rstart, A.shape[1]))
+	return array(None, lib.funcs.fget_view(lib.pt_clusterNet, A.pt,rstart, rend), (rend-rstart, A.shape[1]))
 	
 
 	
@@ -540,15 +541,15 @@ def get_closest_index(x, top=50):
 	return np.array(row_indexes)
 
 def tocpu(A, out):
-	lib.funcs.fto_host(A.pt,out.ctypes.data_as(ct.POINTER(ct.c_float)))
+	lib.funcs.fto_host(lib.pt_clusterNet, A.pt,out.ctypes.data_as(ct.POINTER(ct.c_float)))
 	
 def printmat(A, rstart=None, rend=None, cstart=None,cend=None):
-	if rstart and rend and cstart and cend: lib.funcs.fprintmat(A.pt, rstart, rend, cstart, cend)
-	else: lib.funcs.fprintmat(A.pt, 0, int(A.shape[0]), 0, int(A.shape[1]))
+	if rstart and rend and cstart and cend: lib.funcs.fprintmat(lib.pt_clusterNet, A.pt, rstart, rend, cstart, cend)
+	else: lib.funcs.fprintmat(lib.pt_clusterNet, A.pt, 0, int(A.shape[0]), 0, int(A.shape[1]))
 	
 def lookup_rowwise(embedding, idx_batch, out=None):
 	if not out: out = empty((idx_batch.shape[0]*idx_batch.shape[1],embedding.shape[1]))
-	lib.funcs.flookup(embedding.pt, idx_batch.pt, out.pt)
+	lib.funcs.flookup(lib.pt_clusterNet, embedding.pt, idx_batch.pt, out.pt)
 	return out
 	
 

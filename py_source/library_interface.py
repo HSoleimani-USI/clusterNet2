@@ -1,4 +1,5 @@
 '''
+	virtual void sortbykey(Matrix<float> *keys, Matrix<float> *values) = 0;
 Created on Apr 2, 2015
 
 @author: tim
@@ -13,15 +14,14 @@ class FloatMatrix(ct.Structure):
                 ('cols', ct.c_int),
                 ('bytes', ct.c_size_t),
                 ('size', ct.c_int),
-                ('data', ct.POINTER(ct.c_float))]   
-    def __init__(self): pass    
+                ('data', ct.POINTER(ct.c_float))]
+    def __init__(self): pass
 
 
 funcs.fempty.restype = ct.POINTER(FloatMatrix)
 funcs.ffill_matrix.restype = ct.POINTER(FloatMatrix)
 funcs.fto_host.restype = ct.c_void_p
 funcs.fto_gpu.restype = ct.c_void_p
-funcs.fto_pinned.restype = ct.POINTER(ct.c_float)
 funcs.fT.restype = ct.POINTER(FloatMatrix)
 funcs.ftranspose.restype = ct.c_void_p
 
@@ -107,8 +107,6 @@ funcs.ftock.restype = ct.c_float
 
 funcs.ffree.restype = ct.c_void_p
 
-funcs.fsortbykey.restype = ct.c_void_p
-
 funcs.fscalar_mul.restype = ct.c_void_p
 
 funcs.fget_view.restype = ct.c_void_p
@@ -119,5 +117,5 @@ funcs.flookup.restype = ct.c_void_p
 
 
 
-    
+
 
