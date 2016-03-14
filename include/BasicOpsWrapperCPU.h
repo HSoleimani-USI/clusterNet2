@@ -8,6 +8,8 @@
 #ifndef BASICOPSWRAPPERCPU_H_
 #define BASICOPSWRAPPERCPU_H_
 
+#include <Matrix.h>
+
 class BasicOpsWrapperCPU : public BasicOpsWrapper
 {
 public:
