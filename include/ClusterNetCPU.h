@@ -10,6 +10,7 @@
 
 #include <Matrix.h>
 #include <ClusterNet.h>
+#include <random>
 
 class ClusterNetCPU : public ClusterNet
 {
@@ -35,6 +36,13 @@ public:
 	//  for regularization , using random numbers
 	//  getting the simplest model ...random between 0 and 1 , matrix
 	void dropout(Matrix<float> *A, Matrix <float> *out, const float dropout);
+private:
+	std::default_random_engine generator_uniform;
+	std::default_random_engine generator_gaussian;
+	std::default_random_engine generator_normal;
+	std::uniform_real_distribution<float> uniform;
+	std::normal_distribution<float> gaussian;
+	std::normal_distribution<float> normal_distribution;
 
 };
 
