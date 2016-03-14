@@ -467,12 +467,13 @@ def argmax(A, out=None):
 	lib.funcs.fargmax(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
+'''
 def to_pinned(X):
 	pt = lib.funcs.fto_pinned(lib.pt_clusterNet, X.shape[0], X.shape[1],
 						X.ctypes.data_as(ct.POINTER(ct.c_float)))
 	buffer = np.core.multiarray.int_asbuffer(ct.addressof(pt.contents), 4*X.size)
 	return np.frombuffer(buffer, np.float32).reshape(X.shape)
-
+'''
 def row_sum(A, out=None):
 	if not out: out = empty((A.shape[0],1))
 	lib.funcs.frowSum(lib.pt_clusterNet, A.pt, out.pt)

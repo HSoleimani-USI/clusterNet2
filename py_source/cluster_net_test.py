@@ -189,13 +189,13 @@ def argmax_test():
     
     t.assert_almost_equal(C, np.argmax(A,1), 3, "Softmax not working")
     
-    
+'''   
 def test_to_pinned():
     A = np.float32(np.random.rand(10,10))
     B = gpu.to_pinned(A)
     
     t.assert_almost_equal(A,B , 3, "Pinned not working")
-    
+'''    
 
     
 def test_batch_allocator_CPU():
