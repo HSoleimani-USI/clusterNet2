@@ -6,13 +6,10 @@
  */
 
 #include "ClusterNetCPU.h"
+#include "cblas.h"
 
-ClusterNetCPU::ClusterNetCPU() {
+ClusterNetCPU::ClusterNetCPU()
+{
 	// TODO Auto-generated constructor stub
 
 }
-
-ClusterNetCPU::~ClusterNetCPU() {
-	// TODO Auto-generated destructor stub
-}
-
