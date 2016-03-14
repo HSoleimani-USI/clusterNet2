@@ -9,6 +9,7 @@
 #define BASICOPSWRAPPERCPU_H_
 
 #include <Matrix.h>
+#include <BasicOpsWrapper.h>
 
 class BasicOpsWrapperCPU : public BasicOpsWrapper
 {
