@@ -15,6 +15,7 @@ public:
 	BasicOpsWrapperCPU(){};
 	~BasicOpsWrapperCPU(){};
 
+
 	void free_matrix(Matrix<float> *A);
 	Matrix<float> *fill_matrix(int rows, int cols, float fill_value);
 	Matrix<float> *empty(int rows, int cols);
