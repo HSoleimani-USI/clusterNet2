@@ -9,6 +9,7 @@
 #include <cmath>
 #include <cstdlib>
 #include <limits>
+#include <algorithm>
 
 
 
@@ -16,7 +17,7 @@
 Matrix<float> *BasicOpsWrapperCPU::fill_matrix(int rows, int cols, float fill_value)
 {
 	Matrix<float> *ret = empty(rows, cols);
-	
+
 	for(int i = 0; i < ret->size; i++)
 		ret->data[i] = fill_value;
 
@@ -32,7 +33,7 @@ Matrix<float> *BasicOpsWrapperCPU::empty(int rows, int cols)
 	ret->size = rows*cols;
 	ret->bytes = rows*cols*sizeof(float);
 
-	
+
 	return ret;
 
 }
@@ -70,7 +71,7 @@ void BasicOpsWrapperCPU::sub(Matrix<float> *A, Matrix<float> *B, Matrix<float> *
 
 void BasicOpsWrapperCPU::div(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
-	
+
 	for(int i=0; i < A->size ;i++)
 	{
 		out->data[i] = A->data[i] / B->data[i];
@@ -79,7 +80,7 @@ void BasicOpsWrapperCPU::div(Matrix<float> *A, Matrix<float> *B, Matrix<float> *
 
 
 void BasicOpsWrapperCPU::mul(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ 
+{
 
 	for(int i=0; i < A->size ;i++)
 	{
@@ -99,7 +100,7 @@ void BasicOpsWrapperCPU::equal(Matrix<float> *A, Matrix<float> *B, Matrix<float>
 
 
 void BasicOpsWrapperCPU::less_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{	
+{
 	for(int i=0; i < A->size ;i++)
 	{
 		out->data[i] = (float)(A->data[i] < B->data[i]);
@@ -109,7 +110,7 @@ void BasicOpsWrapperCPU::less_than(Matrix<float> *A, Matrix<float> *B, Matrix<fl
 
 
 void BasicOpsWrapperCPU::greater_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{	
+{
 	for(int i=0; i < A->size ;i++)
 	{
 		out->data[i] = (float)(A->data[i] > B->data[i]);
@@ -118,7 +119,7 @@ void BasicOpsWrapperCPU::greater_than(Matrix<float> *A, Matrix<float> *B, Matrix
 
 
 void BasicOpsWrapperCPU::greater_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{	
+{
 	for(int i=0; i < A->size ;i++)
 	{
 		out->data[i] = (float)(A->data[i] >= B->data[i]);
@@ -127,7 +128,7 @@ void BasicOpsWrapperCPU::greater_equal(Matrix<float> *A, Matrix<float> *B, Matri
 
 
 void BasicOpsWrapperCPU::less_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{	
+{
 	for(int i=0; i < A->size ;i++)
 	{
 		out->data[i] = (float)(A->data[i] <= B->data[i]);
@@ -137,7 +138,7 @@ void BasicOpsWrapperCPU::less_equal(Matrix<float> *A, Matrix<float> *B, Matrix<f
 
 
 void BasicOpsWrapperCPU::not_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{	
+{
 	for(int i=0; i < A->size ;i++)
 	{
 		out->data[i] = (float)(A->data[i] != B->data[i]);
@@ -147,7 +148,7 @@ void BasicOpsWrapperCPU::not_equal(Matrix<float> *A, Matrix<float> *B, Matrix<fl
 
 
 void BasicOpsWrapperCPU::squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{	
+{
 	for(int i=0; i < A->size ;i++)
 	{
 		out->data[i] = std::pow(A->data[i] - B->data[i],2.0f);
@@ -156,7 +157,7 @@ void BasicOpsWrapperCPU::squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix
 
 
 void BasicOpsWrapperCPU::dropout(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar)
-{	
+{
 	for(int i=0; i < A->size ;i++)
 	{
 		out->data[i] = B->data[i] > scalar ? A->data[i] : 0.0f;
@@ -195,7 +196,7 @@ void BasicOpsWrapperCPU::get_t_matrix(Matrix<float> *v, Matrix<float> *out)
 
 void BasicOpsWrapperCPU::slice(Matrix<float> *A, Matrix<float>*out, int rstart, int rend, int cstart, int cend)
 {
-  
+
   int rows_out = (rend - rstart);
   int cols_out = (cend - cstart);
   int size = rows_out*cols_out;
