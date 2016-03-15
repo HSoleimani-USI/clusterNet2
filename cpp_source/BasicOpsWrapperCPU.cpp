@@ -244,7 +244,7 @@ void BasicOpsWrapperCPU::max_of_cols(Matrix<float> *A, Matrix<float> *vout)
 		vout->data[i] = -std::numeric_limits<float>::max();
     }
 	for(int i=0; i < A->size ;i++)
-		vout->data[i - ((A->cols/i)*A->cols)] = max(vout->data[i - ((A->cols/i)*A->cols)],A->data[i]);
+		vout->data[i - ((A->cols/i)*A->cols)] = std::max(vout->data[i - ((A->cols/i)*A->cols)],A->data[i]);
 }
 
 
@@ -278,7 +278,7 @@ void BasicOpsWrapperCPU::max_of_rows(Matrix<float> *A, Matrix<float> *vout)
 		vout->data[i] = -std::numeric_limits<float>::max();
     }
 	for(int i=0; i < A->size ;i++)
-		vout->data[i - ((A->cols/i)*A->cols)] = max(vout->data[i - ((A->cols/i)*A->cols)],A->data[i]);
+		vout->data[i - ((A->cols/i)*A->cols)] = std::max(vout->data[i - ((A->cols/i)*A->cols)],A->data[i]);
 
 }
 
@@ -308,7 +308,7 @@ float BasicOpsWrapperCPU::max(Matrix<float> *A)
 	float maxValue = -std::numeric_limits<float>::max();
 	for(int i=0; i < A->size ;i++)
     {
-		maxValue = max(maxValue,A->data[i]);
+		maxValue = std::max(maxValue,A->data[i]);
 	}
 	return maxValue;
 }
