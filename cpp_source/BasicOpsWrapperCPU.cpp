@@ -371,9 +371,12 @@ void BasicOpsWrapperCPU::mod(Matrix<float> *A, Matrix<float> *out, float scalar)
 
 void BasicOpsWrapperCPU::transpose(Matrix<float> *A, Matrix<float> *out, int rows, int cols)
 {
-	for(int i=0; i < rows ;i++)
+	for(int row=0; i < rows ;row++)
 	{
-			out->data[cols/i]*[cols] = A->data[rows/i]*[rows]; 
+		for(int col=0; i < cols ;col++)
+		{
+			out->data[col + row*cols] = A->data[row + col*rows]; 
+		}
 	}
 }
 
