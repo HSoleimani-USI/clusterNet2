@@ -210,10 +210,104 @@ void BasicOpsWrapperCPU::slice(Matrix<float> *A, Matrix<float>*out, int rstart, 
 	  offset = (A->cols * (current_row+rstart)) + current_col + cstart;
 	  out->data[i] = A->data[offset];
   }
+  return 0;
 
 }
 
 
+void mean_of_cols(Matrix<float> *A, Matrix<float> *vout)
+{
+	for(int i=0; i < A->size ;i++)
+	{
+		vout->data = median(A->data[i],'c');
+	}
+
+
+}
+
+
+
+void sum_of_cols(Matrix<float> *A, Matrix<float> *vout)
+{
+	for(int i=0; i < A->size ;i++)
+	{
+		vout->data[i] = vout->data[i]+A->data[i];
+    }
+ 
+    return 0;
+
+}
+
+
+void max_of_cols(Matrix<float> *A, Matrix<float> *vout)
+{
+	for(int i=0; i < A->size ; i++)
+	{
+		out->data = max(A->data[i],[],1)
+	}
+	return 0;
+}
+
+
+void mean_of_rows(Matrix<float> *A, Matrix<float> *vout)
+{
+	for(int i=0; i < A->size ;i++)
+	{
+		vout->data = median(A->data[i],'r');
+	}
+
+	return 0;
+
+}
+
+
+void sum_of_rows(Matrix<float> *A, Matrix<float> *vout)
+{
+	for(int i=0; i < A->size ;i++)
+    {
+		vout->data[i] = 0;
+	    for(int j=0; j < A->size ;i++)
+	  	vout->data[i] = vout->data[i] + A->data[i][j];
+    }
+
+    return 0;
+
+}
+
+
+
+void max_of_rows(Matrix<float> *A, Matrix<float> *vout)
+{
+	for(int i=0; i < A->size ; i++)
+	{
+		out->data = max(A->data[i],[],1)
+	}
+	return 0;
+
+}
+
+
+float mean(Matrix<float> *A)
+{
+
+	for(int i=0; i < A->size ;i++)
+    {
+    	sum = sum + A->data[i];
+
+    {
+    average = sum / (float)A->size);
+    }
+
+}
+
+
+float sum(Matrix<float> *A)
+{
+	for(int i=0; i < A->size ;i++)
+    {
+	totalsum = sum_of_rows(*A) + sum_of_cols(*A)
+	}
+}
 
 
 
