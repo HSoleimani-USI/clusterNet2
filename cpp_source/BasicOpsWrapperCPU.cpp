@@ -338,6 +338,23 @@ void BasicOpsWrapperCPU::ELU_grad(Matrix<float> *A, Matrix<float> *out)
 { for(int i=0; i < A->size ;i++){ out->data[i] = A->data[i] > 0.0f ? 1.0f : A->data[i] + 1.0f;} }
 void BasicOpsWrapperCPU::rectified(Matrix<float> *A, Matrix<float> *out)
 { for(int i=0; i < A->size ;i++){ out->data[i] = A->data[i] > 0.0f ? A->data[i] : 0.0f;} }
+void BasicOpsWrapperCPU::rectified_grad(Matrix<float> *A, Matrix<float> *out)
+{ for(int i=0; i < A->size ;i++){ out->data[i] = A->data[i] > 0.0f ? 1.0f : 0.0f;} }
+
+void BasicOpsWrapperCPU::softmax(Matrix<float> *A, Matrix<float> *out)
+{
+	Matrix<float> vsum = empty(A->rows, 1);
+	max_of_cols(A, vsum);
+	vsub(A, vsum, out);
+	exp(out, out);
+	sum_of_cols(out, vsum);
+	for(int i=0; i < A->size ;i++)
+	{
+		out->data[i] /= vsum->data[i - ((i / out->cols)*out->cols)];
+	}
+
+	free(vsum);
+}
 
 
 
