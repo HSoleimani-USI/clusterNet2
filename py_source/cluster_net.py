@@ -230,7 +230,13 @@ class BatchAllocator(object):
 		self.current_batch = 0
 		self.epoch = 0
 		self.batches = X.shape[0]/batch_size
-		if buffertype == 'CPU':
+		if  lib.pt_clusterNet == lib.pt_clusterNetCPU:
+			self.pt = lib.funcs.fget_CPUtoCPUBatchAllocator(lib.pt_clusterNet, 
+						X.ctypes.data_as(ct.POINTER(ct.c_float)),
+						y.ctypes.data_as(ct.POINTER(ct.c_float)),
+						int(X.shape[0]), int(X.shape[1]), int(y.shape[1]),
+						int(batch_size))
+		elif buffertype == 'CPU':
 			self.pt = lib.funcs.fget_CPUBatchAllocator(lib.pt_clusterNet, 
 						X.ctypes.data_as(ct.POINTER(ct.c_float)),
 						y.ctypes.data_as(ct.POINTER(ct.c_float)),
@@ -467,13 +473,12 @@ def argmax(A, out=None):
 	lib.funcs.fargmax(lib.pt_clusterNet, A.pt, out.pt)
 	return out
 
-'''
+
 def to_pinned(X):
-	pt = lib.funcs.fto_pinned(lib.pt_clusterNet, X.shape[0], X.shape[1],
-						X.ctypes.data_as(ct.POINTER(ct.c_float)))
+	pt = lib.funcs.fto_pinned(lib.pt_clusterNet, X.shape[0], X.shape[1], X.ctypes.data_as(ct.POINTER(ct.c_float)))	
 	buffer = np.core.multiarray.int_asbuffer(ct.addressof(pt.contents), 4*X.size)
 	return np.frombuffer(buffer, np.float32).reshape(X.shape)
-'''
+
 def row_sum(A, out=None):
 	if not out: out = empty((A.shape[0],1))
 	lib.funcs.frowSum(lib.pt_clusterNet, A.pt, out.pt)
@@ -551,5 +556,8 @@ def lookup_rowwise(embedding, idx_batch, out=None):
 	if not out: out = empty((idx_batch.shape[0]*idx_batch.shape[1],embedding.shape[1]))
 	lib.funcs.flookup(lib.pt_clusterNet, embedding.pt, idx_batch.pt, out.pt)
 	return out
+
+def setCPU(): lib.pt_clusterNet = lib.pt_clusterNetCPU	
+def setGPU(): lib.pt_clusterNet = lib.pt_clusterNetGPU
 	
 

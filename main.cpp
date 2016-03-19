@@ -1,5 +1,6 @@
 #include "ClusterNet.h"
 #include <ClusterNetGPU.h>
+#include <ClusterNetCPU.h>
 #include "Timer.cuh"
 #include "Network.h"
 #include <Optimizer.h>
@@ -162,9 +163,9 @@ void test_neural_network()
 	test_transfer_time();
 
 	Timer t = Timer();
-	ClusterNet *gpu = new ClusterNetGPU();
+	ClusterNet *gpu = new ClusterNetCPU();
 
-	//gpu->OPS = new BasicOpsWrapperCPU();
+
 
 	gpu->useNervanaGPU = true;
 
@@ -195,8 +196,8 @@ void test_neural_network()
 
 
 
-	BatchAllocator *b_train = new GPUBatchAllocator(gpu, trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
-	BatchAllocator *b_cv = new GPUBatchAllocator(gpu, cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
+	BatchAllocator *b_train = new CPUBatchAllocator(gpu, trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
+	BatchAllocator *b_cv = new CPUBatchAllocator(gpu, cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
 
 	Network net = Network(gpu);
 

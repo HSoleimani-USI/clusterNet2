@@ -17,6 +17,7 @@ extern "C"
 	void fto_host(ClusterNet *gpu, FloatMatrix *gpumat, float *cpu){ to_host(gpu,gpumat, cpu);}
 	void fto_gpu(ClusterNet *gpu, float *cpu, FloatMatrix *gpumat){ to_gpu(gpu,cpu, gpumat); }
 	ClusterNet *fget_clusterNet(){ return get_clusterNet(); }
+	ClusterNet *fget_clusterNetCPU(){ return get_clusterNetCPU(); }
 	void fdot(ClusterNet *gpu, FloatMatrix*A, FloatMatrix *B, FloatMatrix*C){ gpu->dot(A,B,C); }
 	void frand(ClusterNet *gpu, int rows, int cols){ gpu->rand(rows, cols); }
 	void frandn(ClusterNet *gpu, int rows, int cols){ gpu->randn(rows, cols); }
@@ -59,15 +60,16 @@ extern "C"
 	{ return new FloatCPUBatchAllocator(gpu, X, y, rows, colsX, colsY, batch_size); }
 	FloatGPUBatchAllocator *fget_GPUBatchAllocator(ClusterNet *gpu, float *X, float *y, int rows, int colsX, int colsY, int batch_size)
 	{ return new FloatGPUBatchAllocator(gpu, X, y, rows, colsX, colsY, batch_size); }
+	FloatCPUtoCPUBatchAllocator *fget_CPUtoCPUBatchAllocator(ClusterNet *gpu, float *X, float *y, int rows, int colsX, int colsY, int batch_size)
+	{ return new FloatCPUtoCPUBatchAllocator(gpu, X, y, rows, colsX, colsY, batch_size); }
 
 
 	void falloc_next_batch(FloatBatchAllocator *alloc){ alloc->allocate_next_batch_async(); }
 	void freplace_current_with_next_batch(FloatBatchAllocator *alloc){ alloc->replace_current_with_next_batch(); }
-	FloatMatrix *fgetOffBatchX(FloatCPUBatchAllocator *alloc){ return alloc->nextoffbatchX; }
-	FloatMatrix *fgetOffBatchY(FloatCPUBatchAllocator *alloc){ return alloc->nextoffbatchY; }
-
-	FloatMatrix *fgetBatchX(FloatCPUBatchAllocator *alloc){ return alloc->get_current_batchX(); }
-	FloatMatrix *fgetBatchY(FloatCPUBatchAllocator *alloc){ return alloc->get_current_batchY(); }
+	FloatMatrix *fgetOffBatchX(FloatBatchAllocator *alloc){ return alloc->nextoffbatchX; }
+	FloatMatrix *fgetOffBatchY(FloatBatchAllocator *alloc){ return alloc->nextoffbatchY; }
+	FloatMatrix *fgetBatchX(FloatBatchAllocator *alloc){ return alloc->get_current_batchX(); }
+	FloatMatrix *fgetBatchY(FloatBatchAllocator *alloc){ return alloc->get_current_batchY(); }
 
 
 	FloatMatrix *fget_view(ClusterNet *gpu, FloatMatrix *A, int rstart, int rend){ wget_view(gpu,A, rstart, rend); }
@@ -83,6 +85,8 @@ extern "C"
 	float ffmax(ClusterNet *gpu, FloatMatrix *A){ return wMax(gpu,A); }
 	float ffsum(ClusterNet *gpu, FloatMatrix *A){ return wSum(gpu,A); }
 	float ffmean(ClusterNet *gpu, FloatMatrix *A){ return wMean(gpu,A); }
+
+	FloatMatrix *fto_pinned(ClusterNet *gpu, int rows, int cols, float *cpu){ return wto_pinned(gpu, rows, cols, cpu); }
 
 
 	Timer *fget_Timer(){ return new Timer(); }

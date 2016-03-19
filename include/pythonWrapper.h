@@ -5,14 +5,17 @@
 #include <BatchAllocator.h>
 #include <CPUBatchAllocator.h>
 #include <GPUBatchAllocator.h>
+#include <CPUtoCPUBatchAllocator.h>
 
 typedef Matrix<float> FloatMatrix;
 typedef BatchAllocator FloatBatchAllocator;
 typedef CPUBatchAllocator FloatCPUBatchAllocator;
 typedef GPUBatchAllocator FloatGPUBatchAllocator;
+typedef CPUtoCPUBatchAllocator FloatCPUtoCPUBatchAllocator;
 
 
 ClusterNet *get_clusterNet();
+ClusterNet *get_clusterNetCPU();
 
 FloatMatrix *fill_matrix(ClusterNet *gpu, int rows, int cols, float fill_value);
 FloatMatrix *empty(ClusterNet *gpu, int rows, int cols);
@@ -59,6 +62,8 @@ float wMax(ClusterNet *gpu, FloatMatrix *A);
 float wSum(ClusterNet *gpu, FloatMatrix *A);
 float wMean(ClusterNet *gpu, FloatMatrix *A);
 void freemat(FloatMatrix *A);
+
+FloatMatrix *wto_pinned(ClusterNet *gpu, int rows, int cols, float *cpu);
 
 void wsortbykey(ClusterNet *gpu, FloatMatrix *keys, FloatMatrix *values);
 

@@ -86,12 +86,12 @@ public:
 
 	void WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
 
-	void mean_of_cols(Matrix<float> *A, Matrix<float> *vout);
-	void sum_of_cols(Matrix<float> *A, Matrix<float> *vout);
-	void max_of_cols(Matrix<float> *A, Matrix<float> *vout);
-	void mean_of_rows(Matrix<float> *A, Matrix<float> *vout);
-	void sum_of_rows(Matrix<float> *A, Matrix<float> *vout);
-	void max_of_rows(Matrix<float> *A, Matrix<float> *vout);
+	void reduceToRowsMean(Matrix<float> *A, Matrix<float> *vout);
+	void reduceToRowsSum(Matrix<float> *A, Matrix<float> *vout);
+	void reduceToRowsMax(Matrix<float> *A, Matrix<float> *vout);
+	void reduceToColsMean(Matrix<float> *A, Matrix<float> *vout);
+	void reduceToColsSum(Matrix<float> *A, Matrix<float> *vout);
+	void reduceToColsMax(Matrix<float> *A, Matrix<float> *vout);
 
 	float mean(Matrix<float> *A);
 	float sum(Matrix<float> *A);

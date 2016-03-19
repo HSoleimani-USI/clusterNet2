@@ -8,6 +8,9 @@ import ctypes as ct
 import logging
 import numpy as np
 funcs = ct.cdll.LoadLibrary('libClusterNet.so')
+pt_clusterNetCPU = funcs.fget_clusterNetCPU()
+pt_clusterNetGPU = funcs.fget_clusterNet()
+pt_clusterNet = pt_clusterNetGPU
 
 class FloatMatrix(ct.Structure):
     _fields_ = [('rows', ct.c_int),
@@ -22,11 +25,13 @@ funcs.fempty.restype = ct.POINTER(FloatMatrix)
 funcs.ffill_matrix.restype = ct.POINTER(FloatMatrix)
 funcs.fto_host.restype = ct.c_void_p
 funcs.fto_gpu.restype = ct.c_void_p
+funcs.fto_pinned = ct.POINTER(FloatMatrix)
 funcs.fT.restype = ct.POINTER(FloatMatrix)
 funcs.ftranspose.restype = ct.c_void_p
 
 funcs.fget_CPUBatchAllocator.restype = ct.c_void_p
 funcs.fget_GPUBatchAllocator.restype = ct.c_void_p
+funcs.fget_CPUtoCPUBatchAllocator.restype = ct.c_void_p
 funcs.falloc_next_batch.restype = ct.c_void_p
 funcs.freplace_current_with_next_batch.restype = ct.c_void_p
 funcs.fgetBatchX.restype = ct.POINTER(FloatMatrix)
@@ -83,9 +88,6 @@ funcs.fslice.restype = ct.c_void_p
 
 funcs.fsoftmax.restype = ct.c_void_p
 funcs.fargmax.restype = ct.c_void_p
-
-
-pt_clusterNet = funcs.fget_clusterNet()
 
 
 funcs.frowMax.restype = ct.c_void_p

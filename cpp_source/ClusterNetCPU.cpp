@@ -7,6 +7,7 @@
 
 #include "ClusterNetCPU.h"
 #include "cblas.h"
+#include <BasicOpsWrapperCPU.h>
 
 
 ClusterNetCPU::ClusterNetCPU()
@@ -16,6 +17,8 @@ ClusterNetCPU::ClusterNetCPU()
 	uniform = std::uniform_real_distribution<float>(0.0f,1.0f);
 	gaussian = std::normal_distribution<float>(0.0f,1.0f);
 	normal_distribution = std::normal_distribution<float>(0.0f,1.0f);
+
+	OPS = new BasicOpsWrapperCPU();
 
 }
 
@@ -95,6 +98,6 @@ void ClusterNetCPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, 
 					 T1 ? CblasTrans : CblasNoTrans,
 					 T2 ? CblasTrans : CblasNoTrans,
 					 A_rows, B_cols, A_cols, alpha, A->data,
-					 A->rows, B->data, B->rows,
-					 beta, out->data, out->rows);
+					 A->cols, B->data, B->cols,
+					 beta, out->data, out->cols);
 }

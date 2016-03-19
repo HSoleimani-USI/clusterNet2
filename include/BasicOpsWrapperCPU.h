@@ -44,20 +44,6 @@ public:
 	void lookup(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out);
 	void embeddingUpdate(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *grad, Matrix<float> *RMS, float RMS_momentum, float learning_rate);
 
-
-
-	bool check_matrix_vector_op(Matrix<float> *A, Matrix<float> *vec);
-	bool check_for_same_dimensions(Matrix<float> *A, Matrix<float> *B);
-	bool check_matrix_multiplication(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2);
-	Matrix<float> *get_view(Matrix<float> *A, int rstart, int rend);
-
-
-	//map those to util file
-	void printmat(Matrix<float> *A);
-	void printsum(Matrix<float> *A);
-	void printmat(Matrix<float> *A, int end_rows, int end_cols);
-	void printmat(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col);
-
 	void abs(Matrix<float> *A, Matrix<float> *out);
 	void log(Matrix<float> *A, Matrix<float> *out);
 	void sqrt(Matrix<float> *A, Matrix<float> *out);
@@ -99,12 +85,12 @@ public:
 
 	void WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate);
 
-	void mean_of_cols(Matrix<float> *A, Matrix<float> *vout);
-	void sum_of_cols(Matrix<float> *A, Matrix<float> *vout);
-	void max_of_cols(Matrix<float> *A, Matrix<float> *vout);
-	void mean_of_rows(Matrix<float> *A, Matrix<float> *vout);
-	void sum_of_rows(Matrix<float> *A, Matrix<float> *vout);
-	void max_of_rows(Matrix<float> *A, Matrix<float> *vout);
+	void reduceToRowsMean(Matrix<float> *A, Matrix<float> *vout);
+	void reduceToRowsSum(Matrix<float> *A, Matrix<float> *vout);
+	void reduceToRowsMax(Matrix<float> *A, Matrix<float> *vout);
+	void reduceToColsMean(Matrix<float> *A, Matrix<float> *vout);
+	void reduceToColsSum(Matrix<float> *A, Matrix<float> *vout);
+	void reduceToColsMax(Matrix<float> *A, Matrix<float> *vout);
 
 	float mean(Matrix<float> *A);
 	float sum(Matrix<float> *A);

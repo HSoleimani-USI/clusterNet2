@@ -6,6 +6,7 @@ FloatMatrix *empty(ClusterNet *gpu, int rows, int cols){	return gpu->OPS->empty(
 void to_host(ClusterNet *gpu, FloatMatrix *gpumat, float *cpu){ gpu->OPS->to_host(gpumat, cpu); }
 void to_gpu(ClusterNet *gpu, float *cpu, FloatMatrix *gpumat){ gpu->OPS->to_gpu(cpu, gpumat); }
 ClusterNet *get_clusterNet(){ return new ClusterNetGPU(); }
+ClusterNet *get_clusterNetCPU(){ return new ClusterNetCPU(); }
 
 void pow(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out, float scalar){ gpu->OPS->pow(A, out, scalar); }
 void abs(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out){ gpu->OPS->abs(A, out); }
@@ -37,18 +38,20 @@ void tmatrix(ClusterNet *gpu, FloatMatrix *v, FloatMatrix *out){ gpu->OPS->get_t
 
 void wlookup(ClusterNet *gpu, FloatMatrix *embedding, FloatMatrix *idx_batch, FloatMatrix *out){ gpu->OPS->lookup(embedding,idx_batch,out); }
 
-void rowMax(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ gpu->OPS->max_of_cols(A, vout); }
-void rowSum(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ gpu->OPS->sum_of_cols(A, vout); }
-void rowMean(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ gpu->OPS->mean_of_cols(A, vout); }
+void rowMax(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ gpu->OPS->reduceToRowsMax(A, vout); }
+void rowSum(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ gpu->OPS->reduceToRowsSum(A, vout); }
+void rowMean(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ gpu->OPS->reduceToRowsMean(A, vout); }
 
-void colMax(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ gpu->OPS->max_of_rows(A, vout); }
-void colSum(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ gpu->OPS->sum_of_rows(A, vout); }
-void colMean(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ gpu->OPS->mean_of_rows(A, vout); }
+void colMax(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ gpu->OPS->reduceToColsMax(A, vout); }
+void colSum(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ gpu->OPS->reduceToColsSum(A, vout); }
+void colMean(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ gpu->OPS->reduceToColsMean(A, vout); }
 
 float wMax(ClusterNet *gpu, FloatMatrix *A){ return gpu->OPS->max(A); }
 float wSum(ClusterNet *gpu, FloatMatrix *A){ return gpu->OPS->sum(A); }
 float wMean(ClusterNet *gpu, FloatMatrix *A){ return gpu->OPS->mean(A); }
 void freemat(FloatMatrix *A){ cudaFree(A->data); free(A); }
+
+FloatMatrix *wto_pinned(ClusterNet *gpu, int rows, int cols, float *cpu){ return gpu->OPS->to_pinned(rows, cols, cpu); }
 
 
 

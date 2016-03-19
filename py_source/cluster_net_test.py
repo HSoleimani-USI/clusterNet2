@@ -10,6 +10,7 @@ import time
 
 
 def setup():
+    gpu.setCPU()
     pass
 
 def teardown():
@@ -166,76 +167,8 @@ def slice_test():
     print A
     
     t.assert_almost_equal(C, A[17:83,7:23], 3, "Slicing not working")
-    
-    
-def softmax_test():   
-    def softmax(X):
-        #numerically stable softmax function        
-        max_row_values = np.matrix(np.max(X,axis=1)).T
-        result = np.exp(X - max_row_values)
-        sums = np.matrix(np.sum(result,axis=1))        
-        return result/sums
-    
-    A = np.float32(np.random.randn(17,83))
-    B = gpu.array(A)
-    C = gpu.softmax(B).tocpu()
-    
-    t.assert_almost_equal(C, softmax(A), 3, "Softmax not working")
-    
-def argmax_test():       
-    A = np.float32(np.random.randn(123,83))
-    B = gpu.array(A)
-    C = gpu.argmax(B).tocpu()
-    
-    t.assert_almost_equal(C, np.argmax(A,1), 3, "Softmax not working")
-    
-'''   
-def test_to_pinned():
-    A = np.float32(np.random.rand(10,10))
-    B = gpu.to_pinned(A)
-    
-    t.assert_almost_equal(A,B , 3, "Pinned not working")
-'''    
 
-    
-def test_batch_allocator_CPU():
-    X = np.float32(np.random.rand(1000,17))
-    Y = np.float32(np.random.rand(1000,13))
-    batch_size = 128
-        
-    alloc = gpu.BatchAllocator(X,Y,batch_size, 'CPU')  
-    
-    
-    for epoch in range(3):  
-        for i in range(0,1000,batch_size):
-            batchX = X[i:i+batch_size]
-            batchY = Y[i:i+batch_size]
-            
-            if batchX.shape[0] != batch_size: continue
-            alloc.replace_current_with_next_batch()    
-            alloc.alloc_next_async()   
-            t.assert_almost_equal(alloc.X.tocpu(),batchX , 3, "Batch allocator not working")  
-            t.assert_almost_equal(alloc.Y.tocpu(),batchY , 3, "Batch allocator not working")    
-            
-    
    
-def test_batch_allocator_GPU():
-    X = np.float32(np.random.rand(1000,17))
-    Y = np.float32(np.random.rand(1000,13))
-    batch_size = 128 
-    alloc = gpu.BatchAllocator(X,Y,batch_size,'GPU')  
-    
-    for epoch in range(3):  
-        for i in range(0,1000,batch_size):
-            batchX = X[i:i+batch_size]
-            batchY = Y[i:i+batch_size]
-            
-            if batchX.shape[0] != batch_size: continue
-            alloc.replace_current_with_next_batch()    
-            alloc.alloc_next_async()   
-            t.assert_almost_equal(alloc.X.tocpu(),batchX , 3, "Batch allocator not working")  
-            t.assert_almost_equal(alloc.Y.tocpu(),batchY , 3, "Batch allocator not working")    
-       
     
 def test_row_reductions():
     A = np.float32(np.random.randn(100,110))
@@ -249,7 +182,7 @@ def test_row_reductions():
     
     C = gpu.row_mean(B).tocpu()    
     t.assert_almost_equal(C, np.mean(A,1), 3, "Rowmean not working")
-    
+ 
 def test_col_reductions():
     A = np.float32(np.random.randn(100,110))
     B = gpu.array(A)
@@ -275,7 +208,40 @@ def test_matrix_reductions():
     t.assert_almost_equal(C, np.mean(A), 3, "Max not working")
 
 
+
+
+
+def softmax_test():   
+    def softmax(X):
+        #numerically stable softmax function        
+        max_row_values = np.matrix(np.max(X,axis=1)).T
+        result = np.exp(X - max_row_values)
+        sums = np.matrix(np.sum(result,axis=1))        
+        return result/sums
     
+    A = np.float32(np.random.randn(17,83))
+    B = gpu.array(A)
+    C = gpu.softmax(B).tocpu()
+    
+    t.assert_almost_equal(C, softmax(A), 3, "Softmax not working")
+
+
+def argmax_test():       
+    A = np.float32(np.random.randn(123,83))
+    B = gpu.array(A)
+    C = gpu.argmax(B).tocpu()
+    
+    t.assert_almost_equal(C, np.argmax(A,1), 3, "Softmax not working")
+    
+'''
+def test_to_pinned():
+    A = np.float32(np.random.rand(10,10))
+    B = gpu.to_pinned(A)    
+    
+    t.assert_almost_equal(A,B , 3, "Pinned not working")
+'''
+
+     
 def test_timer():
     t = gpu.Timer()
     A = gpu.rand(100,100)
@@ -305,18 +271,6 @@ def test_timer():
     
     assert accumulative_time > 5*time
     
-def test_free():
-    #needs at least 3GB ram
-    dim = 1
-    for i in range(14):
-        dim*=2
-        print dim
-        A = gpu.rand(dim,dim)
-        B = gpu.rand(dim,dim)
-        C = gpu.rand(dim,dim)
-        gpu.dot(A,B,C)
-        del A, B, C
-         
 
         
 def test_euclidean_distance():
@@ -380,6 +334,57 @@ def test_get_view():
     t.assert_equal(Y[0:5], A.tocpu()[0:5], "Partial application to view not working!")
     t.assert_equal(np.sqrt(Y[5:10]), A.tocpu()[5:10], "Partial application to view not working!")
     
+  
+  
+def test_batch_allocator_CPU():
+    X = np.float32(np.random.rand(1000,17))
+    Y = np.float32(np.random.rand(1000,13))
+    batch_size = 128
+        
+    alloc = gpu.BatchAllocator(X,Y,batch_size, 'CPU')  
+    
+    
+    for epoch in range(3):  
+        for i in range(0,1000,batch_size):
+            batchX = X[i:i+batch_size]
+            batchY = Y[i:i+batch_size]
+            
+            if batchX.shape[0] != batch_size: continue
+            alloc.replace_current_with_next_batch()    
+            alloc.alloc_next_async()   
+            t.assert_almost_equal(alloc.X.tocpu(),batchX , 3, "Batch allocator not working")  
+            t.assert_almost_equal(alloc.Y.tocpu(),batchY , 3, "Batch allocator not working")    
+            
+    
+   
+def test_batch_allocator_GPU():
+    X = np.float32(np.random.rand(1000,17))
+    Y = np.float32(np.random.rand(1000,13))
+    batch_size = 128 
+    alloc = gpu.BatchAllocator(X,Y,batch_size,'GPU')  
+    
+    for epoch in range(3):  
+        for i in range(0,1000,batch_size):
+            batchX = X[i:i+batch_size]
+            batchY = Y[i:i+batch_size]
+            
+            if batchX.shape[0] != batch_size: continue
+            alloc.replace_current_with_next_batch()    
+            alloc.alloc_next_async()   
+            t.assert_almost_equal(alloc.X.tocpu(),batchX , 3, "Batch allocator not working")  
+            t.assert_almost_equal(alloc.Y.tocpu(),batchY , 3, "Batch allocator not working")    
+  
+def test_free():
+    #needs at least 3GB ram
+    
+    for i in range(100):
+        A = gpu.empty((256*1024,#1kb
+                      1024*1024))#total of 1GB memory
+        del A
+        
+         
+  
+'''
 def test_lookup():
     embedding_cols = 128
     batch_size = 32
@@ -406,20 +411,9 @@ def test_lookup():
     gpu.copy(out, out2)
     #t.assert_array_equal(out_rows_gpu.tocpu(), out_rowwise,"Lookup not working!")
     #t.assert_array_equal(out.tocpu(), out_concat,"Lookup not working!")
-    '''
-    timer = Timer()
-    timer.tick()
-    for i in range(1000):
-        gpu.lookup_rowwise(embeddings, batch,out)
-    timer.tock()
-    timer.tick()
-    for i in range(1000):
-        gpu.copy(out, out2)
-    timer.tock()
-    '''
+   
     
-    
-'''
+
 def test_TextToIdx():
     txt2idx = gpu.TextToIndex('brown', '../data/NLP/', '../data/')
     txt2idx.create_vocabulary()  

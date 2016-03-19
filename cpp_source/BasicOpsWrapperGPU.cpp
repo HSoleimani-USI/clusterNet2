@@ -124,12 +124,12 @@ void BasicOpsWrapperGPU::WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> 
 	WeightUpdate<RMSProp>(RMS, grad, w, RMS_multiplier, learning_rate);
 }
 
-void BasicOpsWrapperGPU::mean_of_cols(Matrix<float> *A, Matrix<float> *vout){ reduceToRows<rmean>(A, vout); }
-void BasicOpsWrapperGPU::sum_of_cols(Matrix<float> *A, Matrix<float> *vout){ reduceToRows<rsum>(A, vout); }
-void BasicOpsWrapperGPU::max_of_cols(Matrix<float> *A, Matrix<float> *vout){ reduceToRows<rmax>(A, vout); }
-void BasicOpsWrapperGPU::mean_of_rows(Matrix<float> *A, Matrix<float> *vout){ reduceToCols<rmean>(A, vout); }
-void BasicOpsWrapperGPU::sum_of_rows(Matrix<float> *A, Matrix<float> *vout){ reduceToCols<rsum>(A, vout); }
-void BasicOpsWrapperGPU::max_of_rows(Matrix<float> *A, Matrix<float> *vout){ reduceToCols<rmax>(A, vout); }
+void BasicOpsWrapperGPU::reduceToRowsMean(Matrix<float> *A, Matrix<float> *vout){ reduceToRows<rmean>(A, vout); }
+void BasicOpsWrapperGPU::reduceToRowsSum(Matrix<float> *A, Matrix<float> *vout){ reduceToRows<rsum>(A, vout); }
+void BasicOpsWrapperGPU::reduceToRowsMax(Matrix<float> *A, Matrix<float> *vout){ reduceToRows<rmax>(A, vout); }
+void BasicOpsWrapperGPU::reduceToColsMean(Matrix<float> *A, Matrix<float> *vout){ reduceToCols<rmean>(A, vout); }
+void BasicOpsWrapperGPU::reduceToColsSum(Matrix<float> *A, Matrix<float> *vout){ reduceToCols<rsum>(A, vout); }
+void BasicOpsWrapperGPU::reduceToColsMax(Matrix<float> *A, Matrix<float> *vout){ reduceToCols<rmax>(A, vout); }
 
 float BasicOpsWrapperGPU::mean(Matrix<float> *A){ return reduceToValue<rmean>(A); }
 float BasicOpsWrapperGPU::sum(Matrix<float> *A){ return reduceToValue<rsum>(A); }

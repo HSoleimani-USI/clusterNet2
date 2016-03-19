@@ -46,7 +46,7 @@ void LookupLayer::backward_grads()
 {
 	GPU->Tdot(activation, next->error, w_grad_next);
 	if(!next->target){ next->backward_grads(); }
-	GPU->OPS->mean_of_rows(next->error,b_grad_next);
+	GPU->OPS->reduceToColsMean(next->error,b_grad_next);
 }
 
 

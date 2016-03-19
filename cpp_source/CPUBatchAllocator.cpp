@@ -6,7 +6,6 @@
  */
 
 #include "CPUBatchAllocator.h"
-#include <Timer.cuh>
 
 
 CPUBatchAllocator::CPUBatchAllocator(ClusterNet *gpu){GPU = gpu;}

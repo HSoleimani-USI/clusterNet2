@@ -122,12 +122,12 @@ public:
 
 	virtual void WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> *grad, Matrix<float> *w, float RMS_multiplier, float learning_rate) = 0;
 
-	virtual void mean_of_cols(Matrix<float> *A, Matrix<float> *vout) = 0;
-	virtual void sum_of_cols(Matrix<float> *A, Matrix<float> *vout) = 0;
-	virtual void max_of_cols(Matrix<float> *A, Matrix<float> *vout) = 0;
-	virtual void mean_of_rows(Matrix<float> *A, Matrix<float> *vout) = 0;
-	virtual void sum_of_rows(Matrix<float> *A, Matrix<float> *vout) = 0;
-	virtual void max_of_rows(Matrix<float> *A, Matrix<float> *vout) = 0;
+	virtual void reduceToRowsMean(Matrix<float> *A, Matrix<float> *vout) = 0;
+	virtual void reduceToRowsSum(Matrix<float> *A, Matrix<float> *vout) = 0;
+	virtual void reduceToRowsMax(Matrix<float> *A, Matrix<float> *vout) = 0;
+	virtual void reduceToColsMean(Matrix<float> *A, Matrix<float> *vout) = 0;
+	virtual void reduceToColsSum(Matrix<float> *A, Matrix<float> *vout) = 0;
+	virtual void reduceToColsMax(Matrix<float> *A, Matrix<float> *vout) = 0;
 
 
 	virtual float mean(Matrix<float> *A) = 0;

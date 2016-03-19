@@ -165,10 +165,10 @@ void LSTMLayer::backward_grads()
 	GPU->Tdot(output_full, next->error_forget_gate_full, r_grad_next_forget_gate);
 	GPU->Tdot(output_full, next->error_output_gate_full, r_grad_next_output_gate);
 
-	GPU->OPS->mean_of_rows(next->error_input_full,bw_grad_next_input);
-	GPU->OPS->mean_of_rows(next->error_input_gate_full,bw_grad_next_input_gate);
-	GPU->OPS->mean_of_rows(next->error_forget_gate_full,bw_grad_next_forget_gate);
-	GPU->OPS->mean_of_rows(next->error_output_gate_full,bw_grad_next_output_gate);
+	GPU->OPS->reduceToColsMean(next->error_input_full,bw_grad_next_input);
+	GPU->OPS->reduceToColsMean(next->error_input_gate_full,bw_grad_next_input_gate);
+	GPU->OPS->reduceToColsMean(next->error_forget_gate_full,bw_grad_next_forget_gate);
+	GPU->OPS->reduceToColsMean(next->error_output_gate_full,bw_grad_next_output_gate);
 
 	if(!next->target){ next->backward_grads(); }
 }
