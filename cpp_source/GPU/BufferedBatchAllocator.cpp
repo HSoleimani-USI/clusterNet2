@@ -66,8 +66,8 @@ void BufferedBatchAllocator::replace_current_with_next_batch()
 
 	cudaStreamSynchronize(streamX);
 	cudaStreamSynchronize(streamY);
-	boost::swap(batchX,nextbatchX);
-	boost::swap(batchY,nextbatchY);
+	std::swap(batchX,nextbatchX);
+	std::swap(batchY,nextbatchY);
 
 	CURRENT_BATCH += 1;
 

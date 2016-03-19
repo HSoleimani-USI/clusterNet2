@@ -502,6 +502,7 @@ void BasicOpsWrapperCPU::WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> 
 
 	for(int i = 0; i < w->size; i++)
 	{
+		grad_value = grad->data[i];
 		RMS_value = (RMS_multiplier*RMS->data[i]) + (std::pow(grad_value,2.0f)*rms_reciprocal);
 		grad_value = learning_rate*grad_value/((std::sqrt(RMS_value)+1.0e-08f));
 		RMS->data[i] = RMS_value;

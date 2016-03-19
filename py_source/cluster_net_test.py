@@ -10,7 +10,7 @@ import time
 
 
 def setup():
-    gpu.setCPU()
+    #gpu.setCPU()
     pass
 
 def teardown():

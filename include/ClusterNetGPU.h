@@ -5,10 +5,14 @@
  *      Author: tim
  */
 
-#include <ClusterNet.h>
 
 #ifndef CLUSTERNETGPU_H_
 #define CLUSTERNETGPU_H_
+
+#include <ClusterNet.h>
+#include <cublas_v2.h>
+#include <curand.h>
+#include <cuda.h>
 
 class ClusterNetGPU : public ClusterNet
 {

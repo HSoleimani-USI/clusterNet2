@@ -1,12 +1,9 @@
-#include <boost/thread.hpp>
-#include <boost/date_time.hpp>
 #include <iostream>
 #include <BasicOpsWrapper.h>
-#include <cublas_v2.h>
-#include <curand.h>
-#include <cuda.h>
-#include "nervana_c_api.h"
-#include "leveldb/db.h"
+
+#ifdef NERVANA
+	#include "nervana_c_api.h"
+#endif
 
 
 #ifndef __ClusterNet_H__

@@ -5,14 +5,14 @@
  *      Author: tim
  */
 
-#include <cuda_runtime_api.h>
-#include <BasicOpsWrapper.h>
-#include <boost/swap.hpp>
-#include <BatchAllocator.h>
-
 
 #ifndef GPUBatchAllocator_H_
 #define GPUBatchAllocator_H_
+
+#include <cuda_runtime_api.h>
+#include <BasicOpsWrapper.h>
+#include <BatchAllocator.h>
+#include <cuda_runtime_api.h>
 
 #define CUDA_CHECK_RETURN(value) {                      \
   cudaError_t _m_cudaStat = value;                    \
@@ -29,6 +29,8 @@ public:
 	GPUBatchAllocator(ClusterNet *gpu, float *X, float *y, int rows, int colsX, int colsY, int batch_size);
 	void allocate_next_batch_async();
 	void replace_current_with_next_batch();
+	cudaStream_t streamX;
+	cudaStream_t streamY;
 };
 
 #endif /* GPUBatchAllocator_H_ */

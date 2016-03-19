@@ -6,7 +6,7 @@
  */
 
 #include "LSTMLayer.h"
-#include <boost/swap.hpp>
+#include <utility>
 #include <RecurrentNetwork.h>
 #include <ActivationFunction.h>
 #include <Configurator.h>
@@ -146,7 +146,7 @@ void LSTMLayer::backward_errors()
 			GPU->OPS->mul(error_input_batch[i], grad_input_batch[i] , error_input_batch[i]);
 		}
 
-		boost::swap(error_cell_prev,error_cell_current);
+		std::swap(error_cell_prev,error_cell_current);
 
 	}
 

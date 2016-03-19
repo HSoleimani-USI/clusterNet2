@@ -5,9 +5,8 @@
  *      Author: tim
  */
 
-#include <cuda_runtime_api.h>
 #include <BasicOpsWrapper.h>
-#include <boost/swap.hpp>
+#include <utility>
 #include <ClusterNet.h>
 
 
@@ -34,9 +33,6 @@ public:
 	int BATCHES;
 	int CURRENT_BATCH;
 	int EPOCH;
-
-	cudaStream_t streamX;
-	cudaStream_t streamY;
 
 	Matrix<float> *get_current_batchX();
 	Matrix<float> *get_current_batchY();

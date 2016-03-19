@@ -3,7 +3,7 @@
 #include <BasicOpsWrapper.h>
 #include <string>
 #include <map>
-
+#include <cuda_runtime_api.h>
 
 struct Timer
 {

@@ -23,12 +23,15 @@ ClusterNetGPU::ClusterNetGPU()
         exit(1);
     }
 
-    useNervanaGPU = true;
-    if (!nervana_loadKernels("/usr/local/cuda/cubin/"))
-    {
-        std::cerr << "Couldn't load all kernels" << std::endl;
-        useNervanaGPU = false;
-    }
+    useNervanaGPU = false;
+
+#ifdef NERVANA
+		if (!nervana_loadKernels("/usr/local/cuda/cubin/"))
+		{
+			std::cerr << "Couldn't load all kernels" << std::endl;
+			useNervanaGPU = false;
+		}
+#endif
 
 	//setRandomState(time(0));
     setRandomState(56564);
@@ -85,6 +88,7 @@ void ClusterNetGPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, 
 
 		if(useNervanaGPU)
 		{
+#ifdef NERVANA
 			bool success = nervana_sgemm(A->data, B->data, out->data, T1,T2,
 										 A_rows, B_cols, A_cols,
 										 A->cols,B->cols,out->cols,
@@ -97,6 +101,7 @@ void ClusterNetGPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, 
 				cout << "NERVANA ERROR" << endl;
 				throw "NERVANA ERROR";
 			}
+#endif
 
 		}
 		else

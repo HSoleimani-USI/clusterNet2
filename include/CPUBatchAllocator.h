@@ -7,8 +7,8 @@
 
 #include <cuda_runtime_api.h>
 #include <BasicOpsWrapper.h>
-#include <boost/swap.hpp>
 #include <BatchAllocator.h>
+#include <cuda_runtime_api.h>
 
 
 #ifndef CPUBatchAllocator_H_
@@ -21,6 +21,9 @@ public:
 	CPUBatchAllocator(ClusterNet *gpu, float *X, float *y, int rows, int colsX, int colsY, int batch_size);
 	void allocate_next_batch_async();
 	void replace_current_with_next_batch();
+
+	cudaStream_t streamX;
+	cudaStream_t streamY;
 };
 
 #endif /* CPUBatchAllocator_H_ */

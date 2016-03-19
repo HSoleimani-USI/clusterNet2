@@ -6,7 +6,6 @@
  */
 
 #include "BatchAllocator.h"
-#include <Timer.cuh>
 
 
 //we need to fetch the current batch in python, because the struct values with the dimensions does not update automatically

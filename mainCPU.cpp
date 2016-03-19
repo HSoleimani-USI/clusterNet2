@@ -1,41 +1,44 @@
 #include "ClusterNet.h"
-#include <ClusterNetGPU.h>
 #include <ClusterNetCPU.h>
-#include "Timer.cuh"
+//#include <ClusterNetGPU.h>
+//#include "Timer.cuh"
 #include "Network.h"
 #include <Optimizer.h>
 #include <FCLayer.h>
 #include <BatchAllocator.h>
-#include <CPUBatchAllocator.h>
-#include <GPUBatchAllocator.h>
-#include <BufferedBatchAllocator.h>
+//#include <CPUtoCPUBatchAllocator.h>
+//#include <GPUBatchAllocator.h>
+//#include <BufferedBatchAllocator.h>
 #include <ErrorHandler.h>
 #include <Configurator.h>
 #include <string>
 #include <map>
 #include <BasicOpsWrapperCPU.h>
+#include <CPUtoCPUBatchAllocator.h>
 
 using namespace std;
 
 
 void test_timer()
 {
-	ClusterNet *gpu = new ClusterNetGPU();
+	ClusterNet *gpu = new ClusterNetCPU();
 	Matrix<float> *A = gpu->rand(100,100);
 	Matrix<float> *B = gpu->rand(100,100);
 	Matrix<float> *C = gpu->rand(100,100);
 
+	/*
 	Timer t = Timer();
 
 	t.tick();
 	for(int i = 0; i < 10000; i++)
 		gpu->dot(A,B,C);
 	t.tock();
+	*/
 }
 
 void test_transfer_time()
 {
-	ClusterNet *gpu = new ClusterNetGPU();
+	ClusterNet *gpu = new ClusterNetCPU();
 	int batch_size = 32;
 	int time_steps = 100;
 
@@ -47,6 +50,7 @@ void test_transfer_time()
 	Matrix<float> *error = gpu->rand(batch_size*time_steps,256);
 	Matrix<float> *w = gpu->rand(128,256);
 
+	/*
 	Timer t = Timer();
 
 	t.tick();
@@ -64,13 +68,14 @@ void test_transfer_time()
 	for(int i = 0; i < 100; i++)
 		gpu->dot(data,error,w);
 	t.tock();
+	*/
 
 }
 
 void test_LSTM_swapping()
 {
 
-	ClusterNet *gpu = new ClusterNetGPU();
+	ClusterNet *gpu = new ClusterNetCPU();
 
 	int hidden = 256;
 	int timesteps = 1000;
@@ -81,6 +86,7 @@ void test_LSTM_swapping()
 	Matrix<float> *inputR = gpu->rand(batch_size*stack_size,hidden);
 	Matrix<float> *errorsR = gpu->rand(batch_size*stack_size,hidden);
 
+	/*
 	Timer t = Timer();
 
 
@@ -93,12 +99,13 @@ void test_LSTM_swapping()
 		gpu->dot(inputR,errorsR,R);
 
 	t.tock();
+	*/
 }
 
 void test_lookup_time()
 {
 
-	ClusterNet *gpu = new ClusterNetGPU();
+	ClusterNet *gpu = new ClusterNetCPU();
 
 	int embedding_rows = 10000;
 	int embedding_cols = 256;
@@ -109,11 +116,13 @@ void test_lookup_time()
 	Matrix<float> *batch = gpu->rand(batch_size*batch_cols,embedding_cols);
 	Matrix<float> *batch1 = gpu->rand(batch_size*batch_cols,embedding_cols);
 
+	/*
 	Timer t = Timer();
 	t.tick();
 	for(int i = 0; i < 1000; i++)
 		cudaMemcpy(batch1->data, batch->data,batch->bytes,cudaMemcpyDeviceToDevice);
 	t.tock();
+	*/
 
 	/*
 
@@ -140,8 +149,8 @@ void test_neural_network()
 
 	test_transfer_time();
 
-	Timer t = Timer();
-	ClusterNet *gpu = new ClusterNetGPU();
+	//Timer t = Timer();
+	ClusterNet *gpu = new ClusterNetCPU();
 
 
 
@@ -174,8 +183,8 @@ void test_neural_network()
 
 
 
-	BatchAllocator *b_train = new GPUBatchAllocator(gpu, trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
-	BatchAllocator *b_cv = new GPUBatchAllocator(gpu, cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
+	BatchAllocator *b_train = new CPUtoCPUBatchAllocator(gpu, trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
+	BatchAllocator *b_cv = new CPUtoCPUBatchAllocator(gpu, cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
 
 	Network net = Network(gpu);
 
@@ -203,7 +212,7 @@ void test_neural_network()
 	*/
 
 
-	t.tick();
+	//t.tick();
 	net.train(b_train, b_cv, 20);
 
 	/*
@@ -220,7 +229,7 @@ void test_neural_network()
 
 	net.train(b_train, b_cv, 11);
 
-	t.tock();
+	//t.tock();
 
 }
 
