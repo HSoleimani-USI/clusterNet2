@@ -41,6 +41,8 @@ public:
 	virtual Matrix<float> *to_pinned(int rows, int cols, float *cpu) = 0;
 	virtual Matrix<float> *to_pinned(int rows, int cols, float *cpu, size_t bytes_to_copy) = 0;
 
+	virtual Matrix<float> *get_pinned(int rows, int cols) = 0;
+
 
 
 	virtual Matrix<float> *transpose(Matrix<float> *A) = 0;
@@ -132,29 +134,27 @@ public:
 	virtual float sum(Matrix<float> *A) = 0;
 	virtual float max(Matrix<float> *A) = 0;
 
+
+
+
 	// to check the dimention
-	virtual bool check_matrix_vector_op(Matrix<float> *A, Matrix<float> *vec) = 0;
-	virtual bool check_for_same_dimensions(Matrix<float> *A, Matrix<float> *B) = 0;
-	virtual bool check_matrix_multiplication(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2) = 0;
-
-
-	//map those to util file
-	virtual Matrix<float> *read_hdf5(const char *filepath) = 0;
-	virtual Matrix<float> *read_hdf5(const char *filepath, const char *tag) = 0;
-
-
+	bool check_matrix_vector_op(Matrix<float> *A, Matrix<float> *vec);
+	bool check_for_same_dimensions(Matrix<float> *A, Matrix<float> *B);
+	bool check_matrix_multiplication(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2);
 	// getting pointers from the starting row to nth rows
-	virtual Matrix<float> *get_view(Matrix<float> *A, int rstart, int rend) = 0;
+	Matrix<float> *get_view(Matrix<float> *A, int rstart, int rend);
+	void printsum(Matrix<float> *A);
 
+	Matrix<float> *read_hdf5(const char *filepath);
+	Matrix<float> *read_hdf5(const char *filepath, const char *tag);
 
-	virtual void print_matrix(Matrix<float> *A, int end_rows, int end_cols) = 0;
-	virtual void print_matrix(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col) = 0;
-	virtual void printmat(Matrix<float> *A) = 0;
-	virtual void printhostmat(Matrix<float> *A) = 0;
-	virtual void printdim(Matrix<float> *A) = 0;
-	virtual void printsum(Matrix<float> *A) = 0;
-	virtual void printmat(Matrix<float> *A, int end_rows, int end_cols) = 0;
-	virtual void printmat(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col) = 0;
+	void print_matrix(Matrix<float> *A, int end_rows, int end_cols);
+	void print_matrix(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col);
+	void printmat(Matrix<float> *A);
+	void printmat(Matrix<float> *A, int end_rows, int end_cols);
+	void printmat(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col);
+	void printhostmat(Matrix<float> *A);
+	void printdim(Matrix<float> *A);
 
 
 };

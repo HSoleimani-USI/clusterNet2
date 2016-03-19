@@ -103,6 +103,7 @@ template<typename T> Matrix<T> *zeros(int rows, int cols);
 template<typename T> Matrix<T> *ones(int rows, int cols);
 template<typename T> void to_host(Matrix<T> *gpu, T *cpu);
 template<typename T> void to_gpu(T *cpu, Matrix<T> *gpu);
+template <typename T> Matrix<T> *get_pinned(int rows, int cols);
 template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu);
 template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu, size_t bytes_to_copy);
 
@@ -139,27 +140,6 @@ template <int reduction> void reduceToCols(Matrix<float> *A, Matrix<float> *vout
 template <int reduction> void reduceToRows(Matrix<float> *A, Matrix<float> *vout);
 template <int reduction> float reduceToValue(Matrix<float> *A);
 template <int reduction> float reduceToValue(Matrix<float> *A, Matrix<float> *vout_rows);
-
-
-bool check_matrix_vector_op(Matrix<float> *A, Matrix<float> *vec);
-bool check_for_same_dimensions(Matrix<float> *A, Matrix<float> *B);
-bool check_matrix_multiplication(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2);
-
-
-template <typename T> Matrix<T> *read_hdf5(const char *filepath);
-template <typename T> Matrix<T> *read_hdf5(const char *filepath, const char *tag);
-
-Matrix<float> *get_view(Matrix<float> *A, int rstart, int rend);
-
-
-void print_matrix(Matrix<float> *A, int end_rows, int end_cols);
-void print_matrix(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col);
-void printmat(Matrix<float> *A);
-void printhostmat(Matrix<float> *A);
-void printdim(Matrix<float> *A);
-void printsum(Matrix<float> *A);
-void printmat(Matrix<float> *A, int end_rows, int end_cols);
-void printmat(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col);
 
 
 #endif

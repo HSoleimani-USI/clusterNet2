@@ -14,6 +14,7 @@
 #include <Table.h>
 #include <string>
 #include <map>
+#include <BasicOpsWrapperCPU.h>
 
 using namespace std;
 
@@ -162,6 +163,8 @@ void test_neural_network()
 
 	Timer t = Timer();
 	ClusterNet *gpu = new ClusterNetGPU();
+
+	//gpu->OPS = new BasicOpsWrapperCPU();
 
 	gpu->useNervanaGPU = true;
 

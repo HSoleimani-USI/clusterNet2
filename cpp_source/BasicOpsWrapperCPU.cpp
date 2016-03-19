@@ -382,13 +382,6 @@ void BasicOpsWrapperCPU::transpose(Matrix<float> *A, Matrix<float> *out, int row
 	}
 }
 
-
-
-
-
-
-
-
 void BasicOpsWrapperCPU::exp(Matrix<float> *A, Matrix<float> *out)
 { for(int i=0; i < A->size ;i++){ out->data[i] = ::exp(A->data[i]); } }
 void BasicOpsWrapperCPU::abs(Matrix<float> *A, Matrix<float> *out)
