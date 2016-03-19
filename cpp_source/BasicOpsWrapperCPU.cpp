@@ -9,6 +9,8 @@
 #include <cmath>
 #include <cstdlib>
 #include <limits>
+#include <stdlib.h>
+#include <algorithm>
 
 
 
@@ -217,12 +219,12 @@ void BasicOpsWrapperCPU::slice(Matrix<float> *A, Matrix<float>*out, int rstart, 
 
 void BasicOpsWrapperCPU::mean_of_cols(Matrix<float> *A, Matrix<float> *vout)
 {
-	for(int i=0; i < A->size ;i++)
+	//TODO: The name is unclear here, does mean of cols indicate the mean over columns or the mean over rows that result in the mean of for each column?
+	sum_of_cols(A, vout);
+	for(int i = 0; i < vout->size; i++)
 	{
-		vout->data = median(A->data[i],'c');
+		vout->data[i] /= A->rows;
 	}
-
-
 }
 
 
@@ -234,7 +236,7 @@ void BasicOpsWrapperCPU::sum_of_cols(Matrix<float> *A, Matrix<float> *vout)
 		vout->data[i] = 0.0f;
     }
 	//must be either rows or cols here; run tests and change this if the tests fail
-	for(int j=0; j < A->size ;i++)
+	for(int i=0; i < A->size ;i++)
 		vout->data[i - ((A->cols/i)*A->cols)] += A->data[i];
 
 }
@@ -246,8 +248,8 @@ void BasicOpsWrapperCPU::max_of_cols(Matrix<float> *A, Matrix<float> *vout)
     {
 		vout->data[i] = -std::numeric_limits<float>::max();
     }
-	for(int j=0; j < A->size ;i++)
-		vout->data[i - ((A->cols/i)*A->cols)] = max(vout->data[i - ((A->cols/i)*A->cols)],A->data[i]);
+	for(int i=0; i < A->size ;i++)
+		vout->data[i - ((A->cols/i)*A->cols)] = std::max(vout->data[i - ((A->cols/i)*A->cols)],A->data[i]);
 }
 
 
@@ -266,7 +268,7 @@ void BasicOpsWrapperCPU::sum_of_rows(Matrix<float> *A, Matrix<float> *vout)
 		vout->data[i] = 0.0f;
     }
 	//must be either rows or cols here; run tests and change this if the tests fail
-	for(int j=0; j < A->size ;i++)
+	for(int i=0; i < A->size ;i++)
 		vout->data[i - ((A->cols/i)*A->cols)] += A->data[i];
 
 
@@ -280,8 +282,8 @@ void BasicOpsWrapperCPU::max_of_rows(Matrix<float> *A, Matrix<float> *vout)
     {
 		vout->data[i] = -std::numeric_limits<float>::max();
     }
-	for(int j=0; j < A->size ;i++)
-		vout->data[i - ((A->cols/i)*A->cols)] = max(vout->data[i - ((A->cols/i)*A->cols)],A->data[i]);
+	for(int i=0; i < A->size ;i++)
+		vout->data[i - ((A->cols/i)*A->cols)] = std::max(vout->data[i - ((A->cols/i)*A->cols)],A->data[i]);
 
 }
 
@@ -311,7 +313,7 @@ float BasicOpsWrapperCPU::max(Matrix<float> *A)
 	float maxValue = -std::numeric_limits<float>::max();
 	for(int i=0; i < A->size ;i++)
     {
-		maxValue = max(maxValue,A->data[i]);
+		maxValue = std::max(maxValue,A->data[i]);
 	}
 	return maxValue;
 }
@@ -371,9 +373,9 @@ void BasicOpsWrapperCPU::mod(Matrix<float> *A, Matrix<float> *out, float scalar)
 
 void BasicOpsWrapperCPU::transpose(Matrix<float> *A, Matrix<float> *out, int rows, int cols)
 {
-	for(int row=0; i < rows ;row++)
+	for(int row=0; row < rows ;row++)
 	{
-		for(int col=0; i < cols ;col++)
+		for(int col=0; col < cols ;col++)
 		{
 			out->data[col + row*cols] = A->data[row + col*rows]; 
 		}
@@ -387,18 +389,20 @@ void BasicOpsWrapperCPU::transpose(Matrix<float> *A, Matrix<float> *out, int row
 
 
 
+void BasicOpsWrapperCPU::exp(Matrix<float> *A, Matrix<float> *out)
+{ for(int i=0; i < A->size ;i++){ out->data[i] = ::exp(A->data[i]); } }
 void BasicOpsWrapperCPU::abs(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = abs(A->data[i]); } }
+{ for(int i=0; i < A->size ;i++){ out->data[i] = std::abs(A->data[i]); } }
 void BasicOpsWrapperCPU::log(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = log(A->data[i]); } }
+{ for(int i=0; i < A->size ;i++){ out->data[i] = std::log(A->data[i]); } }
 void BasicOpsWrapperCPU::sqrt(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = sqrt(A->data[i]); } }
+{ for(int i=0; i < A->size ;i++){ out->data[i] = std::sqrt(A->data[i]); } }
 void BasicOpsWrapperCPU::logistic(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = 1.0f/(1.0f-exp(-A->data[i])); } }
+{ for(int i=0; i < A->size ;i++){ out->data[i] = 1.0f/(1.0f-::exp(-A->data[i])); } }
 void BasicOpsWrapperCPU::logistic_grad(Matrix<float> *A, Matrix<float> *out)
 { for(int i=0; i < A->size ;i++){ out->data[i] = A->data[i]*(1.0f-A->data[i]); } }
 void BasicOpsWrapperCPU::tanh(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = tanh(A->data[i]); } }
+{ for(int i=0; i < A->size ;i++){ out->data[i] = std::tanh(A->data[i]); } }
 void BasicOpsWrapperCPU::tanh_grad(Matrix<float> *A, Matrix<float> *out)
 { for(int i=0; i < A->size ;i++){ out->data[i] = 1.0f - (A->data[i]*A->data[i]); } }
 void BasicOpsWrapperCPU::ELU(Matrix<float> *A, Matrix<float> *out)
@@ -412,7 +416,7 @@ void BasicOpsWrapperCPU::rectified_grad(Matrix<float> *A, Matrix<float> *out)
 
 void BasicOpsWrapperCPU::softmax(Matrix<float> *A, Matrix<float> *out)
 {
-	Matrix<float> vsum = empty(A->rows, 1);
+	Matrix<float> *vsum = empty(A->rows, 1);
 	max_of_cols(A, vsum);
 	vsub(A, vsum, out);
 	exp(out, out);

@@ -63,7 +63,6 @@ public:
 	void printmat(Matrix<float> *A, int end_rows, int end_cols);
 	void printmat(Matrix<float> *A, int start_row, int end_row, int start_col, int end_col);
 
-
 	void abs(Matrix<float> *A, Matrix<float> *out);
 	void log(Matrix<float> *A, Matrix<float> *out);
 	void sqrt(Matrix<float> *A, Matrix<float> *out);
@@ -115,6 +114,9 @@ public:
 	float mean(Matrix<float> *A);
 	float sum(Matrix<float> *A);
 	float max(Matrix<float> *A);
+
+	//non-abstract
+	void exp(Matrix<float> *A, Matrix<float> *out);
 
 };
 
