@@ -6,7 +6,11 @@
  */
 
 #include "ClusterNetCPU.h"
-#include "cblas.h"
+#ifdef PHI
+	#include <mkl.h>
+#else
+	#include "cblas.h"
+#endif
 #include <BasicOpsWrapperCPU.h>
 
 
