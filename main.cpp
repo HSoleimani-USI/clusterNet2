@@ -224,10 +224,97 @@ void test_neural_network()
 
 }
 
+void run_astro()
+{
+
+	test_transfer_time();
+
+	Timer t = Timer();
+	ClusterNet *gpu = new ClusterNetGPU();
+
+
+
+	gpu->useNervanaGPU = true;
+
+	Matrix<float> *X = gpu->OPS->read_hdf5("/home/tim/data/astro/X.hdf5");
+	Matrix<float> *y = gpu->OPS->read_hdf5("/home/tim/data/astro/y.hdf5");
+
+	int samples = X->rows;
+	int cv = 10000;
+	int dim = X->cols;
+	int classes = 2;
+
+	Matrix<float> *trainX = gpu->OPS->zeros(samples-cv,dim);
+	Matrix<float> *trainy = gpu->OPS->zeros(samples-cv,1);
+
+	Matrix<float> *cvX = gpu->OPS->zeros(cv,dim);
+	Matrix<float> *cvy = gpu->OPS->zeros(cv,1);
+
+	gpu->OPS->slice(X,trainX,0,samples-cv,0,dim);
+	gpu->OPS->slice(y,trainy,0,samples-cv,0,1);
+
+
+	gpu->OPS->slice(X,cvX,samples-cv,samples,0,dim);
+	gpu->OPS->slice(y,cvy,samples-cv,samples,0,1);
+
+
+
+	BatchAllocator *b_train = new GPUBatchAllocator(gpu, trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
+	BatchAllocator *b_cv = new GPUBatchAllocator(gpu, cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,128);
+
+	Network net = Network(gpu);
+
+	net._conf->LEARNING_RATE = 0.003f;
+	net._conf->RMSPROP_MOMENTUM = 0.99f;
+
+	net.add(new FCLayer(dim,Input));
+	net.add(new FCLayer(1024,Exponential_linear));
+	net.add(new FCLayer(1024,Exponential_linear));
+	net.add(new FCLayer(classes,Softmax));
+
+	net._layers.front()->_conf->DROPOUT = 0.0f;
+	net.copy_global_params_to_layers();
+	//net._layers.front()->_conf->DROPOUT = 0.2f;
+
+	net._opt = new Optimizer(gpu, RMSProp);
+	net.init_weights(UniformSqrt);
+
+
+	/*
+	net._opt->_updatetype = RMSPropInit;
+	net._conf->RMSPROP_MOMENTUM = 0.0f;
+	net.fit_partial(b_train,10);
+	net._conf->RMSPROP_MOMENTUM = 0.99f;
+	net._opt->_updatetype = RMSProp;
+	*/
+
+
+	t.tick();
+	net.train(b_train, b_cv, 100);
+
+	/*
+	b_train->BATCH_SIZE = 256;
+	b_train->BATCHES *= 0.5;
+	b_train->CURRENT_BATCH = 0;
+	*/
+
+	net._conf->DROPOUT = 0.25f;
+	net._conf->LEARNING_RATE *= 0.2f;
+	net._conf->LEARNING_RATE_DECAY = 0.95f;
+	net.copy_global_params_to_layers();
+	net._layers.front()->_conf->DROPOUT = 0.1f;
+
+	net.train(b_train, b_cv, 11);
+
+	t.tock();
+
+}
+
 int main(int argc, char const *argv[]) {
 
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
+	run_astro();
 	test_neural_network();
 	//test_lookup_time();
 
