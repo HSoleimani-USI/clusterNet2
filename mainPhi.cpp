@@ -1,4 +1,5 @@
 #include "ClusterNet.h"
+#include <stdio.h>
 #include <ClusterNetCPU.h>
 //#include <ClusterNetGPU.h>
 //#include "Timer.cuh"
@@ -147,17 +148,21 @@ void test_lookup_time()
 void test_neural_network()
 {
 
-	test_transfer_time();
+//	test_transfer_time();
 
 	//Timer t = Timer();
+	printf("init clusternet cpu\n");
 	ClusterNet *gpu = new ClusterNetCPU();
 
 
 
-	gpu->useNervanaGPU = true;
+//	gpu->useNervanaGPU = true;
 
-	Matrix<float> *X = gpu->OPS->read_hdf5("/home/dettmers/data/distributed_X.hdf5");
-	Matrix<float> *y = gpu->OPS->read_hdf5("/home/dettmers/data/distributed_y.hdf5");
+	
+	printf("loading data\n");
+	Matrix<float> *X = gpu->OPS->read_csv("/home/dettmers/data/X.csv");
+	Matrix<float> *y = gpu->OPS->read_csv("/home/dettmers/data/y.csv");
+	printf("post loading data\n");
 
 
 	//Matrix<float> *X = read_hdf5<float>("/home/tim/data/astro/X.hdf5");
@@ -235,6 +240,7 @@ void test_neural_network()
 
 int main(int argc, char const *argv[]) {
 
+	printf("abc2\n");
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
 	test_neural_network();
