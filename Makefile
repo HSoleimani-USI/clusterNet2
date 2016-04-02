@@ -8,7 +8,7 @@ INCLUDE :=  -I /usr/local/cuda/include -I $(ROOT_DIR)/include -I $(NERVANA_DIR) 
 LIB := -L /usr/local/cuda/lib64 -L $(HDF5_DIR)lib -L $(NERVANA_DIR)
 FLAGS_GPU := -lcudart -lcuda -lcublas -lcurand -lhdf5 -lhdf5_hl -lcblas
 FLAGS_CPU := -lhdf5 -lhdf5_hl -lcblas
-FLAGS_PHI := -lhdf5 -lhdf5_hl -mkl -openmp
+FLAGS_PHI := -mkl -openmp
 FILES := $(ROOT_DIR_CU)/BasicOpsCUDA.cu $(ROOT_DIR_CU)/clusterKernels.cu $(ROOT_DIR_CU)/Timer.cu $(ROOT_DIR_CCP)/Matrix.cpp 
 FILES_CPP := $(wildcard $(ROOT_DIR_CCP)/*.cpp) $(wildcard $(ROOT_DIR_CCP)/*.c)
 FILES_CPP_GPU := $(wildcard $(ROOT_DIR_CCP)/GPU/*.cpp) $(wildcard $(ROOT_DIR_CCP)/GPU/*.c)
@@ -31,9 +31,9 @@ testc:
 	g++ -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/mainCPU.cpp -o main.o -L $(HDF5_DIR)lib $(FLAGS_CPU) -lClusterNet
 	
 phi:
-	icpc -D PHI -std=c++11 -shared -fPIC $(INCLUDE) -I $(HDF5_INC_DIR) $(FILES_CPP) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) -L $(HDF5_LIB_DIR) $(FLAGS_PHI)	
+	icpc -D PHI -std=c++11 -shared -fPIC $(INCLUDE) $(FILES_CPP) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) $(FLAGS_PHI)	
 testphi:
-	icpc -D PHI -std=c++11 $(INCLUDE) -I $(HDF5_INC_DIR) -L $(ROOT_DIR)/lib $(ROOT_DIR)/mainPhi.cpp -o main.o -L $(HDF5_LIB_DIR) $(FLAGS_PHI) -lClusterNet
+	icpc -D PHI -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/mainPhi.cpp -o main.o $(FLAGS_PHI) -lClusterNet
 
 	
 clean:
