@@ -144,11 +144,14 @@ void Network::train(BatchAllocator *train, BatchAllocator *CV, int epochs)
 	{
 		cout << "EPOCH: " << epoch + 1 << endl;
 
+
 		fit_partial(train, train->BATCHES);
-		train->replace_current_with_next_batch();
-		train->allocate_next_batch_async();
+		//TODO: Why was this here?
+		//train->replace_current_with_next_batch();
+		//train->allocate_next_batch_async();
 
 		get_errors(train, "Train error: ");
+
 		get_errors(CV, "CV error: ");
 
 		_conf->LEARNING_RATE *= _conf->LEARNING_RATE_DECAY;

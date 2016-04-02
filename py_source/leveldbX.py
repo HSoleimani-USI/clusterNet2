@@ -53,6 +53,7 @@ class Table(object):
             self.set(key, value)
             return value
         else:
+            if ret == None: return None
             if ret == "hdf5":
                 return load_hdf5_matrix(join(self.hdf5_path, key.replace('/','_')+ ".hdf5"))
             else:

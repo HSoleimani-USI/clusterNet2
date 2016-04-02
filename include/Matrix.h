@@ -17,7 +17,7 @@ template<typename T> class Matrix
     int rows;
     int cols;
     size_t bytes;
-    int size;
+    long size;
     T *data;
     bool isRowMajor;
 };

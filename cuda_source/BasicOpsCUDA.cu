@@ -69,11 +69,13 @@ template <typename T> Matrix<T> *to_pinned(int rows, int cols, T *cpu, size_t by
 template Matrix<float> *get_pinned(int rows, int cols);
 template <typename T> Matrix<T> *get_pinned(int rows, int cols)
 {
-	int size = rows*cols;
+	long size = ((long)rows)*((long)cols);
 	size_t bytes = sizeof(T)*size;
 	Matrix<T> *out = (Matrix<T>*)malloc(sizeof(Matrix<T>));
 	T *pinned_ptr;
+
 	CUDA_CHECK_RETURN(cudaHostAlloc(&pinned_ptr, bytes, cudaHostAllocPortable));
+	//CUDA_CHECK_RETURN(cudaHostAlloc(&pinned_ptr, bytes, cudaHostAllocDefault));
 	for(int i = 0; i < rows*cols; i++){ pinned_ptr[i] = 0.0f;}
 
 	out->bytes = bytes;
@@ -105,7 +107,7 @@ template Matrix<float> *empty<float>(int rows, int cols);
 template <typename T> Matrix<T> *empty(int rows, int cols)
 {
   T *gpu_data;
-  int size = rows*cols;
+  long size = rows*cols;
   size_t bytes = rows*cols*sizeof(T);
   CUDA_CHECK_RETURN(cudaMalloc((void**)&gpu_data, bytes));
   

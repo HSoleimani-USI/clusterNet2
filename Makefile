@@ -15,19 +15,18 @@ FILES_CPP_GPU := $(wildcard $(ROOT_DIR_CCP)/GPU/*.cpp) $(wildcard $(ROOT_DIR_CCP
 FILES_OUT := $(wildcard $(BUILD_DIR)/*.o) 
 COMPUTE_CAPABILITY := arch=compute_52,code=sm_52 
 SOURCES := $(shell find $(BUILD_DIR) -name '*.o')
-all:
-	
-	nvcc -gencode $(COMPUTE_CAPABILITY) -Xcompiler '-fPIC' -dc $(FILES) $(INCLUDE) $(LIB) -lnervana $(FLAGS_GPU) --output-directory $(ROOT_DIR)/build 
-	nvcc -gencode $(COMPUTE_CAPABILITY) -Xcompiler '-fPIC' -dlink $(BUILD_DIR)/Matrix.o $(BUILD_DIR)/BasicOpsCUDA.o $(BUILD_DIR)/clusterKernels.o $(BUILD_DIR)/Timer.o -o $(BUILD_DIR)/link.o
-	g++ -D NERVANA -std=c++11 -shared -fPIC $(INCLUDE)  $(wildcard $(BUILD_DIR)/*.o) $(FILES_CPP) $(FILES_CPP_GPU) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) -lnervana $(FLAGS_GPU)
+all:	
+	nvcc -D HDF5 -gencode $(COMPUTE_CAPABILITY) -Xcompiler '-fPIC' -dc $(FILES) $(INCLUDE) $(LIB) -lnervana $(FLAGS_GPU) --output-directory $(ROOT_DIR)/build 
+	nvcc -D HDF5 -gencode $(COMPUTE_CAPABILITY) -Xcompiler '-fPIC' -dlink $(BUILD_DIR)/Matrix.o $(BUILD_DIR)/BasicOpsCUDA.o $(BUILD_DIR)/clusterKernels.o $(BUILD_DIR)/Timer.o -o $(BUILD_DIR)/link.o
+	g++ -D HDF5 -D NERVANA -std=c++11 -shared -fPIC $(INCLUDE)  $(wildcard $(BUILD_DIR)/*.o) $(FILES_CPP) $(FILES_CPP_GPU) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) -lnervana $(FLAGS_GPU)
 kepler:
-	nvcc -gencode arch=compute_30,code=sm_30 -Xcompiler '-fPIC' -dc $(FILES) $(INCLUDE) $(LIB) $(FLAGS) $(FLAGS_GPU) --output-directory $(ROOT_DIR)/build 
-	nvcc -gencode arch=compute_30,code=sm_30 -Xcompiler '-fPIC' -dlink $(BUILD_DIR)/Matrix.o $(BUILD_DIR)/BasicOpsCUDA.o $(BUILD_DIR)/clusterKernels.o $(BUILD_DIR)/Timer.o -o $(BUILD_DIR)/link.o 
-	g++ -std=c++11 -shared -fPIC $(INCLUDE) $(wildcard $(BUILD_DIR)/*.o) $(FILES_CPP) $(FILES_CPP_GPU) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) $(FLAGS_GPU)	
+	nvcc -D HDF5 -gencode arch=compute_30,code=sm_30 -Xcompiler '-fPIC' -dc $(FILES) $(INCLUDE) $(LIB) $(FLAGS) $(FLAGS_GPU) --output-directory $(ROOT_DIR)/build 
+	nvcc -D HDF5 -gencode arch=compute_30,code=sm_30 -Xcompiler '-fPIC' -dlink $(BUILD_DIR)/Matrix.o $(BUILD_DIR)/BasicOpsCUDA.o $(BUILD_DIR)/clusterKernels.o $(BUILD_DIR)/Timer.o -o $(BUILD_DIR)/link.o 
+	g++ -D HDF5 -std=c++11 -shared -fPIC $(INCLUDE) $(wildcard $(BUILD_DIR)/*.o) $(FILES_CPP) $(FILES_CPP_GPU) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) $(FLAGS_GPU)	
 c:
 	g++ -std=c++11 -shared -fPIC $(INCLUDE) $(FILES_CPP) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) $(FLAGS_CPU)	
 test:
-	g++ -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/main.cpp -o main.o $(LIB) $(FLAGS_GPU) -lClusterNet  
+	g++ -D HDF5 -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/main.cpp -o main.o $(LIB) $(FLAGS_GPU) -lClusterNet  
 testc:
 	g++ -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/mainCPU.cpp -o main.o -L $(HDF5_DIR)lib $(FLAGS_CPU) -lClusterNet
 	

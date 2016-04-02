@@ -19,8 +19,8 @@ GPUBatchAllocator::GPUBatchAllocator(ClusterNet *gpu, float *X, float *y, int ro
 	batch_bufferX = GPU->OPS->empty(BATCHES*batch_size,colsX);
 	batch_bufferY = GPU->OPS->empty(BATCHES*batch_size,colsY);
 
-	CUDA_CHECK_RETURN(cudaMemcpy(batch_bufferX->data, X,sizeof(float)*BATCHES*batch_size*colsX, cudaMemcpyHostToDevice));
-	CUDA_CHECK_RETURN(cudaMemcpy(batch_bufferY->data, y,sizeof(float)*BATCHES*batch_size*colsY, cudaMemcpyHostToDevice));
+	CUDA_CHECK_RETURN(cudaMemcpy(batch_bufferX->data, X,sizeof(float)*BATCHES*batch_size*colsX, cudaMemcpyDefault));
+	CUDA_CHECK_RETURN(cudaMemcpy(batch_bufferY->data, y,sizeof(float)*BATCHES*batch_size*colsY, cudaMemcpyDefault));
 
 	CURRENT_BATCH = 0;
 	EPOCH = 0;

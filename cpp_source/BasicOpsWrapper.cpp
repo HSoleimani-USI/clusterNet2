@@ -9,7 +9,17 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <iostream>
-#include <hdf5.h>
+
+#include <vector>
+#include <string>
+#include <string.h> // memcpy
+#include <iostream>
+#include <sstream>
+#include <fstream>
+
+#ifdef HDF5
+	#include <hdf5.h>
+#endif
 
 using std::cout;
 using std::endl;
@@ -136,6 +146,7 @@ bool BasicOpsWrapper::check_matrix_vector_op(Matrix<float> *A, Matrix<float> *ve
 Matrix<float> *BasicOpsWrapper::read_hdf5(const char *filepath){ return read_hdf5(filepath,"/Default"); }
 Matrix<float> *BasicOpsWrapper::read_hdf5(const char *filepath, const char *tag)
 {
+#ifdef HDF5
 	   hid_t       file_id, dataset_id;
 	   file_id = H5Fopen(filepath, H5F_ACC_RDWR, H5P_DEFAULT);
 	   dataset_id = H5Dopen2(file_id, tag, H5P_DEFAULT);
@@ -152,7 +163,43 @@ Matrix<float> *BasicOpsWrapper::read_hdf5(const char *filepath, const char *tag)
 	   H5Dclose(dataset_id);
 	   H5Fclose(file_id);
 
+
 	   return out;
+#else
+	   return 0;
+#endif
+
+}
+
+Matrix<float> *BasicOpsWrapper::read_csv (const char* filename)
+{
+	std::ifstream  dStream(filename);
+	long columns = 0;
+	long rows = 0;
+	std::vector<float> X;
+
+	std::string line;
+	while(std::getline(dStream,line))
+	{
+		std::stringstream  lineStream(line);
+		std::string cell;
+		while(std::getline(lineStream,cell,','))
+		{
+			X.push_back(::atof(cell.c_str()));
+
+			if(rows == 0)
+				columns++;
+		}
+	rows++;
+	}
+
+	float *data = (float*)malloc(sizeof(float)*columns*rows);
+	memcpy(data,&X[0], columns*rows*sizeof(float));
+	Matrix<float> *out = to_pinned(rows, columns, data);
+
+	std::vector<float>().swap( X );
+
+	return out;
 }
 
 
