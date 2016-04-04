@@ -156,10 +156,10 @@ void test_neural_network()
 
 	gpu->useNervanaGPU = true;
 
-	Matrix<float> *X = gpu->OPS->read_hdf5("/home/tim/data/mnist/distributed_X.hdf5");
-	Matrix<float> *y = gpu->OPS->read_hdf5("/home/tim/data/mnist/distributed_y.hdf5");
 
-
+	Matrix<float> *X = gpu->OPS->read_csv("/home/dettmers/data/X.csv");
+	Matrix<float> *y = gpu->OPS->read_csv("/home/dettmers/data/y.csv");
+	p
 	//Matrix<float> *X = read_hdf5<float>("/home/tim/data/astro/X.hdf5");
 	//Matrix<float> *y = read_hdf5<float>("/home/tim/data/astro/y.hdf5");
 

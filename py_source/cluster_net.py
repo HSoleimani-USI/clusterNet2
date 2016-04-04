@@ -1,19 +1,19 @@
 import library_interface as lib
 import numpy as np
 import ctypes as ct
-from nltk.tokenize import WordPunctTokenizer
-from nltk.corpus import stopwords
+#from nltk.tokenize import WordPunctTokenizer
+#from nltk.corpus import stopwords
 import string
 from os.path import join,isfile
 import cPickle as pickle
 import time
 from os import listdir
-import nltk
+#import nltk
 import h5py
 import leveldbX
 
 
-
+'''
 class TextToIndex(object):
 	def __init__(self, name, path, output_dir):
 		self.vocab2freq = {}
@@ -112,7 +112,7 @@ class TextToIndex(object):
 				
 				
 					
-		
+'''		
 		
 
 class NeuralNetwork(object):

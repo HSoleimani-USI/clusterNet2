@@ -71,8 +71,8 @@ void Network::init_activations(int batchsize)
 	for(int i = 1; i < _layers.size(); i++)
 	{
 		_layers[i]->init_transformer_activations(batchsize);
+		
 		if(_layers[i]->activation != NULL && _layers[i]->activation->rows == batchsize){ return; }
-
 		if(_layers[i]->activation != NULL)
 		{
 			_gpu->OPS->free_matrix(_layers[i]->activation);
@@ -102,6 +102,7 @@ void Network::copy_global_params_to_layers()
 
 void Network::fit_partial(BatchAllocator *b, int batches)
 {
+	
 	init_activations(b->BATCH_SIZE);
 	_isTrainTime = true;
 
@@ -112,7 +113,6 @@ void Network::fit_partial(BatchAllocator *b, int batches)
 
 		_layers.front()->activation = b->get_current_batchX();
 		_layers.back()->target = b->get_current_batchY();
-
 		_layers.front()->forward();
 		_errorhandler->add_error(_layers.back()->activation, _layers.back()->target);
 		_layers.front()->backward_errors();

@@ -21,6 +21,7 @@ void Layer::init(int unitcount, Unittype_t unitType, Layer_t layerType)
 	b_grad_next = NULL;
 	eq = NULL;
 	result = NULL;
+	activation = NULL;
 
 	target = NULL;
 	target_matrix = NULL;

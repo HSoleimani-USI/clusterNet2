@@ -164,7 +164,7 @@ def slice_test():
     A = np.float32(np.random.randn(100,100))
     B = gpu.array(A)
     C = gpu.slice(B,17,83,7,23).tocpu()
-    print A
+    print( A)
     
     t.assert_almost_equal(C, A[17:83,7:23], 3, "Slicing not working")
 
@@ -253,7 +253,6 @@ def test_timer():
     for i in range(10):
         gpu.dot(A,B,C)    
     time = t.tock()
-    print time
     assert time > 0
     
     time = 0
@@ -317,7 +316,7 @@ def test_printmat():
     X = np.float32(np.random.rand(2,2))
     A = gpu.array(X)
     gpu.printmat(A)
-    print X
+    print( X)
     
     
 def test_get_view():

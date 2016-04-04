@@ -17,8 +17,8 @@
 #include <BasicOpsWrapperCPU.h>
 #include <CPUtoCPUBatchAllocator.h>
 
-using namespace std;
-
+using std::endl;
+using std::cout;
 
 void test_timer()
 {
@@ -218,6 +218,7 @@ void test_neural_network()
 
 
 	//t.tick();
+	cout << "pre train" << endl;
 	net.train(b_train, b_cv, 20);
 
 	/*
@@ -241,6 +242,7 @@ void test_neural_network()
 int main(int argc, char const *argv[]) {
 
 	printf("abc2\n");
+	cout << "a" << endl;
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
 	test_neural_network();
