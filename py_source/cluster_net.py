@@ -1,3 +1,4 @@
+from __future__ import print_function
 import library_interface as lib
 import numpy as np
 import ctypes as ct
@@ -534,7 +535,7 @@ def get_closest_index(x, top=50):
 	row_indexes = []
 	distances_cpu = np.empty((rows,),dtype=np.float32)
 	for i in range(x.shape[0]):
-		if i % 100 == 0: print i
+		if i % 100 == 0: print(i)
 		slice(X, i,i+1,0, dim, vec)
 		vector_sub(X, vec, buffer)
 		pow(buffer, 2.0, buffer)
