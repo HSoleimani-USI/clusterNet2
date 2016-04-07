@@ -145,6 +145,27 @@ void test_lookup_time()
 	*/
 }
 
+void test_phi()
+{
+	float test[4] = {1.7,1.3,1.2,1.1};
+	
+	ClusterNet *gpu = new ClusterNetCPU();
+
+
+	Matrix<float>* a = gpu->OPS->ones(2,2);
+	Matrix<float>* b = gpu->OPS->ones(2,2);
+	Matrix<float>* c = gpu->OPS->empty(2,2);
+
+	gpu->OPS->to_gpu(test, a);
+
+	gpu->OPS->add(a,b,c);
+
+	cout << gpu->OPS->sum(c) << endl;
+	cout << "Sum should be: " << 4 + 1.7+1.3+1.2+1.1 << endl;
+
+	
+}
+
 void test_neural_network()
 {
 
@@ -163,10 +184,18 @@ void test_neural_network()
 	Matrix<float> *X = gpu->OPS->read_csv("/home/dettmers/data/X.csv");
 	Matrix<float> *y = gpu->OPS->read_csv("/home/dettmers/data/y.csv");
 	printf("post loading data\n");
+	gpu->OPS->printmat(X,0,5,400,410);
 
+	gpu->OPS->printmat(y,0,5,0,1);
 
+	cout << "test X" << gpu->OPS->sum(X) << endl;
+	cout << "test y" << gpu->OPS->sum(y) << endl;
 	//Matrix<float> *X = read_hdf5<float>("/home/tim/data/astro/X.hdf5");
 	//Matrix<float> *y = read_hdf5<float>("/home/tim/data/astro/y.hdf5");
+	cout << "post sum prints" << endl;
+	 for(int i =0; i < 10; i++)
+		cout << y->data[i] << " ";
+	cout << endl;
 
 	int samples = X->rows;
 	int cv = 10000;
@@ -185,7 +214,6 @@ void test_neural_network()
 
 	gpu->OPS->slice(X,cvX,samples-cv,samples,0,dim);
 	gpu->OPS->slice(y,cvy,samples-cv,samples,0,1);
-
 
 
 	BatchAllocator *b_train = new CPUtoCPUBatchAllocator(gpu, trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
@@ -245,7 +273,8 @@ int main(int argc, char const *argv[]) {
 	cout << "a" << endl;
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
-	test_neural_network();
+	//test_neural_network();
+	test_phi();
 	//test_lookup_time();
 
 

@@ -10,8 +10,6 @@ import cPickle as pickle
 import time
 from os import listdir
 #import nltk
-import h5py
-import leveldbX
 
 
 '''

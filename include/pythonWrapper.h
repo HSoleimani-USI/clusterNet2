@@ -1,20 +1,27 @@
 #include <BasicOpsWrapper.h>
 #include <ClusterNet.h>
-#include <ClusterNetGPU.h>
 #include <ClusterNetCPU.h>
 #include <BatchAllocator.h>
-#include <CPUBatchAllocator.h>
-#include <GPUBatchAllocator.h>
 #include <CPUtoCPUBatchAllocator.h>
 
-typedef Matrix<float> FloatMatrix;
+#ifdef PHI
+#else
+	#include <ClusterNetGPU.h>
+	#include <CPUBatchAllocator.h>
+	#include <GPUBatchAllocator.h>
+	#include <Timer.cuh>
+	typedef GPUBatchAllocator FloatGPUBatchAllocator;
+	typedef CPUBatchAllocator FloatCPUBatchAllocator;
+	ClusterNet *get_clusterNet();
+	void freemat(FloatMatrix *A);
+#endif
+
+
 typedef BatchAllocator FloatBatchAllocator;
-typedef CPUBatchAllocator FloatCPUBatchAllocator;
-typedef GPUBatchAllocator FloatGPUBatchAllocator;
+typedef Matrix<float> FloatMatrix;
 typedef CPUtoCPUBatchAllocator FloatCPUtoCPUBatchAllocator;
 
 
-ClusterNet *get_clusterNet();
 ClusterNet *get_clusterNetCPU();
 
 FloatMatrix *fill_matrix(ClusterNet *gpu, int rows, int cols, float fill_value);
@@ -61,7 +68,6 @@ void colMean(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout);
 float wMax(ClusterNet *gpu, FloatMatrix *A);
 float wSum(ClusterNet *gpu, FloatMatrix *A);
 float wMean(ClusterNet *gpu, FloatMatrix *A);
-void freemat(FloatMatrix *A);
 
 FloatMatrix *wto_pinned(ClusterNet *gpu, int rows, int cols, float *cpu);
 

@@ -20,6 +20,12 @@ class FloatMatrix(ct.Structure):
                 ('data', ct.POINTER(ct.c_float))]
     def __init__(self): pass
 
+def load_gpu_funcs():
+    funcs.fget_CPUBatchAllocator.restype = ct.c_void_p
+    funcs.fget_GPUBatchAllocator.restype = ct.c_void_p
+    funcs.ftick.restype = ct.c_void_p
+    funcs.fget_Timer.restype = ct.c_void_p
+    funcs.ftock.restype = ct.c_float
 
 funcs.fempty.restype = ct.POINTER(FloatMatrix)
 funcs.ffill_matrix.restype = ct.POINTER(FloatMatrix)
@@ -29,8 +35,6 @@ funcs.fto_pinned = ct.POINTER(FloatMatrix)
 funcs.fT.restype = ct.POINTER(FloatMatrix)
 funcs.ftranspose.restype = ct.c_void_p
 
-funcs.fget_CPUBatchAllocator.restype = ct.c_void_p
-funcs.fget_GPUBatchAllocator.restype = ct.c_void_p
 funcs.fget_CPUtoCPUBatchAllocator.restype = ct.c_void_p
 funcs.falloc_next_batch.restype = ct.c_void_p
 funcs.freplace_current_with_next_batch.restype = ct.c_void_p
@@ -103,9 +107,6 @@ funcs.ffsum.restype = ct.c_float
 funcs.ffmean.restype = ct.c_float
 
 
-funcs.fget_Timer.restype = ct.c_void_p
-funcs.ftick.restype = ct.c_void_p
-funcs.ftock.restype = ct.c_float
 
 funcs.ffree.restype = ct.c_void_p
 

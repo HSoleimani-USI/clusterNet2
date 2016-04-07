@@ -111,6 +111,8 @@ void Network::fit_partial(BatchAllocator *b, int batches)
 		b->replace_current_with_next_batch();
 		b->allocate_next_batch_async();
 
+		cout << _gpu->OPS->sum(b->get_current_batchX()) << endl;
+
 		_layers.front()->activation = b->get_current_batchX();
 		_layers.back()->target = b->get_current_batchY();
 		_layers.front()->forward();

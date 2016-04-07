@@ -3,14 +3,13 @@ import nose
 import numpy as np
 import numpy.testing as t
 import time
-from scipy.spatial.distance import cdist
 from cluster_net import NeuralNetwork, Timer
 import time
 
 
 
 def setup():
-    #gpu.setCPU()
+    gpu.setCPU()
     pass
 
 def teardown():

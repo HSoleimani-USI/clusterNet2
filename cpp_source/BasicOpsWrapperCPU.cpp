@@ -304,10 +304,12 @@ float BasicOpsWrapperCPU::sum(Matrix<float> *A)
 {
 
 	float sumValue = 0.0f;
+	cout << "size: " << A->size << endl;
 	for(int i=0; i < A->size ;i++)
     {
 		sumValue += A->data[i];
 	}
+	cout << "sum value: " << sumValue  << endl;
 	return sumValue;
 }
 
@@ -441,7 +443,17 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *A, Matrix<float> *out)
 
 
 
-void BasicOpsWrapperCPU::to_host(Matrix<float> *gpu, float *cpu){ std::memcpy(cpu,gpu->data, gpu->bytes); }
+void BasicOpsWrapperCPU::to_host(Matrix<float> *gpu, float *cpu)
+{
+ for(int i =0; i < 10; i++)
+	cout << cpu[i] << " ";
+cout << endl;
+ std::memcpy(gpu->data, cpu, gpu->bytes); 
+cout << "gpu data" << endl;
+ for(int i =0; i < 10; i++)
+	cout << gpu->data[i] << " ";
+cout << endl;
+}
 Matrix<float> *BasicOpsWrapperCPU::to_host(Matrix<float> *gpu)
 {
 	Matrix<float> *out = empty(gpu->rows, gpu->cols);
@@ -458,8 +470,12 @@ Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu)
 }
 Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu, size_t bytes_to_copy)
 {
+	for(int i =0; i < 10; i++)
+		cout << cpu[i] << " ";
+	cout << endl;
 	Matrix<float> *out = empty(rows, cols);
 	std::memcpy(out->data,cpu, bytes_to_copy);
+	cout << sum(out) << endl;
 	return out;
 }
 Matrix<float> *BasicOpsWrapperCPU::get_pinned(int rows, int cols){ return empty(rows, cols); }

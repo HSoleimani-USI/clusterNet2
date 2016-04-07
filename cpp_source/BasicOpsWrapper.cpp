@@ -197,7 +197,12 @@ Matrix<float> *BasicOpsWrapper::read_csv (const char* filename)
 	memcpy(data,&X[0], columns*rows*sizeof(float));
 	Matrix<float> *out = to_pinned(rows, columns, data);
 
-	std::vector<float>().swap( X );
+	
+	cout << "post pinned data" << endl;
+	 for(int i =0; i < 10; i++)
+		cout << out->data[i] << " ";
+	cout << endl;
+	//std::vector<float>().swap( X );
 
 	return out;
 }
