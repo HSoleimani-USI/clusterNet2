@@ -147,19 +147,33 @@ void test_lookup_time()
 
 void test_phi()
 {
-	float test[4] = {1.7,1.3,1.2,1.1};
 	
+	float test[4] = {1.7,1.3,1.2,1.1};
+	float test2[4] = {1.7,1.3,1.2,1.1};
 	ClusterNet *gpu = new ClusterNetCPU();
 
 
-	Matrix<float>* a = gpu->OPS->ones(2,2);
+	Matrix<float>* a = gpu->OPS->zeros(2,2);
 	Matrix<float>* b = gpu->OPS->ones(2,2);
 	Matrix<float>* c = gpu->OPS->empty(2,2);
 
-	gpu->OPS->to_gpu(test, a);
+
+	gpu->OPS->to_host(a, test);
+	gpu->OPS->to_host(b, test);
+	gpu->OPS->to_host(c, test);
+	gpu->OPS->to_gpu(test2, a);
+	gpu->OPS->to_host(a, test);
 
 	gpu->OPS->add(a,b,c);
 
+	gpu->OPS->to_host(c, test);
+
+	for(int i =0; i < 4; i++)
+		cout << test[i] << " ";
+	cout << endl; 
+
+	cout << gpu->OPS->sum(a) << endl;
+	cout << gpu->OPS->sum(b) << endl;
 	cout << gpu->OPS->sum(c) << endl;
 	cout << "Sum should be: " << 4 + 1.7+1.3+1.2+1.1 << endl;
 

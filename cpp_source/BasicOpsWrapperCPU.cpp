@@ -21,22 +21,36 @@ Matrix<float> *BasicOpsWrapperCPU::fill_matrix(int rows, int cols, float fill_va
 {
 	Matrix<float> *ret = empty(rows, cols);
 	
-	for(int i = 0; i < ret->size; i++)
-		ret->data[i] = fill_value;
+	int size = ret->size;
+	float *data = ret->data;
+	#pragma offload target(mic:0) in(size) in(data : length(size) alloc_if(0) free_if(0))
+	{
+		#pragma omp parallel for
+		for(int i = 0; i < size; i++)
+			data[i] = fill_value;
 
+	}
 	return ret;
 }
 
 Matrix<float> *BasicOpsWrapperCPU::empty(int rows, int cols)
 {
 	Matrix<float> *ret = new Matrix<float>();
-	ret->data = (float*)malloc(sizeof(float)*rows*cols);
+	{
+		ret->data = (float*)malloc(sizeof(float)*rows*cols);
+	}
 	ret->rows = rows;
 	ret->cols = cols;
 	ret->size = rows*cols;
 	ret->bytes = rows*cols*sizeof(float);
 	ret->isRowMajor = true;
+	float *data = ret-> data;
+	int size = rows*cols;
 
+	
+	#pragma offload target(mic:0) in(size) inout(data: length(size) alloc_if(1) free_if(0)) 
+	{
+	}
 	
 	return ret;
 
@@ -56,9 +70,22 @@ Matrix<float> *BasicOpsWrapperCPU::ones(int rows, int cols)
 
 void BasicOpsWrapperCPU::add(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
-	for(int i=0; i < A->size ;i++)
+	int size = A->size;
+	float *a = A->data;
+	float *b = B->data;
+	float *c = out->data;
+	#pragma offload target(mic:0) \ 
+	in(a : length(size) alloc_if(0) free_if(0)) \
+	in(b : length(size) alloc_if(0) free_if(0) )\
+	in(c : length(size) alloc_if(0) free_if(0)) \
+	in(size)
 	{
-		out->data[i] = A->data[i] + B->data[i];
+
+		#pragma omp parallel for
+		for(int i=0; i < size ;i++)
+		{
+			c[i] = a[i] + b[i];
+		}
 	}
 
 }
@@ -305,6 +332,7 @@ float BasicOpsWrapperCPU::sum(Matrix<float> *A)
 
 	float sumValue = 0.0f;
 	cout << "size: " << A->size << endl;
+	#pragma omp parallel for
 	for(int i=0; i < A->size ;i++)
     {
 		sumValue += A->data[i];
@@ -445,14 +473,16 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *A, Matrix<float> *out)
 
 void BasicOpsWrapperCPU::to_host(Matrix<float> *gpu, float *cpu)
 {
- for(int i =0; i < 10; i++)
-	cout << cpu[i] << " ";
-cout << endl;
- std::memcpy(gpu->data, cpu, gpu->bytes); 
-cout << "gpu data" << endl;
- for(int i =0; i < 10; i++)
-	cout << gpu->data[i] << " ";
-cout << endl;
+int size = gpu->size;
+float *data = gpu->data;
+
+
+	#pragma offload target(mic:0) \
+	out(data: length(size) alloc_if(0) free_if(0)) 
+	{
+	}
+	std::memcpy(cpu, data, size*sizeof(float));
+
 }
 Matrix<float> *BasicOpsWrapperCPU::to_host(Matrix<float> *gpu)
 {
@@ -461,7 +491,17 @@ Matrix<float> *BasicOpsWrapperCPU::to_host(Matrix<float> *gpu)
 	return out;
 }
 
-void BasicOpsWrapperCPU::to_gpu(float *cpu, Matrix<float> *gpu){ std::memcpy(gpu->data, cpu, gpu->bytes); }
+void BasicOpsWrapperCPU::to_gpu(float *cpu, Matrix<float> *gpu)
+{
+
+	float *A = gpu->data;
+	int size = gpu->size;
+	std::memcpy(gpu->data, cpu, gpu->bytes);
+	#pragma offload target(mic:0) \
+	in(A: length(size) alloc_if(0) free_if(0)) 
+	{
+	}
+}
 Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu)
 {
 	Matrix<float> *out = empty(rows, cols);
