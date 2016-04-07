@@ -233,6 +233,51 @@ void test_neural_network()
 
 }
 
+
+
+void test_MPI(int argc, char const *argv[]){
+
+	ClusterNet *gpu = new ClusterNetCPU();
+	Matrix<float> *A = gpu->rand(100,100);
+	Matrix<float> *B = gpu->rand(2,2);
+
+
+	gradientAccumulator *ga = new gradientAccumulator();
+	ga.init_MPI(argc, argv);
+
+	float a[4] = {0,0,0,0};
+	if(ga->my_rank == 0)
+	{
+		for(int i = 0; i < 4; i++)
+			a[i] = 1.7;
+	}
+	else
+	{
+		for(int i = 0; i < 4; i++)
+			a[i] = 1.2;
+	}
+
+	to_gpu(B,a);
+
+
+
+	ga.init_Matrix(B);
+	ga.send_MPI();
+	
+	if(ga->my_rank == 0)
+	{
+		cout << "Myrank " << ga->my_rank << endl;
+		for(int = 0; i < 4; i++)
+			ga->buffer->data[i];
+	}
+
+
+}
+
+
+
+
+
 int main(int argc, char const *argv[]) {
 
 	//test_LSTM_swapping();
