@@ -4,6 +4,11 @@
 #include <BatchAllocator.h>
 #include <CPUtoCPUBatchAllocator.h>
 
+
+typedef BatchAllocator FloatBatchAllocator;
+typedef Matrix<float> FloatMatrix;
+typedef CPUtoCPUBatchAllocator FloatCPUtoCPUBatchAllocator;
+
 #ifdef PHI
 #else
 	#include <ClusterNetGPU.h>
@@ -15,12 +20,6 @@
 	ClusterNet *get_clusterNet();
 	void freemat(FloatMatrix *A);
 #endif
-
-
-typedef BatchAllocator FloatBatchAllocator;
-typedef Matrix<float> FloatMatrix;
-typedef CPUtoCPUBatchAllocator FloatCPUtoCPUBatchAllocator;
-
 
 ClusterNet *get_clusterNetCPU();
 
