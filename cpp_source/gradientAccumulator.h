@@ -18,20 +18,19 @@
 class GradientAccumulator{
 
 public:
+	int my_rank;
+	int node_count;
+	Matrix<float> *buffer;
+	Matrix<float> *matrix;
+	std : vector<Matrix <float> *> v;
+	std : vector<Matrix <float> *> b;
 
 	void init_MPI(int argc, char** argv);
 	void init_Matrix (Matrix<float> * m);
 	void send_MPI();
-	     int my_rank;
-	     int node_count;
-	     Matrix<float> *buffer;
-	     Matrix<float> *matrix;
-	     std : vector<Matrix <float> *> v;
-	     std : vector<Matrix <float> *> b;
-
 	void recv_MPI();
 
-		 
+
 
 };
 

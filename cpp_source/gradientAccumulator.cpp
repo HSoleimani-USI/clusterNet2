@@ -70,7 +70,7 @@ void gradientAccumulator::send_MPI(){
         v[1]->size,
         MPI_Float,
         i,
-        MPI_COMM_WORLD communicator)
+        MPI_COMM_WORLD);
   }
 
 }
@@ -80,21 +80,21 @@ void gradientAccumulator::send_MPI(){
 
 void gradientAccumulator::recv_MPI(){
 
-  for(int i=0; i<= buffer->size; i++){
+  for(int i=0; i<= node_count; i++){
 
-      add(b[0], b[my_rank], b[my_rank]);
+      add(b[i], b[my_rank], b[my_rank]);
 
-      MPI_Allgather(
-        b[i],
+  }
+
+  MPI_Allgather(
+        b[my_rank],
         b[1] ->size,
         MPI_Float,
         matrix,
         v[1]-> size,
         MPI_Float,
-        MPI_COMM_WORLD communicator)
+        MPI_COMM_WORLD);
 
-
-  }
 
 }
 
