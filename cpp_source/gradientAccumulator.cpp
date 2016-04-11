@@ -30,7 +30,7 @@ using std::endl;
 
 
 
-void GradientAccumulator::GradientAccumulator(ClusterNet *clusterNet){
+GradientAccumulator::GradientAccumulator(ClusterNet *clusterNet){
 
   cn = clusterNet;
 }
@@ -60,8 +60,8 @@ void GradientAccumulator::init_Matrix(Matrix<float> * m){
   buffer = cn->OPS->zeros(m->rows, m->cols);
   int slice_size = m->rows/node_count;
   for(int i=0; i< m->rows; i = i+slice_size){
-  	v.push_back (cn->OPS->get_view( &m, i, i+slice_size));
-    b.push_back (cn->OPS->get_view( &buffer, i, i+slice_size));
+  	v.push_back (cn->OPS->get_view( m, i, i+slice_size));
+    b.push_back (cn->OPS->get_view( buffer, i, i+slice_size));
 
   }
 
@@ -77,10 +77,10 @@ void GradientAccumulator::send_MPI(){
       MPI_Scatter(
         matrix,
         v[1]->size,
-        MPI_Float,
+        MPI_FLOAT,
         b[i],
         v[1]->size,
-        MPI_Float,
+        MPI_FLOAT,
         i,
         MPI_COMM_WORLD);
   }
@@ -101,10 +101,10 @@ void GradientAccumulator::recv_MPI(){
   MPI_Allgather(
         b[my_rank],
         b[1] ->size,
-        MPI_Float,
+        MPI_FLOAT,
         matrix,
         v[1]-> size,
-        MPI_Float,
+        MPI_FLOAT,
         MPI_COMM_WORLD);
 
 

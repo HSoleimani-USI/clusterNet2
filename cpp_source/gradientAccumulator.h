@@ -26,8 +26,8 @@ public:
 	ClusterNet *cn;
 	Matrix<float> *buffer;
 	Matrix<float> *matrix;
-	std : vector<Matrix <float> *> v;
-	std : vector<Matrix <float> *> b;
+	std :: vector<Matrix <float> *> v;
+	std :: vector<Matrix <float> *> b;
 
 	void init_MPI(int argc, char** argv);
 	void init_Matrix (Matrix<float> * m);
