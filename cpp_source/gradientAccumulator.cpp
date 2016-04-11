@@ -16,6 +16,9 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
+#include "gradientAccumulator.h"
+
+
 
 #ifdef HDF5
 	#include <hdf5.h>
@@ -25,15 +28,24 @@ using std::cout;
 using std::endl;
 
 
-void gradientAccumulator::init_MPI(int argc, char** argv) {
+
+
+void GradientAccumulator::GradientAccumulator(ClusterNet *clusterNet){
+
+  cn = clusterNet;
+}
+
+
+
+void GradientAccumulator::init_MPI(int argc, char** argv) {
 
   MPI_Init(&argc , &argv);
   
   int matrix_rank;
-  MPI_Comm_rank(MPI_COMM_MATRIX, &matrix_rank);
+  MPI_Comm_rank(MPI_COMM_WORLD, &matrix_rank);
   int matrix_size;
   my_rank = matrix_rank;
-  MPI_Comm_size(MPI_COMM_MATRIX, &matrix_size);
+  MPI_Comm_size(MPI_COMM_WORLD, &matrix_size);
   node_count = matrix_size;
 
 
@@ -42,14 +54,14 @@ void gradientAccumulator::init_MPI(int argc, char** argv) {
 }
 
 
-void init_Matrix(Matrix<float> * m){
+void GradientAccumulator::init_Matrix(Matrix<float> * m){
 
   matrix = m;
-  buffer = zeros(m->rows, m->cols);
+  buffer = cn->OPS->zeros(m->rows, m->cols);
   int slice_size = m->rows/node_count;
   for(int i=0; i< m->rows; i = i+slice_size){
-  	v.push_back (get_view( &m, i, i+slice_size));
-    b.push_back (get_view( &buffer, i, i+slice_size));
+  	v.push_back (cn->OPS->get_view( &m, i, i+slice_size));
+    b.push_back (cn->OPS->get_view( &buffer, i, i+slice_size));
 
   }
 
@@ -57,7 +69,7 @@ void init_Matrix(Matrix<float> * m){
 }
 
 
-void gradientAccumulator::send_MPI(){
+void GradientAccumulator::send_MPI(){
 
 
   for(int i=0; i<=node_count; i++){ 
@@ -78,11 +90,11 @@ void gradientAccumulator::send_MPI(){
 
 
 
-void gradientAccumulator::recv_MPI(){
+void GradientAccumulator::recv_MPI(){
 
   for(int i=0; i<= node_count; i++){
 
-      add(b[i], b[my_rank], b[my_rank]);
+      cn->OPS->add(b[i], b[my_rank], b[my_rank]);
 
   }
 

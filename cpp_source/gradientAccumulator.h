@@ -10,16 +10,20 @@
 #define GRADIENTACCUMULATOR_H_
 
 #include <Matrix.h>
-#include <mpif.h>
+#include <mpi.h>
 #include <vector>
+#include "ClusterNet.h"
 
 
 
 class GradientAccumulator{
 
+
+
 public:
 	int my_rank;
 	int node_count;
+	ClusterNet *cn;
 	Matrix<float> *buffer;
 	Matrix<float> *matrix;
 	std : vector<Matrix <float> *> v;
@@ -30,6 +34,8 @@ public:
 	void send_MPI();
 	void recv_MPI();
 
+
+    GradientAccumulator();
 
 
 };
