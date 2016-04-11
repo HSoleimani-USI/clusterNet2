@@ -78,12 +78,26 @@ void gradientAccumulator::send_MPI(){
 
 
 
-void recv_MPI(){
+void gradientAccumulator::recv_MPI(){
+
+  for(int i=0; i<= buffer->size; i++){
+
+      add(b[0], b[my_rank], b[my_rank]);
+
+      MPI_Allgather(
+        b[i],
+        b[1] ->size,
+        MPI_Float,
+        matrix,
+        v[1]-> size,
+        MPI_Float,
+        MPI_COMM_WORLD communicator)
 
 
-
+  }
 
 }
+
 
 
 

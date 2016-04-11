@@ -258,11 +258,13 @@ void test_MPI(int argc, char const *argv[]){
 	}
 
 	to_gpu(B,a);
+	
 
 
 
 	ga.init_Matrix(B);
 	ga.send_MPI();
+	ga.recv_MPI();
 	
 	if(ga->my_rank == 0)
 	{
