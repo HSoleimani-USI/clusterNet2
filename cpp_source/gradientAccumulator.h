@@ -35,7 +35,7 @@ public:
 	void recv_MPI();
 
 
-    GradientAccumulator();
+    GradientAccumulator(ClusterNet *clusterNet);
 
 
 };
