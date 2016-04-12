@@ -75,9 +75,7 @@ void BasicOpsWrapperCPU::add(Matrix<float> *A, Matrix<float> *B, Matrix<float> *
 	float *b = B->data;
 	float *c = out->data;
 	#pragma offload target(mic:0) \ 
-	in(a : length(size) alloc_if(0) free_if(0)) \
-	in(b : length(size) alloc_if(0) free_if(0) )\
-	in(c : length(size) alloc_if(0) free_if(0)) \
+	in(a,b,c : length(0) alloc_if(0) free_if(0)) \
 	in(size)
 	{
 
@@ -330,12 +328,18 @@ float BasicOpsWrapperCPU::mean(Matrix<float> *A)
 float BasicOpsWrapperCPU::sum(Matrix<float> *A)
 {
 
+	float *a = A->data;
 	float sumValue = 0.0f;
 	cout << "size: " << A->size << endl;
-	#pragma omp parallel for
-	for(int i=0; i < A->size ;i++)
-    {
-		sumValue += A->data[i];
+	#pragma offload target(mic:0)\
+	in(A:length(0) alloc_if(0) free_if(0))\
+	inout(sumValue)
+	{
+		#pragma omp parallel for
+		for(int i=0; i < A->size ;i++)
+	    {
+			sumValue += A->data[i];
+		}
 	}
 	cout << "sum value: " << sumValue  << endl;
 	return sumValue;
