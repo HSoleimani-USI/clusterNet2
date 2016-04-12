@@ -67,8 +67,8 @@ Matrix<float> *BasicOpsWrapperCPU::ones(int rows, int cols)
 	return fill_matrix(rows,cols,1);
 }
 
-template void elementWise<kdropout>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar);
-template <int action> void elementWise(Matrix<float> *a, Matrix<float> *b, Matrix<float> *c, float scalar)
+template void BasicOpsWrapperCPU::elementWise<kdropout>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar);
+template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Matrix<float> *b, Matrix<float> *c, float scalar)
 {
 	int size = a->size;
 	float *A = a->data;
