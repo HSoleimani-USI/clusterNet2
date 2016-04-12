@@ -23,7 +23,7 @@ Matrix<float> *BasicOpsWrapperCPU::fill_matrix(int rows, int cols, float fill_va
 	
 	int size = ret->size;
 	float *data = ret->data;
-	#pragma offload target(mic:0) in(size) in(data : length(size) alloc_if(0) free_if(0))
+	#pragma offload target(mic:0) in(size) in(data : length(0) alloc_if(0) free_if(0))
 	{
 		#pragma omp parallel for
 		for(int i = 0; i < size; i++)
@@ -67,132 +67,174 @@ Matrix<float> *BasicOpsWrapperCPU::ones(int rows, int cols)
 	return fill_matrix(rows,cols,1);
 }
 
-
-void BasicOpsWrapperCPU::add(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
+template void elementWise<kdropout>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar);
+template <int action> void elementWise(Matrix<float> *a, Matrix<float> *b, Matrix<float> *c, float scalar)
 {
-	int size = A->size;
-	float *a = A->data;
-	float *b = B->data;
-	float *c = out->data;
-	#pragma offload target(mic:0) \ 
-	in(a,b,c : length(0) alloc_if(0) free_if(0)) \
-	in(size)
+	int size = a->size;
+	float *A = a->data;
+	float *B = b->data;
+	float *out = c->data;
+
+	#pragma offload target(mic:0) \
+	in(A,B,out : length(0) alloc_if(0) free_if(0)) \
+	in(scalar)
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
 	{
+		switch(action)
+		{
+    	   case kdropout: out[i] = B[i] > scalar ? A[i] : 0.0f; break;
+		}
+	}
+}
+
+//BasicOpsWrapperCPU::elementWise operation with a single matrix argument
+template void BasicOpsWrapperCPU::elementWise<kabs>(Matrix<float> *A, Matrix<float>*out);
+template void BasicOpsWrapperCPU::elementWise<klog>(Matrix<float> *A, Matrix<float>*out);
+template void BasicOpsWrapperCPU::elementWise<ksqrt>(Matrix<float> *A, Matrix<float>*out);
+template void BasicOpsWrapperCPU::elementWise<klogistic>(Matrix<float> *A, Matrix<float>*out);
+template void BasicOpsWrapperCPU::elementWise<klogistic_grad>(Matrix<float> *A, Matrix<float>*out);
+template void BasicOpsWrapperCPU::elementWise<ktanh>(Matrix<float> *A, Matrix<float>*out);
+template void BasicOpsWrapperCPU::elementWise<ktanh_grad>(Matrix<float> *A, Matrix<float>*out);
+template void BasicOpsWrapperCPU::elementWise<kELU>(Matrix<float> *A, Matrix<float>*out);
+template void BasicOpsWrapperCPU::elementWise<kELU_grad>(Matrix<float> *A, Matrix<float>*out);
+template void BasicOpsWrapperCPU::elementWise<krectified>(Matrix<float> *A, Matrix<float>*out);
+template void BasicOpsWrapperCPU::elementWise<krectified_grad>(Matrix<float> *A, Matrix<float>*out);
+template void BasicOpsWrapperCPU::elementWise<kcopy>(Matrix<float> *A, Matrix<float>*out);
+template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Matrix<float>*c)
+{
+		int size = a->size;
+		float *A = a->data;
+		float *out = c->data;
+
+		#pragma offload target(mic:0) \
+		in(A,out : length(0) alloc_if(0) free_if(0))
+
 
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
 		{
-			c[i] = a[i] + b[i];
+			switch(action)
+			{
+			   case kabs: out[i] = fabsf(A[i]); break;
+			   case klog: out[i] = __logf(A[i]); break;
+			   case ksqrt: out[i] = sqrtf(A[i]); break;
+			   case kpow: out[i] = powf(A[i],scalar); break;
+			   case klogistic: out[i] = 1.0f/(1.0f + expf(-A[i])); break;
+			   case klogistic_grad: out[i] = A[i]*(1.0f-A[i]); break;
+			   case kELU: out[i] = A[i] > 0.0f ? A[i] : expf(A[i])-1.0f; break;
+			   case kELU_grad: out[i] = A[i] > 0.0f ? 1.0f : A[i] + 1.0f; break;
+			   case krectified: out[i] = A[i] > 0.0f ? A[i] : 0.0f; break;
+			   case krectified_grad: out[i] = A[i] > 0.0f ? 1.0f : 0.0f; break;
+			   case kcopy: out[i] = A[i]; break;
+			   case ktanh: out[i] = tanhf(A[i]); break;
+			   case ktanh_grad: out[i] = 1.0f - (A[i]*A[i]); break;
+			   case kexp: out[i] = exp(A[i]); break;
+
+			}
+		}
+}
+
+template void BasicOpsWrapperCPU::elementWise<kpow>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void BasicOpsWrapperCPU::elementWise<ksmul>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void BasicOpsWrapperCPU::elementWise<kssub>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void BasicOpsWrapperCPU::elementWise<ksgt>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template void BasicOpsWrapperCPU::elementWise<kmod>(Matrix<float> *A, Matrix<float>*out, float scalar);
+template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Matrix<float>*c, float scalar)
+{
+		int size = a->size;
+		float *A = a->data;
+		float *out = c->data;
+
+		#pragma offload target(mic:0) \
+		in(A,out : length(0) alloc_if(0) free_if(0)) \
+		in(scalar)
+
+		#pragma omp parallel for
+		for(int i=0; i < size ;i++)
+		{
+			switch(action)
+			{
+			   case kpow: out[i] = powf(A[i],scalar); break;
+			   case ksmul: out[i] = A[i] * scalar; break;
+			   case kssub: out[i] = A[i] - scalar; break;
+			   case ksgt: out[i] = (float)(A[i] > scalar); break;
+			   case kmod: out[i] = (float)((int)A[i] % (int)scalar); break;
+
+			}
+		}
+}
+
+//BasicOpsWrapperCPU::elementWise operation with a two matrix arguments
+template void BasicOpsWrapperCPU::elementWise<kadd>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void BasicOpsWrapperCPU::elementWise<ksub>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void BasicOpsWrapperCPU::elementWise<kdiv>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void BasicOpsWrapperCPU::elementWise<kmul>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void BasicOpsWrapperCPU::elementWise<keq>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void BasicOpsWrapperCPU::elementWise<klt>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void BasicOpsWrapperCPU::elementWise<kgt>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void BasicOpsWrapperCPU::elementWise<kge>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void BasicOpsWrapperCPU::elementWise<kle>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void BasicOpsWrapperCPU::elementWise<kne>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template void BasicOpsWrapperCPU::elementWise<ksquared_diff>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
+template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Matrix<float> *b, Matrix<float> *c)
+{
+	int size = a->size;
+	float *A = a->data;
+	float *B = b->data;
+	float *out = c->data;
+
+	#pragma offload target(mic:0) \
+	in(A,B,out : length(0) alloc_if(0) free_if(0))
+
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	{
+		switch(action)
+		{
+		   case kadd: out[i] = A[i] + B[i]; break;
+		   case ksub: out[i] = A[i] - B[i]; break;
+		   case kdiv: out[i] = fdividef(A[i], B[i]); break;
+		   case kmul: out[i] = A[i] * B[i]; break;
+		   case keq: out[i] = (float)(A[i] == B[i]); break;
+		   case klt: out[i] = (float)(A[i] < B[i]); break;
+		   case kgt: out[i] = (float)(A[i] > B[i]); break;
+		   case kge: out[i] = (float)(A[i] >= B[i]); break;
+		   case kle: out[i] = (float)(A[i] <= B[i]); break;
+		   case kne: out[i] = (float)(A[i] != B[i]); break;
+       	   case ksquared_diff: out[i] = powf(A[i]-B[i],2.0f); break;
+
 		}
 	}
-
 }
 
+
+void BasicOpsWrapperCPU::add(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
+{ elementWise<kadd>(A,B,out); }
 void BasicOpsWrapperCPU::sub(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = A->data[i] - B->data[i];
-	}
-
-}
-
-
+{ elementWise<ksub>(A,B,out); }
 void BasicOpsWrapperCPU::div(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{
-	
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = A->data[i] / B->data[i];
-	}
-}
-
-
+{ elementWise<kdiv>(A,B,out); }
 void BasicOpsWrapperCPU::mul(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ 
-
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = A->data[i] * B->data[i];
-	}
-}
-
-
+{ elementWise<kmul>(A,B,out); }
 void BasicOpsWrapperCPU::equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{
-	for(int i=0; i < A->size ;i++)
-	{
- 		 out->data[i] = (float)(A->data[i] == B->data[i]);
-
- 	}
-}
-
-
+{ elementWise<keq>(A,B,out); }
 void BasicOpsWrapperCPU::less_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{	
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = (float)(A->data[i] < B->data[i]);
-	}
-}
-
-
-
+{ elementWise<klt>(A,B,out); }
 void BasicOpsWrapperCPU::greater_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{	
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = (float)(A->data[i] > B->data[i]);
-	}
-}
-
-
+{ elementWise<kgt>(A,B,out); }
 void BasicOpsWrapperCPU::greater_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{	
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = (float)(A->data[i] >= B->data[i]);
-	}
-}
-
-
+{ elementWise<kge>(A,B,out); }
 void BasicOpsWrapperCPU::less_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{	
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = (float)(A->data[i] <= B->data[i]);
-	}
-}
-
-
-
+{ elementWise<kle>(A,B,out); }
 void BasicOpsWrapperCPU::not_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{	
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = (float)(A->data[i] != B->data[i]);
-	}
-}
-
-
-
+{ elementWise<kne>(A,B,out); }
 void BasicOpsWrapperCPU::squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{	
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = std::pow(A->data[i] - B->data[i],2.0f);
-	}
-}
-
-
+{ elementWise<ksquared_diff>(A,B,out, 2.0f); }
 void BasicOpsWrapperCPU::dropout(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar)
-{	
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = B->data[i] > scalar ? A->data[i] : 0.0f;
-	}
-}
-
+{ elementWise<kdropout>(A,B,out,scalar); }
 
 void BasicOpsWrapperCPU::vadd(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
 {
@@ -360,52 +402,24 @@ float BasicOpsWrapperCPU::max(Matrix<float> *A)
 
 
 void BasicOpsWrapperCPU::pow(Matrix<float> *A, Matrix<float> *out, float scalar)
-{
-	for(int i=0; i < A->size ;i++)
-    {
-		out->data[i] = powf(A->data[i],scalar);
-	}
-}
+{ elementWise<kpow>(A,out, scalar); }
 
 
 void BasicOpsWrapperCPU::mul(Matrix<float> *A, Matrix<float> *out, float scalar)
-{
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = A->data[i] * scalar;
-	}
-
-}
+{ elementWise<ksmul>(A,out,scalar); }
 
 
 void BasicOpsWrapperCPU::sub(Matrix<float> *A, Matrix<float> *out, float scalar)
-{
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = A->data[i] - scalar;
-	}
-
-}
+{ elementWise<kssub>(A,out, scalar); }
 
 
 
 void BasicOpsWrapperCPU::greater_than(Matrix<float> *A, Matrix<float> *out, float scalar)
-{
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = (float)(A->data[i] > scalar);
-	}
-}
+{ elementWise<ksgt>(A,out, scalar); }
 
 
 void BasicOpsWrapperCPU::mod(Matrix<float> *A, Matrix<float> *out, float scalar)
-{
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] = (float)((int)A->data[i] % (int)scalar);
-	}
-
-}
+{ elementWise<kmod>(A,out,scalar); }
 
 
 
@@ -427,31 +441,31 @@ void BasicOpsWrapperCPU::transpose(Matrix<float> *A, Matrix<float> *out, int row
 }
 
 void BasicOpsWrapperCPU::exp(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = ::exp(A->data[i]); } }
+{ elementWise<kexp>(A,out); }
 void BasicOpsWrapperCPU::abs(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = std::abs(A->data[i]); } }
+{ elementWise<kabs>(A,out); }
 void BasicOpsWrapperCPU::log(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = std::log(A->data[i]); } }
+{ elementWise<klog>(A,out); }
 void BasicOpsWrapperCPU::sqrt(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = std::sqrt(A->data[i]); } }
+{ elementWise<ksqrt>(A,out); }
 void BasicOpsWrapperCPU::logistic(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = 1.0f/(1.0f+::exp(-A->data[i])); } }
+{ elementWise<klogistic>(A,out); }
 void BasicOpsWrapperCPU::logistic_grad(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = A->data[i]*(1.0f-A->data[i]); } }
+{ elementWise<klogistic_grad>(A,out); }
 void BasicOpsWrapperCPU::tanh(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = std::tanh(A->data[i]); } }
+{ elementWise<ktanh>(A,out); }
 void BasicOpsWrapperCPU::tanh_grad(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = 1.0f - (A->data[i]*A->data[i]); } }
+{ elementWise<ktanh_grad>(A,out); }
 void BasicOpsWrapperCPU::ELU(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = A->data[i] > 0.0f ? A->data[i] : expf(A->data[i])-1.0f; } }
+{ elementWise<kELU>(A,out); }
 void BasicOpsWrapperCPU::ELU_grad(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = A->data[i] > 0.0f ? 1.0f : A->data[i] + 1.0f;} }
+{ elementWise<kELU_grad>(A,out); }
 void BasicOpsWrapperCPU::rectified(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = A->data[i] > 0.0f ? A->data[i] : 0.0f;} }
+{ elementWise<krectified>(A,out); }
 void BasicOpsWrapperCPU::rectified_grad(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = A->data[i] > 0.0f ? 1.0f : 0.0f;} }
+{ elementWise<krecitfied_grad>(A,out); }
 void BasicOpsWrapperCPU::copy(Matrix<float> *A, Matrix<float> *out)
-{ for(int i=0; i < A->size ;i++){ out->data[i] = A->data[i];} }
+{ elementWise<kcopy>(A,out); }
 
 void BasicOpsWrapperCPU::softmax(Matrix<float> *A, Matrix<float> *out)
 {

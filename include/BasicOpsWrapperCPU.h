@@ -64,6 +64,10 @@ public:
 	void greater_than(Matrix<float> *A, Matrix<float> *out, float scalar);
 	void mod(Matrix<float> *A, Matrix<float> *out, float scalar);
 
+	template <int action> void elementWise(Matrix<float> *A, Matrix<float>*out);
+	template <int action> void elementWise(Matrix<float> *A, Matrix<float>*out, float scalar);
+	template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out);
+	template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
 
 	void add(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
 	void sub(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
