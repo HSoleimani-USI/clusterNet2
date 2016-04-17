@@ -69,6 +69,9 @@ public:
 	template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out);
 	template <int action> void elementWise(Matrix<float> *A, Matrix<float> *B, Matrix<float>*out, float scalar);
 
+	template <int action> void vectorWise(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out);
+	template <int action> void vectorWise(Matrix<float> *v, Matrix<float>*out);
+
 	void add(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
 	void sub(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
 	void div(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);

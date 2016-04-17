@@ -236,55 +236,98 @@ void BasicOpsWrapperCPU::squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix
 void BasicOpsWrapperCPU::dropout(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar)
 { elementWise<kdropout>(A,B,out,scalar); }
 
-void BasicOpsWrapperCPU::vadd(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
+
+
+//vectorwise operation between matrix and vector
+//this is equivalent to broadcasting in numpy
+template void BasicOpsWrapperCPU::vectorWise<kvadd>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out);
+template void BasicOpsWrapperCPU::vectorWise<kvsub>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out);
+template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matrix<float> *b, Matrix<float>*c)
 {
-	check_matrix_vector_op(A, v);
-	for(int i=0; i < A->size ;i++)
+	int size = a->size;
+	float *A = a->data;
+	float *v = b->data;
+	float *out = c->data;
+	int rows = out->rows;
+	int cols = out->cols;
+
+	#pragma offload target(mic:0) \
+	in(A,v,out : length(0) alloc_if(0) free_if(0)) \
+	in(size, cols, rows)
+
+
+	#pragma omp parallel for
+	for(int i = 0; i < size ;i++)
 	{
-		out->data[i] = A->data[i] + v->data[i - ((i / out->cols)*out->cols)];
+		switch(action)
+		{
+			case kvadd: out[i] =  A[i] + v[i - ((i / cols)*cols)]; break;
+			case kvsub: out[i] =  A[i] - v[i - ((i / cols)*cols)]; break;
+		}
 	}
 }
+
+template void BasicOpsWrapperCPU::vectorWise<ktmatrix>(Matrix<float> *v, Matrix<float>*out);
+template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matrix<float>*c)
+{
+	int size = a->size;
+	float *v = a->data;
+	float *out = c->data;
+	int rows = out->rows;
+	int cols = out->cols;
+
+	#pragma offload target(mic:0) \
+	in(v,out : length(0) alloc_if(0) free_if(0)) \
+	in(size, cols, rows)
+
+
+	#pragma omp parallel for
+	for(int i = 0; i < size ;i++)
+	{
+		switch(action)
+		{
+			case ktmatrix: out[i] = i-((i / cols)*cols) == (int)v[(i / cols)] ? 1.0f : 0.0f; break;
+		}
+	}
+}
+
+
+void BasicOpsWrapperCPU::vadd(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
+{ vectorWise<vadd>(A,v,out); }
 
 void BasicOpsWrapperCPU::vsub(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
-{
-	check_matrix_vector_op(A, v);
-	for(int i=0; i < A->size ;i++)
-	{
-		out->data[i] =  A->data[i] - v->data[i - ((i / out->cols)*out->cols)];
-	}
-}
-
+{ vectorWise<vsub>(A,v,out); }
 
 void BasicOpsWrapperCPU::get_t_matrix(Matrix<float> *v, Matrix<float> *out)
-{
-	for(int i=0; i < out->size ;i++)
-	{
-		out->data[i] = i - ((i / out->cols)*out->cols) == (int)v->data[(i / out->cols)] ? 1.0f : 0.0f;
-	}
-}
+{ vectorWise<ktmatrix>(v,out); }
 
 
-
-
-
-void BasicOpsWrapperCPU::slice(Matrix<float> *A, Matrix<float>*out, int rstart, int rend, int cstart, int cend)
+void BasicOpsWrapperCPU::slice(Matrix<float> *a, Matrix<float>*c, int rstart, int rend, int cstart, int cend)
 {
   
-  int rows_out = (rend - rstart);
-  int cols_out = (cend - cstart);
-  int size = rows_out*cols_out;
+	int rows_out = (rend - rstart);
+	int cols_out = (cend - cstart);
+	int size = rows_out*cols_out;
 
-  int current_col = 0;
-  int offset = 0;
-  int current_row = 0;
-  for (unsigned int i = 0;i < size; i++)
-  {
-	  current_row = i / cols_out;
-	  current_col = i - (current_row*cols_out);
+	int size = a->size;
+	int cols = a->cols;
+	float *A = a->data;
+	float *out = c->data;
 
-	  offset = (A->cols * (current_row+rstart)) + current_col + cstart;
-	  out->data[i] = A->data[offset];
-  }
+
+	#pragma offload target(mic:0) \
+	in(v,out : length(0) alloc_if(0) free_if(0)) \
+	in(size, rstart, rend, cstart, cend, cols_out, rows_out, cols)
+
+	#pragma omp parallel for
+	for (unsigned int i = 0;i < size; i++)
+	{
+	  int current_row = i / cols_out;
+	  int current_col = i - (current_row*cols_out);
+
+	  int offset = (cols * (current_row+rstart)) + current_col + cstart;
+	  out[i] = A[offset];
+	}
 
 }
 
@@ -292,69 +335,153 @@ void BasicOpsWrapperCPU::slice(Matrix<float> *A, Matrix<float>*out, int rstart, 
 void BasicOpsWrapperCPU::reduceToRowsMean(Matrix<float> *A, Matrix<float> *vout)
 {
 	reduceToRowsSum(A, vout);
-	for(int i = 0; i < vout->size; i++)
+
+	float *out = vout->data;
+	int size = vout->size;
+	int cols = A->cols;
+
+	#pragma offload target(mic:0)\
+	in(out:length(0) alloc_if(0) free_if(0)) \
+	in(size)
+
+	#pragma omp parallel for
+	for(int i = 0; i < size; i++)
 	{
-		vout->data[i] /= A->cols;
+		out[i] /= cols;
 	}
 }
 
 
 
-void BasicOpsWrapperCPU::reduceToRowsSum(Matrix<float> *A, Matrix<float> *vout)
+void BasicOpsWrapperCPU::reduceToRowsSum(Matrix<float> *a, Matrix<float> *vout)
 {
-	for(int i=0; i < vout->size ;i++)
-    {
-		vout->data[i] = 0.0f;
-    }
 
-	for(int i=0; i < A->size ;i++)
-		vout->data[i/A->cols] += A->data[i];
+	float *A = a->data;
+	float *out = vout->data;
+	int vsize = vout->size;
+	int Asize = a->size;
+	int cols = a->cols;
+
+	#pragma offload target(mic:0)\
+	in(A,out:length(0) alloc_if(0) free_if(0)) \
+	in(vsize,Asize)
+	{
+
+		#pragma omp parallel for
+		for(int i=0; i < vsize ;i++)
+		{
+			out[i] = 0.0f;
+		}
+
+		#pragma omp parallel for
+		for(int i=0; i < Asize ;i++)
+			out[i/cols] += A[i];
+	}
 
 }
 
 
-void BasicOpsWrapperCPU::reduceToRowsMax(Matrix<float> *A, Matrix<float> *vout)
+void BasicOpsWrapperCPU::reduceToRowsMax(Matrix<float> *a, Matrix<float> *vout)
 {
-	for(int i=0; i < vout->size ;i++)
-    {
-		vout->data[i] = -std::numeric_limits<float>::max();
-    }
-	for(int i=0; i < A->size ;i++)
-		vout->data[i/A->cols] = std::max(vout->data[i/A->cols],A->data[i]);
+
+	float *A = a->data;
+	float *out = vout->data;
+	int vsize = vout->size;
+	int Asize = a->size;
+	int cols = a->cols;
+
+	#pragma offload target(mic:0)\
+	in(A,out:length(0) alloc_if(0) free_if(0)) \
+	in(vsize,Asize)
+	{
+
+		#pragma omp parallel for
+		for(int i=0; i < vsize ;i++)
+		{
+			out[i] = -std::numeric_limits<float>::max();
+		}
+
+		#pragma omp parallel for
+		for(int i=0; i < Asize ;i++)
+			out[i/cols] = std::max(out[i/cols],A[i]);
+	}
+
 }
 
 
-void BasicOpsWrapperCPU::reduceToColsMean(Matrix<float> *A, Matrix<float> *vout)
+void BasicOpsWrapperCPU::reduceToColsMean(Matrix<float> *a, Matrix<float> *vout)
 {
 	reduceToColsSum(A, vout);
-	for(int i = 0; i < vout->size; i++)
-		vout->data[i] /= A->rows;
+
+	float *out = vout->data;
+	int size = vout->size;
+	int rows = A->rows;
+
+	#pragma offload target(mic:0)\
+	in(out:length(0) alloc_if(0) free_if(0)) \
+	in(size)
+
+	#pragma omp parallel for
+	for(int i = 0; i < size; i++)
+		out[i] /= rows;
 }
 
 
-void BasicOpsWrapperCPU::reduceToColsSum(Matrix<float> *A, Matrix<float> *vout)
+void BasicOpsWrapperCPU::reduceToColsSum(Matrix<float> *a, Matrix<float> *vout)
 {
-	for(int i=0; i < vout->size ;i++)
-    {
-		vout->data[i] = 0.0f;
-    }
-	//must be either rows or cols here; run tests and change this if the tests fail
-	for(int i=0; i < A->size ;i++)
-		vout->data[i % A->cols] += A->data[i];
 
+
+	float *A = a->data;
+	float *out = vout->data;
+	int vsize = vout->size;
+	int Asize = a->size;
+	int cols = a->cols;
+
+	#pragma offload target(mic:0)\
+	in(A,out:length(0) alloc_if(0) free_if(0)) \
+	in(vsize,Asize)
+	{
+
+		#pragma omp parallel for
+		for(int i=0; i < vsize ;i++)
+		{
+			out[i] = 0.0f;
+		}
+		//must be either rows or cols here; run tests and change this if the tests fail
+
+		#pragma omp parallel for
+		for(int i=0; i < Asize ;i++)
+			out[i % cols] += A[i];
+	}
 
 }
 
 
 
-void BasicOpsWrapperCPU::reduceToColsMax(Matrix<float> *A, Matrix<float> *vout)
+void BasicOpsWrapperCPU::reduceToColsMax(Matrix<float> *a, Matrix<float> *vout)
 {
-	for(int i=0; i < vout->size ;i++)
-    {
-		vout->data[i] = -std::numeric_limits<float>::max();
-    }
-	for(int i=0; i < A->size ;i++)
-		vout->data[i % A->cols] = std::max(vout->data[i % A->cols],A->data[i]);
+	float *A = a->data;
+	float *out = vout->data;
+	int vsize = vout->size;
+	int Asize = a->size;
+	int cols = a->cols;
+
+	#pragma offload target(mic:0)\
+	in(A,out:length(0) alloc_if(0) free_if(0)) \
+	in(vsize,Asize)
+	{
+
+		#pragma omp parallel for
+		for(int i=0; i < vsize ;i++)
+		{
+			out[i] = -std::numeric_limits<float>::max();
+		}
+
+		#pragma omp parallel for
+		for(int i=0; i < Asize ;i++)
+			out[i % cols] = std::max(out[i % cols],A[i]);
+
+	}
 
 }
 
@@ -370,31 +497,43 @@ float BasicOpsWrapperCPU::mean(Matrix<float> *A)
 float BasicOpsWrapperCPU::sum(Matrix<float> *A)
 {
 
-	float *a = A->data;
+	float *A = a->data;
 	float sumValue = 0.0f;
-	cout << "size: " << A->size << endl;
+	int size = a->size;
+
 	#pragma offload target(mic:0)\
-	in(A:length(0) alloc_if(0) free_if(0))\
+	in(A:length(0) alloc_if(0) free_if(0)) \
+	in(size) \
 	inout(sumValue)
+
 	{
 		#pragma omp parallel for
-		for(int i=0; i < A->size ;i++)
+		for(int i=0; i < size ;i++)
 	    {
-			sumValue += A->data[i];
+			sumValue += A[i];
 		}
 	}
-	cout << "sum value: " << sumValue  << endl;
 	return sumValue;
 }
 
 float BasicOpsWrapperCPU::max(Matrix<float> *A)
 {
 
+	float *A = a->data;
 	float maxValue = -std::numeric_limits<float>::max();
-	for(int i=0; i < A->size ;i++)
+	int size = a->size;
+
+	#pragma offload target(mic:0)\
+	in(A:length(0) alloc_if(0) free_if(0)) \
+	in(size) \
+	inout(maxValue)
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
     {
-		maxValue = std::max(maxValue,A->data[i]);
+		maxValue = std::max(maxValue,A[i]);
 	}
+
 	return maxValue;
 }
 
@@ -429,13 +568,23 @@ Matrix<float> *BasicOpsWrapperCPU::transpose(Matrix<float> *A)
 	transpose(A, out, A->rows, A->cols);
 	return out;
 }
-void BasicOpsWrapperCPU::transpose(Matrix<float> *A, Matrix<float> *out, int rows, int cols)
+void BasicOpsWrapperCPU::transpose(Matrix<float> *a, Matrix<float> *c, int rows, int cols)
 {
+	float *A = a->data;
+	float *out = c->data;
+	int size = a->size;
+
+
+	#pragma offload target(mic:0)\
+	in(A:length(0) alloc_if(0) free_if(0)) \
+	in(size, rows, cols)
+
+	#pragma omp parallel for
 	for(int row=0; row < rows ;row++)
 	{
 		for(int col=0; col < cols ;col++)
 		{
-			out->data[col + row*cols] = A->data[row + col*rows]; 
+			out[col + row*cols] = A[row + col*rows];
 		}
 	}
 }
@@ -467,23 +616,44 @@ void BasicOpsWrapperCPU::rectified_grad(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::copy(Matrix<float> *A, Matrix<float> *out)
 { elementWise<kcopy>(A,out); }
 
-void BasicOpsWrapperCPU::softmax(Matrix<float> *A, Matrix<float> *out)
+void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 {
 	check_for_same_dimensions(A, out);
 
-	Matrix<float> *vsum = empty(A->rows, 1);
-	reduceToRowsMax(A, vsum);
+	Matrix<float> *Vsum = empty(A->rows, 1);
+	reduceToRowsMax(A, Vsum);
 
-	for(int i=0; i < A->size ;i++)
-		out->data[i] = A->data[i] - vsum->data[i/A->cols];
 
-	exp(out, out);
-	reduceToRowsSum(out, vsum);
+	float *A = a->data;
+	float *out = c->data;
+	float *vsum = Vsum->data;
+	int size = a->size;
+	int cols = a->cols;
 
-	for(int i=0; i < A->size ;i++)
-		out->data[i] /= vsum->data[i/A->cols];
+	int vsum_size = vsum->size;
 
-	free(vsum);
+	#pragma offload target(mic:0)\
+	in(A,out,vsum:length(0) alloc_if(0) free_if(0)) \
+	in(size, cols)
+	{
+		#pragma omp parallel for
+		for(int i=0; i < size ;i++)
+			out[i] = A[i] - vsum[i/cols];
+
+		exp(out, out);
+		reduceToRowsSum(out, vsum);
+
+		#pragma omp parallel for
+		for(int i=0; i < size ;i++)
+			out[i] /= vsum[i/cols];
+
+
+		//free vsum
+		#pragma offload target(mic:0)\
+		in(vsum:length(vsum_size) alloc_if(0) free_if(1))
+		{
+		}
+	}
 }
 
 
@@ -491,8 +661,8 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *A, Matrix<float> *out)
 
 void BasicOpsWrapperCPU::to_host(Matrix<float> *gpu, float *cpu)
 {
-int size = gpu->size;
-float *data = gpu->data;
+	int size = gpu->size;
+	float *data = gpu->data;
 
 
 	#pragma offload target(mic:0) \
@@ -528,12 +698,8 @@ Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu)
 }
 Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu, size_t bytes_to_copy)
 {
-	for(int i =0; i < 10; i++)
-		cout << cpu[i] << " ";
-	cout << endl;
 	Matrix<float> *out = empty(rows, cols);
 	std::memcpy(out->data,cpu, bytes_to_copy);
-	cout << sum(out) << endl;
 	return out;
 }
 Matrix<float> *BasicOpsWrapperCPU::get_pinned(int rows, int cols){ return empty(rows, cols); }
@@ -574,18 +740,39 @@ void BasicOpsWrapperCPU::WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> 
 	float grad_value = 0.0f;
 	float RMS_value = 0.0f;
 
-	for(int i = 0; i < w->size; i++)
+
+
+	float *xRMS = RMS->data;
+	float *xgrad = grad->data;
+	float *xw = w->data;
+	int size = a->size;
+
+	#pragma offload target(mic:0)\
+	in(xRMS,xgrad,xw:length(0) alloc_if(0) free_if(0)) \
+	in(size, rms_reciprocal, grad_value, RMS_value)
+
+	#pragma omp parallel for
+	for(int i = 0; i < size; i++)
 	{
-		grad_value = grad->data[i];
-		RMS_value = (RMS_multiplier*RMS->data[i]) + (std::pow(grad_value,2.0f)*rms_reciprocal);
+		grad_value = xgrad[i];
+		RMS_value = (RMS_multiplier*xRMS[i]) + (std::pow(grad_value,2.0f)*rms_reciprocal);
 		grad_value = learning_rate*grad_value/((std::sqrt(RMS_value)+1.0e-08f));
-		RMS->data[i] = RMS_value;
-		w->data[i] -= grad_value;
+		xRMS[i] = RMS_value;
+		xw[i] -= grad_value;
 	}
 }
 
 
-void BasicOpsWrapperCPU::free_matrix(Matrix<float> *A){ free(A->data); free(A);}
+void BasicOpsWrapperCPU::free_matrix(Matrix<float> *A)
+{
+	float *xA = A->data;
+	int size = A->size;
+
+	#pragma offload target(mic:0)\
+	in(xA:length(size) alloc_if(0) free_if(1))
+	{
+	}
+}
 
 void BasicOpsWrapperCPU::lookup(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out){}
 void BasicOpsWrapperCPU::embeddingUpdate(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *grad, Matrix<float> *RMS, float RMS_momentum, float learning_rate){}
@@ -593,19 +780,38 @@ void BasicOpsWrapperCPU::embeddingUpdate(Matrix<float> *embedding, Matrix<float>
 
 void BasicOpsWrapperCPU::argmax(Matrix<float> *A, Matrix<float> *out)
 {
-	Matrix<float> *vmaxbuffer = empty(out->rows, out->cols);
-	for(int i=0; i < vmaxbuffer->size ;i++)
-	{
-		vmaxbuffer->data[i] = -std::numeric_limits<float>::max();
-		out->data[i] = -1.0f;
-	}
 
-	for(int i=0; i < A->size ;i++)
+	Matrix<float> *vmaxbuffer = empty(out->rows, out->cols);
+
+	float *xvmaxbuffer = vmaxbuffer->data;
+
+	float *xA = A->data;
+	float *xout = out->data;
+	int size = A->size;
+	int cols = A->cols;
+	int vmaxbuffer_size = vmaxbuffer->size;
+
+	int vsum_size = vsum->size;
+
+	#pragma offload target(mic:0)\
+	in(xA,xout,xvmaxbuffer:length(0) alloc_if(0) free_if(0)) \
+	in(size, cols,vmaxbuffer_size)
 	{
-		if(A->data[i] > vmaxbuffer->data[i/A->cols])
+		#pragma omp parallel for
+		for(int i=0; i < vmaxbuffer_size ;i++)
 		{
-			vmaxbuffer->data[i/A->cols] = A->data[i];
-			out->data[i/A->cols] = (float)(i % A->cols);
+			xvmaxbuffer[i] = -std::numeric_limits<float>::max();
+			xout[i] = -1.0f;
+		}
+
+		#pragma omp parallel for
+		for(int i=0; i < size ;i++)
+		{
+			if(xA[i] > xvmaxbuffer[i/cols])
+			{
+				xvmaxbuffer[i/cols] = xA[i];
+				xout[i/cols] = (float)(i % cols);
+			}
 		}
 	}
 }
