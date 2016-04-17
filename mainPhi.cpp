@@ -16,6 +16,8 @@
 #include <map>
 #include <BasicOpsWrapperCPU.h>
 #include <CPUtoCPUBatchAllocator.h>
+#include <gradientAccumulator.h>
+
 
 using std::endl;
 using std::cout;
@@ -147,19 +149,33 @@ void test_lookup_time()
 
 void test_phi()
 {
-	float test[4] = {1.7,1.3,1.2,1.1};
 	
+	float test[4] = {1.7,1.3,1.2,1.1};
+	float test2[4] = {1.7,1.3,1.2,1.1};
 	ClusterNet *gpu = new ClusterNetCPU();
 
 
-	Matrix<float>* a = gpu->OPS->ones(2,2);
+	Matrix<float>* a = gpu->OPS->zeros(2,2);
 	Matrix<float>* b = gpu->OPS->ones(2,2);
 	Matrix<float>* c = gpu->OPS->empty(2,2);
 
-	gpu->OPS->to_gpu(test, a);
+
+	gpu->OPS->to_host(a, test);
+	gpu->OPS->to_host(b, test);
+	gpu->OPS->to_host(c, test);
+	gpu->OPS->to_gpu(test2, a);
+	gpu->OPS->to_host(a, test);
 
 	gpu->OPS->add(a,b,c);
 
+	gpu->OPS->to_host(c, test);
+
+	for(int i =0; i < 4; i++)
+		cout << test[i] << " ";
+	cout << endl; 
+
+	cout << gpu->OPS->sum(a) << endl;
+	cout << gpu->OPS->sum(b) << endl;
 	cout << gpu->OPS->sum(c) << endl;
 	cout << "Sum should be: " << 4 + 1.7+1.3+1.2+1.1 << endl;
 
@@ -267,15 +283,71 @@ void test_neural_network()
 
 }
 
-int main(int argc, char const *argv[]) {
+
+
+void test_MPI(int argc, char *argv[]){
+
+	ClusterNet *gpu = new ClusterNetCPU();
+	Matrix<float> *A = gpu->rand(100,100);
+	Matrix<float> *B = gpu->rand(2,2);
+
+	cout << "pre gradient init" << endl;
+	GradientAccumulator *ga = new GradientAccumulator(gpu);
+	cout << "pre init mpi" << endl;
+	ga->init_MPI(argc, argv);
+
+	float a[4] = {0,0,0,0};
+	if(ga->my_rank == 0)
+	{
+		for(int i = 0; i < 4; i++)
+			a[i] = 1.7;
+	}
+	else
+	{
+		for(int i = 0; i < 4; i++)
+			a[i] = 1.2;
+	}
+
+	cout << "pre gpu" << endl;
+	gpu->OPS->to_gpu(a, B);
+	
+
+
+	cout << "pre init matrix" << endl;
+	ga->init_Matrix(B);
+	cout << "pre send matrix" << endl;
+	ga->send_MPI();
+	cout << "pre recv matrix" << endl;
+	ga->recv_MPI();
+
+	gpu->OPS->to_host(ga->buffer,a);
+	
+	if(ga->my_rank == 0)
+	{
+		cout << "Myrank " << ga->my_rank << endl;
+		for(int i = 0; i < 4; i++)
+			ga->buffer->data[i];
+	}
+
+
+}
+
+
+
+
+
+
+
+int main(int argc, char *argv[]) {
 
 	printf("abc2\n");
 	cout << "a" << endl;
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
 	//test_neural_network();
-	test_phi();
+	// test_phi();
 	//test_lookup_time();
+	test_MPI(argc, argv);
 
 
 	return 0;

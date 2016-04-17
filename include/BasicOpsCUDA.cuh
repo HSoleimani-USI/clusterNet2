@@ -41,58 +41,7 @@ using std::endl;
 
 
 
-typedef enum Operations_t
-{
-	kabs = 0,
-	klog = 1,
-	ksqrt = 2,
-	kpow = 3,
-	kadd = 4,
-	ksub = 5,
-	kdiv = 6,
-	kmul = 7,
-	klogistic = 8,
-	klogistic_grad = 9,
-	krectified = 10,
-	krectified_grad = 11,
-	keq = 12,
-	klt = 13,
-	kgt = 14,
-	kge = 15,
-	kle = 16,
-	kne = 17,
-	ksquared_diff = 18,
 
-
-
-	kvadd = 19,
-	kvsub = 20,
-	ktmatrix = 21,
-
-
-	ksmul = 22,
-	ksgt = 23,
-
-	kdropout = 24,
-	kcopy = 25,
-	kssub = 26,
-	kELU = 27,
-	kELU_grad = 28,
-	kmod = 29,
-	ktanh = 30,
-	ktanh_grad = 31
-
-} Operations_t;
-
-
-
-typedef enum Reduction_t
-{
-	rmax,
-	rsum,
-	rmean
-
-} Reduction_t;
 
 
 template <typename T> Matrix<T> *to_host(Matrix<T> *in);
