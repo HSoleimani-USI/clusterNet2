@@ -118,10 +118,12 @@ void test_LSTM_optimizations()
 
 	ClusterNet *gpu = new ClusterNetGPU();
 
-	int hidden = 1024;
-	int timesteps = 1000;
-	int input_size = 256;
-	int batch_size = 32;
+	gpu->useNervanaGPU = true;
+
+	int hidden = 1000;
+	int timesteps = 1;
+	int input_size = 1000;
+	int batch_size = 100;
 	int stack_size = 4;
 
 	Matrix<float> *W = gpu->rand(input_size,hidden);
@@ -211,14 +213,10 @@ void test_neural_network()
 	Timer t = Timer();
 	ClusterNet *gpu = new ClusterNetGPU();
 
+	Matrix<float> *X = gpu->OPS->read_hdf5("/home/tim/data/mnist/distributed_X.hdf5");
+	Matrix<float> *y = gpu->OPS->read_hdf5("/home/tim/data/mnist/distributed_y.hdf5");
 
-
-	gpu->useNervanaGPU = true;
-
-	//Matrix<float> *X = gpu->OPS->read_hdf5("/home/tim/data/mnist/distributed_X.hdf5");
-	//Matrix<float> *y = gpu->OPS->read_hdf5("/home/tim/data/mnist/distributed_y.hdf5");
-
-
+	/*
 	Matrix<float> *XCPU = gpu->OPS->read_csv("/home/tim/data/mnist/X.csv");
 	Matrix<float> *yCPU = gpu->OPS->read_csv("/home/tim/data/mnist/y.csv");
 	Matrix<float> *X = gpu->OPS->empty(70000,784);
@@ -229,12 +227,12 @@ void test_neural_network()
 	gpu->OPS->to_gpu(yCPU->data,y);
 
 
-	/*
-
 	gpu->OPS->mul(X,X,1.0f/255.0f);
+	cout << gpu->OPS->max(X) << endl;
+
+
 	gpu->OPS->printmat(y,59990,60010,0,1);
 
-	cout << gpu->OPS->max(X) << endl;
 	gpu->OPS->printdim(X);
 	gpu->OPS->printdim(y);
 	*/

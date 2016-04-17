@@ -45,6 +45,31 @@ template<typename T> __global__ void kFill_with(T *m, const T fill_value, int si
        m[i] = fill_value;
 }
 
+__global__ void kVectorMatrix_1sample(const float *v, const float *B, float *out, const int rowsB, const int colsB)
+{
+	extern __shared__ float shared[];
+	float *shared_vec_in = (float*)shared;
+	float *shared_vec_out = (float*)&shared_vec_in[colsB];
+
+	int idx = threadIdx.x;
+	int col = blockIdx.x;
+
+
+	for(; idx < rowsB; idx+=blockDim.x)
+	{
+
+		shared_vec_in[threadIdx.x] = v[idx];
+
+		for(; col < colsB; col+=gridDim.x)
+		{
+
+		}
+	}
+
+
+
+}
+
 
 
 template __global__ void kElementWise<kabs>(const float *A, const float *B,  float *out, const float scalar, int size);
