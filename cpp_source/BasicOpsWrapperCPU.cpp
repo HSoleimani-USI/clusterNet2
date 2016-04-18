@@ -118,7 +118,7 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 			switch(action)
 			{
 			   case kabs: out[i] = fabsf(A[i]); break;
-			   case klog: out[i] = __logf(A[i]); break;
+			   case klog: out[i] = logf(A[i]); break;
 			   case ksqrt: out[i] = sqrtf(A[i]); break;
 			   case klogistic: out[i] = 1.0f/(1.0f + expf(-A[i])); break;
 			   case klogistic_grad: out[i] = A[i]*(1.0f-A[i]); break;
@@ -401,7 +401,7 @@ void BasicOpsWrapperCPU::reduceToRowsMax(Matrix<float> *a, Matrix<float> *vout)
 
 		#pragma omp parallel for
 		for(int i=0; i < Asize ;i++)
-			out[i/cols] = std::max(out[i/cols],A[i]);
+			out[i/cols] = fmaxf(out[i/cols],A[i]);
 	}
 
 }
@@ -477,7 +477,7 @@ void BasicOpsWrapperCPU::reduceToColsMax(Matrix<float> *a, Matrix<float> *vout)
 
 		#pragma omp parallel for
 		for(int i=0; i < Asize ;i++)
-			out[i % cols] = std::max(out[i % cols],A[i]);
+			out[i % cols] = fmaxf(out[i % cols],A[i]);
 
 	}
 
@@ -529,7 +529,7 @@ float BasicOpsWrapperCPU::max(Matrix<float> *a)
 	#pragma omp parallel for
 	for(int i=0; i < size ;i++)
     {
-		maxValue = std::max(maxValue,A[i]);
+		maxValue = fmaxf(maxValue,A[i]);
 	}
 
 	return maxValue;
@@ -759,8 +759,8 @@ void BasicOpsWrapperCPU::WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> 
 	for(int i = 0; i < size; i++)
 	{
 		grad_value = xgrad[i];
-		RMS_value = (RMS_multiplier*xRMS[i]) + (std::pow(grad_value,2.0f)*rms_reciprocal);
-		grad_value = learning_rate*grad_value/((std::sqrt(RMS_value)+1.0e-08f));
+		RMS_value = (RMS_multiplier*xRMS[i]) + (powf(grad_value,2.0f)*rms_reciprocal);
+		grad_value = learning_rate*grad_value/((sqrtf(RMS_value)+1.0e-08f));
 		xRMS[i] = RMS_value;
 		xw[i] -= grad_value;
 	}
