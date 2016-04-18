@@ -274,8 +274,8 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 	int size = a->size;
 	float *v = a->data;
 	float *out = c->data;
-	int rows = out->rows;
-	int cols = out->cols;
+	int rows = c->rows;
+	int cols = c->cols;
 
 	#pragma offload target(mic:0) \
 	in(v,out : length(0) alloc_if(0) free_if(0)) \
