@@ -109,7 +109,8 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 		float *out = c->data;
 
 		#pragma offload target(mic:0) \
-		in(A,out : length(0) alloc_if(0) free_if(0))
+		in(A,out : length(0) alloc_if(0) free_if(0)) \
+		in(scalar)
 
 
 		#pragma omp parallel for
@@ -130,7 +131,7 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 			   case kcopy: out[i] = A[i]; break;
 			   case ktanh: out[i] = tanhf(A[i]); break;
 			   case ktanh_grad: out[i] = 1.0f - (A[i]*A[i]); break;
-			   case kexp: out[i] = exp(A[i]); break;
+			   case kexp: out[i] = expf(A[i]); break;
 
 			}
 		}
@@ -196,7 +197,7 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 		{
 		   case kadd: out[i] = A[i] + B[i]; break;
 		   case ksub: out[i] = A[i] - B[i]; break;
-		   case kdiv: out[i] = fdividef(A[i], B[i]); break;
+		   case kdiv: out[i] = A[i] / B[i]; break;
 		   case kmul: out[i] = A[i] * B[i]; break;
 		   case keq: out[i] = (float)(A[i] == B[i]); break;
 		   case klt: out[i] = (float)(A[i] < B[i]); break;
@@ -293,10 +294,10 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 
 
 void BasicOpsWrapperCPU::vadd(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
-{ vectorWise<vadd>(A,v,out); }
+{ vectorWise<kadd>(A,v,out); }
 
 void BasicOpsWrapperCPU::vsub(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
-{ vectorWise<vsub>(A,v,out); }
+{ vectorWise<ksub>(A,v,out); }
 
 void BasicOpsWrapperCPU::get_t_matrix(Matrix<float> *v, Matrix<float> *out)
 { vectorWise<ktmatrix>(v,out); }
@@ -309,14 +310,13 @@ void BasicOpsWrapperCPU::slice(Matrix<float> *a, Matrix<float>*c, int rstart, in
 	int cols_out = (cend - cstart);
 	int size = rows_out*cols_out;
 
-	int size = a->size;
 	int cols = a->cols;
 	float *A = a->data;
 	float *out = c->data;
 
 
 	#pragma offload target(mic:0) \
-	in(v,out : length(0) alloc_if(0) free_if(0)) \
+	in(A,out : length(0) alloc_if(0) free_if(0)) \
 	in(size, rstart, rend, cstart, cend, cols_out, rows_out, cols)
 
 	#pragma omp parallel for
@@ -411,7 +411,7 @@ void BasicOpsWrapperCPU::reduceToRowsMax(Matrix<float> *a, Matrix<float> *vout)
 
 void BasicOpsWrapperCPU::reduceToColsMean(Matrix<float> *a, Matrix<float> *vout)
 {
-	reduceToColsSum(A, vout);
+	reduceToColsSum(a, vout);
 
 	float *out = vout->data;
 	int size = vout->size;
@@ -494,7 +494,7 @@ float BasicOpsWrapperCPU::mean(Matrix<float> *A)
 }
 
 
-float BasicOpsWrapperCPU::sum(Matrix<float> *A)
+float BasicOpsWrapperCPU::sum(Matrix<float> *a)
 {
 
 	float *A = a->data;
@@ -516,7 +516,7 @@ float BasicOpsWrapperCPU::sum(Matrix<float> *A)
 	return sumValue;
 }
 
-float BasicOpsWrapperCPU::max(Matrix<float> *A)
+float BasicOpsWrapperCPU::max(Matrix<float> *a)
 {
 
 	float *A = a->data;
@@ -612,13 +612,13 @@ void BasicOpsWrapperCPU::ELU_grad(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::rectified(Matrix<float> *A, Matrix<float> *out)
 { elementWise<krectified>(A,out); }
 void BasicOpsWrapperCPU::rectified_grad(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<krecitfied_grad>(A,out); }
+{ elementWise<krectified_grad>(A,out); }
 void BasicOpsWrapperCPU::copy(Matrix<float> *A, Matrix<float> *out)
 { elementWise<kcopy>(A,out); }
 
 void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 {
-	check_for_same_dimensions(A, out);
+	check_for_same_dimensions(a, c);
 
 	Matrix<float> *Vsum = empty(A->rows, 1);
 	reduceToRowsMax(A, Vsum);
@@ -630,7 +630,7 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 	int size = a->size;
 	int cols = a->cols;
 
-	int vsum_size = vsum->size;
+	int vsum_size = Vsum->size;
 
 	#pragma offload target(mic:0)\
 	in(A,out,vsum:length(0) alloc_if(0) free_if(0)) \
@@ -640,19 +640,25 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 		for(int i=0; i < size ;i++)
 			out[i] = A[i] - vsum[i/cols];
 
+	}
 		exp(out, out);
 		reduceToRowsSum(out, vsum);
 
+
+	#pragma offload target(mic:0)\
+	in(A,out,vsum:length(0) alloc_if(0) free_if(0)) \
+	in(size, cols)
+	{
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
 			out[i] /= vsum[i/cols];
 
+	}
 
-		//free vsum
-		#pragma offload target(mic:0)\
-		in(vsum:length(vsum_size) alloc_if(0) free_if(1))
-		{
-		}
+	//free vsum
+	#pragma offload target(mic:0)\
+	in(vsum:length(vsum_size) alloc_if(0) free_if(1))
+	{
 	}
 }
 
