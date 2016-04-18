@@ -110,7 +110,6 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 
 		#pragma offload target(mic:0) \
 		in(A,out : length(0) alloc_if(0) free_if(0)) \
-		in(scalar)
 
 
 		#pragma omp parallel for
@@ -121,7 +120,6 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 			   case kabs: out[i] = fabsf(A[i]); break;
 			   case klog: out[i] = __logf(A[i]); break;
 			   case ksqrt: out[i] = sqrtf(A[i]); break;
-			   case kpow: out[i] = powf(A[i],scalar); break;
 			   case klogistic: out[i] = 1.0f/(1.0f + expf(-A[i])); break;
 			   case klogistic_grad: out[i] = A[i]*(1.0f-A[i]); break;
 			   case kELU: out[i] = A[i] > 0.0f ? A[i] : expf(A[i])-1.0f; break;
@@ -249,8 +247,8 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 	float *A = a->data;
 	float *v = b->data;
 	float *out = c->data;
-	int rows = out->rows;
-	int cols = out->cols;
+	int rows = c->rows;
+	int cols = c->cols;
 
 	#pragma offload target(mic:0) \
 	in(A,v,out : length(0) alloc_if(0) free_if(0)) \
@@ -415,7 +413,7 @@ void BasicOpsWrapperCPU::reduceToColsMean(Matrix<float> *a, Matrix<float> *vout)
 
 	float *out = vout->data;
 	int size = vout->size;
-	int rows = A->rows;
+	int rows = a->rows;
 
 	#pragma offload target(mic:0)\
 	in(out:length(0) alloc_if(0) free_if(0)) \
@@ -620,8 +618,8 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 {
 	check_for_same_dimensions(a, c);
 
-	Matrix<float> *Vsum = empty(A->rows, 1);
-	reduceToRowsMax(A, Vsum);
+	Matrix<float> *Vsum = empty(a->rows, 1);
+	reduceToRowsMax(a, Vsum);
 
 
 	float *A = a->data;
@@ -641,8 +639,8 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 			out[i] = A[i] - vsum[i/cols];
 
 	}
-		exp(out, out);
-		reduceToRowsSum(out, vsum);
+		exp(c, c);
+		reduceToRowsSum(c, Vsum);
 
 
 	#pragma offload target(mic:0)\
@@ -751,7 +749,7 @@ void BasicOpsWrapperCPU::WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> 
 	float *xRMS = RMS->data;
 	float *xgrad = grad->data;
 	float *xw = w->data;
-	int size = a->size;
+	int size = w->size;
 
 	#pragma offload target(mic:0)\
 	in(xRMS,xgrad,xw:length(0) alloc_if(0) free_if(0)) \
@@ -796,8 +794,6 @@ void BasicOpsWrapperCPU::argmax(Matrix<float> *A, Matrix<float> *out)
 	int size = A->size;
 	int cols = A->cols;
 	int vmaxbuffer_size = vmaxbuffer->size;
-
-	int vsum_size = vsum->size;
 
 	#pragma offload target(mic:0)\
 	in(xA,xout,xvmaxbuffer:length(0) alloc_if(0) free_if(0)) \
