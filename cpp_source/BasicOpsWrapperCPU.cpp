@@ -574,7 +574,7 @@ void BasicOpsWrapperCPU::transpose(Matrix<float> *a, Matrix<float> *c, int rows,
 
 
 	#pragma offload target(mic:0)\
-	in(A:length(0) alloc_if(0) free_if(0)) \
+	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(size, rows, cols)
 
 	#pragma omp parallel for
