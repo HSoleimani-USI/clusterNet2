@@ -14,6 +14,9 @@
 #include <BasicOpsWrapperCPU.h>
 
 ClusterNetCPU::ClusterNetCPU()
+: generator_uniform(time(0)),
+uniform(boost::uniform_distribution<float>(0.0f,1.0f),
+vargen_uniform(boost::random::variate_gene
 {
 	// TODO Auto-generated constructor stub
 

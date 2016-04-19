@@ -47,8 +47,7 @@ private:
 	boost::random::normal_distribution<float> gaussian;
 	boost::random::normal_distribution<float> normal_distribution;
 
-	boost::random::variate_generator< boost::mt19937&,
-	   boost::random::uniform_real_distribution <float> > vargen_uniform;
+	boost::random::variate_generator<boost::mt19937&, boost::normal_distribution<float> > vargen_uniform; 
 	boost::random::variate_generator< boost::mt19937&,
 	   boost::random::uniform_real_distribution <float> > vargen_gaussian;
 	boost::random::variate_generator< boost::mt19937&,

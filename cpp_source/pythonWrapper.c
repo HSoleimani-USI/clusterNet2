@@ -17,7 +17,7 @@ void logistic_grad(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out){ gpu->OPS-
 void rectified(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out){ gpu->OPS->rectified(A, out); }
 void rectified_grad(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out){ gpu->OPS->rectified_grad(A, out); }
 void wcopy(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out){ gpu->OPS->copy(A, out); }
-void *wtranspose(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out){ gpu->OPS->transpose(A, out, out->cols, out->rows); }
+void wtranspose(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out){ gpu->OPS->transpose(A, out, out->cols, out->rows); }
 FloatMatrix *wT(ClusterNet *gpu, FloatMatrix * A){  return gpu->OPS->transpose(A); }
 
 void add(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *B, FloatMatrix *out){ gpu->OPS->add(A, B, out); }
