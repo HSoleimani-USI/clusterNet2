@@ -36,10 +36,10 @@ void ClusterNetCPU::setRandomState(int seed)
 					 (uniform, generator_uniform);
 	vargen_gaussian = boost::variate_generator< boost::mt19937&,
 											   boost::random::uniform_real_distribution <float> >
-												(uniform, generator_uniform);
+												(gaussian, generator_gaussian);
 	vargen_normal = boost::variate_generator< boost::mt19937&,
 											   boost::random::uniform_real_distribution <float> >
-								(uniform, generator_uniform);
+								(normal_distribution, generator_normal);
 }
 
 Matrix<float> *ClusterNetCPU::rand(int rows, int cols)
@@ -66,7 +66,10 @@ Matrix<float> *ClusterNetCPU::randn(int rows, int cols)
 Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 {
 	Matrix<float> *ret = OPS->empty(rows,cols);
-	normal_distribution = std::normal_distribution<float>(mean,std);
+	normal_distribution = boost::random::normal_distribution<float>(mean,std);
+	vargen_normal = boost::variate_generator< boost::mt19937&,
+											   boost::random::uniform_real_distribution <float> >
+								(gaussian, generator_gaussian);
 
 	for(int i = 0; i < ret->size; i++)
 		ret->data[i] = vargen_normal();
