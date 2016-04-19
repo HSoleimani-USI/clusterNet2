@@ -39,7 +39,6 @@ public:
 	//  for regularization , using random numbers
 	//  getting the simplest model ...random between 0 and 1 , matrix
 	void dropout(Matrix<float> *A, Matrix <float> *out, const float dropout);
-
 };
 
 #endif /* CLUSTERNETCPU_H_ */

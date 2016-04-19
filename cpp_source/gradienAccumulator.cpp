@@ -5,17 +5,6 @@
  *      Author: Hanieh
  */
 
-#include "BasicOpsWrapper.h"
-#include <stdlib.h>
-#include <assert.h>
-#include <iostream>
-
-#include <vector>
-#include <string>
-#include <string.h> // memcpy
-#include <iostream>
-#include <sstream>
-#include <fstream>
 #include "gradientAccumulator.h"
 
 

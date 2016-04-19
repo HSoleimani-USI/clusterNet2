@@ -21,7 +21,7 @@ extern "C"
 	void frandn(ClusterNet *gpu, int rows, int cols){ gpu->randn(rows, cols); }
 	void fsetRandomState(ClusterNet *gpu, int seed){ gpu->setRandomState(seed); }
 	FloatMatrix *fT(ClusterNet *gpu, FloatMatrix * A){ return wT(gpu,A); }
-	void *ftranspose(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out){ wtranspose(gpu,A, out); }
+	void ftranspose(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *out){ wtranspose(gpu,A, out); }
 	void ffabs(ClusterNet *gpu, FloatMatrix * A, FloatMatrix *out){ return abs(gpu,A,out); }
 	void flog(ClusterNet *gpu, FloatMatrix * A, FloatMatrix *out){ return log(gpu,A,out); }
 	void fsqrt(ClusterNet *gpu, FloatMatrix * A, FloatMatrix *out){ return sqrt(gpu,A,out); }
@@ -65,7 +65,7 @@ extern "C"
 	FloatMatrix *fgetBatchY(FloatBatchAllocator *alloc){ return alloc->get_current_batchY(); }
 
 
-	FloatMatrix *fget_view(ClusterNet *gpu, FloatMatrix *A, int rstart, int rend){ wget_view(gpu,A, rstart, rend); }
+	FloatMatrix *fget_view(ClusterNet *gpu, FloatMatrix *A, int rstart, int rend){ return wget_view(gpu,A, rstart, rend); }
 
 
 	void frowMax(ClusterNet *gpu, FloatMatrix *A, FloatMatrix *vout){ rowMax(gpu,A, vout); }
