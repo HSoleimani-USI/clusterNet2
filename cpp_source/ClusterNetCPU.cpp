@@ -12,6 +12,7 @@
 	#include "cblas.h"
 #endif
 #include <BasicOpsWrapperCPU.h>
+#include <math.h>
 
 ClusterNetCPU::ClusterNetCPU()
 {
@@ -30,7 +31,7 @@ Matrix<float> *ClusterNetCPU::rand(int rows, int cols)
 	Matrix<float> *ret = OPS->empty(rows,cols);
 
 	for(int i = 0; i < ret->size; i++)
-		ret->data[i] =(float)((double) rand() / (RAND_MAX+1) * (2));
+		ret->data[i] =(float)((double) ::rand() / (RAND_MAX+1) * (2));
 
 	return ret;
 }
@@ -41,7 +42,7 @@ Matrix<float> *ClusterNetCPU::randn(int rows, int cols)
 
 	for(int i = 0; i < ret->size; i++)
 	{
-		float rdm = (float)((double) rand() / (RAND_MAX+1) * (2));
+		float rdm = (float)((double) ::rand() / (RAND_MAX+1) * (2));
 		ret->data[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
 	}
 
@@ -55,7 +56,7 @@ Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 
 	for(int i = 0; i < ret->size; i++)
 	{
-		float rdm = (float)((double) rand() / (RAND_MAX+1) * (2));
+		float rdm = (float)((double) ::rand() / (RAND_MAX+1) * (2));
 		ret->data[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
 	}
 
@@ -65,7 +66,7 @@ Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 void ClusterNetCPU::dropout(Matrix<float> *A, Matrix <float> *out, const float dropout)
 {
 	for(int i = 0; i < out->size; i++)
-		out->data[i] = vargen_uniform();
+		out->data[i] = (float)((double) ::rand() / (RAND_MAX+1) * (2));
 
 	OPS->dropout(A, out, out, dropout);
 }
