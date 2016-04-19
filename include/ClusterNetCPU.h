@@ -10,7 +10,10 @@
 
 #include <Matrix.h>
 #include <ClusterNet.h>
-#include <random>
+#include <boost/random/mersenne_twister.hpp>
+#include <boost/random/uniform_real_distribution.hpp>
+#include <boost/random/normal_distribution.hpp>
+#include <boost/random/variate_generator.hpp>
 
 class ClusterNetCPU : public ClusterNet
 {
@@ -37,12 +40,16 @@ public:
 	//  getting the simplest model ...random between 0 and 1 , matrix
 	void dropout(Matrix<float> *A, Matrix <float> *out, const float dropout);
 private:
-	std::default_random_engine generator_uniform;
-	std::default_random_engine generator_gaussian;
-	std::default_random_engine generator_normal;
-	std::uniform_real_distribution<float> uniform;
-	std::normal_distribution<float> gaussian;
-	std::normal_distribution<float> normal_distribution;
+	boost::random::mt19937 generator_uniform;
+	boost::random::mt19937 generator_gaussian;
+	boost::random::mt19937 generator_normal;
+	boost::random::uniform_real_distribution uniform;
+	boost::random::normal_distribution gaussian;
+	boost::random::normal_distribution normal_distribution;
+
+	boost::random::variate_generator vargen_uniform;
+	boost::random::variate_generator vargen_gaussian;
+	boost::random::variate_generator vargen_normal;
 
 };
 

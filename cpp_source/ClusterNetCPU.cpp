@@ -13,14 +13,13 @@
 #endif
 #include <BasicOpsWrapperCPU.h>
 
-
 ClusterNetCPU::ClusterNetCPU()
 {
 	// TODO Auto-generated constructor stub
 
-	uniform = std::uniform_real_distribution<float>(0.0f,1.0f);
-	gaussian = std::normal_distribution<float>(0.0f,1.0f);
-	normal_distribution = std::normal_distribution<float>(0.0f,1.0f);
+	uniform = boost::random::uniform_real_distribution<float>(0.0f, 1.0f);
+	gaussian = boost::random::normal_distribution<float>(0.0f,1.0f);
+	normal_distribution = boost::random::normal_distribution<float>(0.0f,1.0f);
 
 	OPS = new BasicOpsWrapperCPU();
 
@@ -28,9 +27,19 @@ ClusterNetCPU::ClusterNetCPU()
 
 void ClusterNetCPU::setRandomState(int seed)
 {
-	generator_uniform = std::default_random_engine(seed);
-	generator_gaussian = std::default_random_engine(seed);
-	generator_normal = std::default_random_engine(seed);
+	generator_uniform = boost::mt19937(seed);
+	generator_gaussian = boost::mt19937(seed);
+	generator_normal = boost::mt19937(seed);
+
+	vargen_uniform = boost::variate_generator< boost::mt19937&,
+											   boost::random::uniform_real_distribution <float> >
+					 (uniform, generator_uniform);
+	vargen_gaussian = boost::variate_generator< boost::mt19937&,
+											   boost::random::uniform_real_distribution <float> >
+												(uniform, generator_uniform);
+	vargen_normal = boost::variate_generator< boost::mt19937&,
+											   boost::random::uniform_real_distribution <float> >
+								(uniform, generator_uniform);
 }
 
 Matrix<float> *ClusterNetCPU::rand(int rows, int cols)
@@ -38,7 +47,7 @@ Matrix<float> *ClusterNetCPU::rand(int rows, int cols)
 	Matrix<float> *ret = OPS->empty(rows,cols);
 
 	for(int i = 0; i < ret->size; i++)
-		ret->data[i] = uniform(generator_uniform);
+		ret->data[i] = vargen_uniform();
 
 	return ret;
 }
@@ -48,7 +57,7 @@ Matrix<float> *ClusterNetCPU::randn(int rows, int cols)
 	Matrix<float> *ret = OPS->empty(rows,cols);
 
 	for(int i = 0; i < ret->size; i++)
-		ret->data[i] = gaussian(generator_gaussian);
+		ret->data[i] = vargen_gaussian();
 
 	return ret;
 }
@@ -60,7 +69,7 @@ Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 	normal_distribution = std::normal_distribution<float>(mean,std);
 
 	for(int i = 0; i < ret->size; i++)
-		ret->data[i] = normal_distribution(generator_gaussian);
+		ret->data[i] = vargen_normal();
 
 	return ret;
 }
@@ -68,7 +77,7 @@ Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 void ClusterNetCPU::dropout(Matrix<float> *A, Matrix <float> *out, const float dropout)
 {
 	for(int i = 0; i < out->size; i++)
-		out->data[i] = uniform(generator_uniform);
+		out->data[i] = vargen_uniform();
 
 	OPS->dropout(A, out, out, dropout);
 }
