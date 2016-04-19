@@ -91,17 +91,25 @@ void ClusterNetCPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, 
 	const float alpha = 1.0f;
 	const float beta = 0.0f;
 	int A_rows = A->rows, A_cols = A->cols, B_rows = B->rows, B_cols = B->cols;
+	int ldout = out->cols, ldA = A->cols, ldB = B->cols;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
 	if (T1){ A_rows = A->cols; A_cols = A->rows; }
 	if (T2){ B_cols = B->rows; B_rows = B->cols; }
 
 	OPS->check_matrix_multiplication(A, B, out, T1, T2);
 
-
+	#pragma offload target(mic:0) \
+	in(xA, xB, xout:length(0) alloc_if(0) free_if(0)) \
+	in(T1, T2, A_rows, B_cols, A_cols, alpha, beta)
+	{
 
 		cblas_sgemm(CblasRowMajor,
-					 T1 ? CblasTrans : CblasNoTrans,
-					 T2 ? CblasTrans : CblasNoTrans,
-					 A_rows, B_cols, A_cols, alpha, A->data,
-					 A->cols, B->data, B->cols,
-					 beta, out->data, out->cols);
+				 T1 ? CblasTrans : CblasNoTrans,
+				 T2 ? CblasTrans : CblasNoTrans,
+				 A_rows, B_cols, A_cols, alpha,
+				 xA, ldA, xB, ldB,
+				 beta, xout, ldout);
+	}
 }

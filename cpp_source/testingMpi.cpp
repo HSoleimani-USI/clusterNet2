@@ -1,9 +1,17 @@
-#include <mpi.h>
+//#include <mpi.h>
 #include <stdio.h>
 
 int main(int argc, char** argv) {
+float test = 0.0f;
+#pragma offload target(mic:0) \
+inout(test)
+{
+	printf("%f\n",test);
+}
+/*
     // Initialize the MPI environment
     MPI_Init(NULL, NULL);
+
 
     // Get the number of processes
     int world_size;
@@ -25,4 +33,5 @@ int main(int argc, char** argv) {
 
     // Finalize the MPI environment.
     MPI_Finalize();
+*/
 }

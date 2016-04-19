@@ -154,8 +154,9 @@ void test_phi()
 	float test2[4] = {1.7,1.3,1.2,1.1};
 	ClusterNet *gpu = new ClusterNetCPU();
 
-
+	cout << "before offload" << endl;
 	Matrix<float>* a = gpu->OPS->zeros(2,2);
+	cout << "after offload" << endl;
 	Matrix<float>* b = gpu->OPS->ones(2,2);
 	Matrix<float>* c = gpu->OPS->empty(2,2);
 
@@ -334,7 +335,26 @@ void test_MPI(int argc, char *argv[]){
 
 
 
+void test_gem()
+{
+	ClusterNet *acc = new ClusterNetCPU();
 
+	Matrix<float> *a = acc->rand(2,2);
+	Matrix<float> *b = acc->rand(2,2);
+
+	Matrix<float> *A = acc->OPS->zeros(2,2);
+	Matrix<float> *B = acc->OPS->zeros(2,2);
+	Matrix<float> *C = acc->OPS->zeros(2,2);
+
+	acc->OPS->to_gpu(a->data, A);	
+	acc->OPS->to_gpu(b->data, B);	
+
+	acc->dot(A,B,C);
+
+	float *aa = a->data;
+	float *bb = b->data;
+	cout << aa[0]*bb[0] + aa[0]*bb[0] << endl;
+}
 
 
 
@@ -345,9 +365,10 @@ int main(int argc, char *argv[]) {
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
 	//test_neural_network();
-	// test_phi();
+	 test_phi();
 	//test_lookup_time();
 	test_MPI(argc, argv);
+	test_gem();
 
 
 	return 0;
