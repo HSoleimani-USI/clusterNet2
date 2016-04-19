@@ -39,20 +39,6 @@ public:
 	//  for regularization , using random numbers
 	//  getting the simplest model ...random between 0 and 1 , matrix
 	void dropout(Matrix<float> *A, Matrix <float> *out, const float dropout);
-private:
-	boost::random::mt19937 generator_uniform;
-	boost::random::mt19937 generator_gaussian;
-	boost::random::mt19937 generator_normal;
-	boost::random::uniform_real_distribution<float> uniform;
-	boost::random::normal_distribution<float> gaussian;
-	boost::random::normal_distribution<float> normal_distribution;
-
-	boost::random::variate_generator< boost::mt19937&,
-	   boost::random::uniform_real_distribution <float> > vargen_uniform;
-	boost::random::variate_generator< boost::mt19937&,
-	   boost::random::uniform_real_distribution <float> > vargen_gaussian;
-	boost::random::variate_generator< boost::mt19937&,
-	   boost::random::uniform_real_distribution <float> > vargen_normal;
 
 };
 

@@ -16,30 +16,13 @@
 ClusterNetCPU::ClusterNetCPU()
 {
 	// TODO Auto-generated constructor stub
-
-	uniform = boost::random::uniform_real_distribution<float>(0.0f, 1.0f);
-	gaussian = boost::random::normal_distribution<float>(0.0f,1.0f);
-	normal_distribution = boost::random::normal_distribution<float>(0.0f,1.0f);
-
 	OPS = new BasicOpsWrapperCPU();
 
 }
 
 void ClusterNetCPU::setRandomState(int seed)
 {
-	generator_uniform = boost::mt19937(seed);
-	generator_gaussian = boost::mt19937(seed);
-	generator_normal = boost::mt19937(seed);
-
-	vargen_uniform = boost::variate_generator< boost::mt19937&,
-											   boost::random::uniform_real_distribution <float> >
-					 (uniform, generator_uniform);
-	vargen_gaussian = boost::variate_generator< boost::mt19937&,
-											   boost::random::uniform_real_distribution <float> >
-												(gaussian, generator_gaussian);
-	vargen_normal = boost::variate_generator< boost::mt19937&,
-											   boost::random::uniform_real_distribution <float> >
-								(normal_distribution, generator_normal);
+	srand(seed);
 }
 
 Matrix<float> *ClusterNetCPU::rand(int rows, int cols)
@@ -47,7 +30,7 @@ Matrix<float> *ClusterNetCPU::rand(int rows, int cols)
 	Matrix<float> *ret = OPS->empty(rows,cols);
 
 	for(int i = 0; i < ret->size; i++)
-		ret->data[i] = vargen_uniform();
+		ret->data[i] =(float)((double) rand() / (RAND_MAX+1) * (2));
 
 	return ret;
 }
@@ -57,7 +40,10 @@ Matrix<float> *ClusterNetCPU::randn(int rows, int cols)
 	Matrix<float> *ret = OPS->empty(rows,cols);
 
 	for(int i = 0; i < ret->size; i++)
-		ret->data[i] = vargen_gaussian();
+	{
+		float rdm = (float)((double) rand() / (RAND_MAX+1) * (2));
+		ret->data[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
+	}
 
 	return ret;
 }
@@ -66,13 +52,12 @@ Matrix<float> *ClusterNetCPU::randn(int rows, int cols)
 Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 {
 	Matrix<float> *ret = OPS->empty(rows,cols);
-	normal_distribution = boost::random::normal_distribution<float>(mean,std);
-	vargen_normal = boost::variate_generator< boost::mt19937&,
-											   boost::random::uniform_real_distribution <float> >
-								(gaussian, generator_gaussian);
 
 	for(int i = 0; i < ret->size; i++)
-		ret->data[i] = vargen_normal();
+	{
+		float rdm = (float)((double) rand() / (RAND_MAX+1) * (2));
+		ret->data[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
+	}
 
 	return ret;
 }

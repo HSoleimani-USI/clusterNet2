@@ -79,9 +79,10 @@ void ErrorHandler::print_error(std::string message)
 {
 	std::string value = message;
 	std::string strEmpty(25-message.length(),' ');
+	float standard_error = (1.96*sqrtf(RUNNING_VARIANCE)/sqrtf(RUNNING_BATCHES));
 
-	printf("%s %s %1.4f (%1.4f,%1.4f)\n", message.c_str(), strEmpty.c_str(), (RUNNING_ERROR/RUNNING_SAMPLE_SIZE),
-		   RUNNING_MEAN - standard_error,RUNNING_MEAN + standard_error);
+
+	printf("%s %s %1.4f (%1.4f,%1.4f)\n", message.c_str(), strEmpty.c_str(), (RUNNING_ERROR/RUNNING_SAMPLE_SIZE), (RUNNING_MEAN - standard_error),(RUNNING_MEAN + standard_error));
 
 	reset();
 }
