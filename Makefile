@@ -33,7 +33,7 @@ testc:
 phi:
 	mpiicpc -D PHI -std=c++11 -shared -fPIC $(INCLUDE) $(FILES_CPP) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) $(FLAGS_PHI)	
 testphi:
-	mpiicpc -D PHI -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/mainPhi.cpp /apps/intel/composer_xe_2015.3.187//compiler/lib/intel64/libiomp5.a -o main.o $(FLAGS_PHI) -lClusterNet 
+	mpiicpc -D PHI -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/mainPhi.cpp -o main.o $(FLAGS_PHI) -lClusterNet 
 	
 clean:
 	rm $(ROOT_DIR)/lib/libClusterNet.so
