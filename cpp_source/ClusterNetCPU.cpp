@@ -30,8 +30,16 @@ Matrix<float> *ClusterNetCPU::rand(int rows, int cols)
 {
 	Matrix<float> *ret = OPS->empty(rows,cols);
 
-	for(int i = 0; i < ret->size; i++)
-		ret->data[i] =(float)((double) ::rand() / (RAND_MAX+1) * (2));
+	int size = ret->size;
+	float *xret = ret->data;
+
+	#pragma offload target(mic:0) \
+	in(xret : length(0) alloc_if(0) free_if(0)) \
+    in(size)
+
+	#pragma omp parallel for
+	for(int i = 0; i < size; i++)
+		xret[i] =(float)((double) ::rand() / (RAND_MAX) * (2));
 
 	return ret;
 }
@@ -40,10 +48,18 @@ Matrix<float> *ClusterNetCPU::randn(int rows, int cols)
 {
 	Matrix<float> *ret = OPS->empty(rows,cols);
 
-	for(int i = 0; i < ret->size; i++)
+	int size = ret->size;
+	float *xret = ret->data;
+
+	#pragma offload target(mic:0) \
+	in(xret : length(0) alloc_if(0) free_if(0)) \
+    in(size)
+
+	#pragma omp parallel for
+	for(int i = 0; i < size; i++)
 	{
 		float rdm = (float)((double) ::rand() / (RAND_MAX+1) * (2));
-		ret->data[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
+		xret[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
 	}
 
 	return ret;
@@ -53,11 +69,18 @@ Matrix<float> *ClusterNetCPU::randn(int rows, int cols)
 Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 {
 	Matrix<float> *ret = OPS->empty(rows,cols);
+	int size = ret->size;
+	float *xret = ret->data;
 
-	for(int i = 0; i < ret->size; i++)
+	#pragma offload target(mic:0) \
+	in(xret : length(0) alloc_if(0) free_if(0)) \
+    in(size)
+
+	#pragma omp parallel for
+	for(int i = 0; i < size; i++)
 	{
 		float rdm = (float)((double) ::rand() / (RAND_MAX+1) * (2));
-		ret->data[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
+		xret[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
 	}
 
 	return ret;
@@ -65,8 +88,17 @@ Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 
 void ClusterNetCPU::dropout(Matrix<float> *A, Matrix <float> *out, const float dropout)
 {
-	for(int i = 0; i < out->size; i++)
-		out->data[i] = (float)((double) ::rand() / (RAND_MAX+1) * (2));
+    int size = out->size;
+	float *xout = out->data;
+
+	#pragma offload target(mic:0) \
+	in(xout : length(0) alloc_if(0) free_if(0)) \
+    in(size)
+
+	#pragma omp parallel for
+
+	for(int i = 0; i < out; i++)
+		out[i] = (float)((double) ::rand() / (RAND_MAX+1) * (2));
 
 	OPS->dropout(A, out, out, dropout);
 }
