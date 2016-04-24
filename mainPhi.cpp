@@ -201,22 +201,8 @@ void test_neural_network()
 	Matrix<float> *X = gpu->OPS->read_csv("/home/dettmers/data/X.csv");
 	Matrix<float> *y = gpu->OPS->read_csv("/home/dettmers/data/y.csv");
 
-	cout << "post sum prints" << endl;
-	 for(int i =0; i < 10; i++)
-		cout << y->data[i] << " ";
-	cout << endl;
 
-	Matrix<float> *ygpu = gpu->OPS->zeros(y->rows, y->cols);
-	gpu->OPS->to_gpu(y->data, ygpu);
-	printf("post loading data\n");
-	gpu->OPS->printmat(X,0,5,400,410);
-
-	gpu->OPS->printmat(ygpu,0,5,0,1);
-
-	cout << "test X" << gpu->OPS->sum(X) << endl;
-	cout << "test y" << gpu->OPS->sum(y) << endl;
-	//Matrix<float> *X = read_hdf5<float>("/home/tim/data/astro/X.hdf5");
-	//Matrix<float> *y = read_hdf5<float>("/home/tim/data/astro/y.hdf5");
+	gpu->OPS->printmat(y,0,5,0,1);
 
 	int samples = X->rows;
 	int cv = 10000;
@@ -235,7 +221,6 @@ void test_neural_network()
 
 	gpu->OPS->slice(X,cvX,samples-cv,samples,0,dim);
 	gpu->OPS->slice(y,cvy,samples-cv,samples,0,1);
-
 
 	BatchAllocator *b_train = new CPUtoCPUBatchAllocator(gpu, trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
 	BatchAllocator *b_cv = new CPUtoCPUBatchAllocator(gpu, cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
@@ -257,24 +242,11 @@ void test_neural_network()
 	net.init_weights(UniformSqrt);
 
 
-	/*
-	net._opt->_updatetype = RMSPropInit;
-	net._conf->RMSPROP_MOMENTUM = 0.0f;
-	net.fit_partial(b_train,10);
-	net._conf->RMSPROP_MOMENTUM = 0.99f;
-	net._opt->_updatetype = RMSProp;
-	*/
 
 
 	//t.tick();
 	cout << "pre train" << endl;
 	net.train(b_train, b_cv, 20);
-
-	/*
-	b_train->BATCH_SIZE = 256;
-	b_train->BATCHES *= 0.5;
-	b_train->CURRENT_BATCH = 0;
-	*/
 
 	net._conf->DROPOUT = 0.25f;
 	net._conf->LEARNING_RATE *= 0.2f;
@@ -285,7 +257,8 @@ void test_neural_network()
 	net.train(b_train, b_cv, 11);
 
 	//t.tock();
-
+	/*
+	*/
 }
 
 
