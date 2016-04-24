@@ -200,19 +200,23 @@ void test_neural_network()
 	printf("loading data\n");
 	Matrix<float> *X = gpu->OPS->read_csv("/home/dettmers/data/X.csv");
 	Matrix<float> *y = gpu->OPS->read_csv("/home/dettmers/data/y.csv");
+
+	cout << "post sum prints" << endl;
+	 for(int i =0; i < 10; i++)
+		cout << y->data[i] << " ";
+	cout << endl;
+
+	Matrix<float> *ygpu = gpu->OPS->zeros(y->rows, y->cols);
+	gpu->OPS->to_gpu(y->data, ygpu);
 	printf("post loading data\n");
 	gpu->OPS->printmat(X,0,5,400,410);
 
-	gpu->OPS->printmat(y,0,5,0,1);
+	gpu->OPS->printmat(ygpu,0,5,0,1);
 
 	cout << "test X" << gpu->OPS->sum(X) << endl;
 	cout << "test y" << gpu->OPS->sum(y) << endl;
 	//Matrix<float> *X = read_hdf5<float>("/home/tim/data/astro/X.hdf5");
 	//Matrix<float> *y = read_hdf5<float>("/home/tim/data/astro/y.hdf5");
-	cout << "post sum prints" << endl;
-	 for(int i =0; i < 10; i++)
-		cout << y->data[i] << " ";
-	cout << endl;
 
 	int samples = X->rows;
 	int cv = 10000;
@@ -349,11 +353,23 @@ void test_gem()
 	acc->OPS->to_gpu(a->data, A);	
 	acc->OPS->to_gpu(b->data, B);	
 
+	cout << C->data[0] << endl;
+
+	acc->OPS->to_host(C,C->data);
+	cout << C->data[0] << endl;
 	acc->dot(A,B,C);
 
 	float *aa = a->data;
 	float *bb = b->data;
-	cout << aa[0]*bb[0] + aa[0]*bb[0] << endl;
+	cout << aa[0]*bb[0] + (aa[1]*bb[2]) << endl;
+
+	acc->OPS->printmat(A);
+	acc->OPS->printmat(B);
+
+	acc->OPS->to_host(C,aa);
+
+	cout << aa[0] << endl;
+	cout << C->data[0] << endl;
 }
 
 
@@ -364,10 +380,10 @@ int main(int argc, char *argv[]) {
 	cout << "a" << endl;
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
-	//test_neural_network();
-	test_phi();
+	test_neural_network();
+	//test_phi();
 	//test_lookup_time();
-	test_MPI(argc, argv);
+	//test_MPI(argc, argv);
 	//test_gem();
 
 

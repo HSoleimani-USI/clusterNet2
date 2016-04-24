@@ -193,15 +193,15 @@ Matrix<float> *BasicOpsWrapper::read_csv (const char* filename)
 	rows++;
 	}
 
+	//happens if the file has only one column with 
+	if(columns == 0){ columns = 1; }
+	cout << "Loaded csv file " << filename << " with " << rows << " and " << columns << " columns." <<endl;
+
 	float *data = (float*)malloc(sizeof(float)*columns*rows);
 	memcpy(data,&X[0], columns*rows*sizeof(float));
 	Matrix<float> *out = to_pinned(rows, columns, data);
 
 	
-	cout << "post pinned data" << endl;
-	 for(int i =0; i < 10; i++)
-		cout << out->data[i] << " ";
-	cout << endl;
 	//std::vector<float>().swap( X );
 
 	return out;

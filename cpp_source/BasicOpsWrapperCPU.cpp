@@ -696,8 +696,19 @@ void BasicOpsWrapperCPU::to_gpu(float *cpu, Matrix<float> *gpu)
 }
 Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu)
 {
+
+	//1. creat empty matrix, 2. free Xeon Phi memory, 3. assign host memory to matrix
 	Matrix<float> *out = empty(rows, cols);
-	to_host(out, cpu);
+	float *acc_data = out->data;
+	int size = out->size;
+
+	#pragma offload target(mic:0) \
+	in(acc_data: length(size) alloc_if(0) free_if(1)) 
+	{
+	}
+
+	out->data = cpu;
+	
 	return out;
 }
 Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu, size_t bytes_to_copy)
