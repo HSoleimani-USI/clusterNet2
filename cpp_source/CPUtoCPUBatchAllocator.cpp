@@ -38,6 +38,9 @@ void CPUtoCPUBatchAllocator::replace_current_with_next_batch()
 	batchX = GPU->OPS->get_view(batch_bufferX, CURRENT_BATCH*BATCH_SIZE, (CURRENT_BATCH+1)*BATCH_SIZE);
 	batchY = GPU->OPS->get_view(batch_bufferY, CURRENT_BATCH*BATCH_SIZE, (CURRENT_BATCH+1)*BATCH_SIZE);
 
+	//GPU->OPS->to_gpu(GPU->OPS->get_view(batch_bufferX, CURRENT_BATCH*BATCH_SIZE, (CURRENT_BATCH+1)*BATCH_SIZE)->data, batchX);
+	//GPU->OPS->to_gpu(GPU->OPS->get_view(batch_bufferY, CURRENT_BATCH*BATCH_SIZE, (CURRENT_BATCH+1)*BATCH_SIZE)->data, batchY);
+
 	CURRENT_BATCH += 1;
 	if(CURRENT_BATCH == BATCHES)
 	{

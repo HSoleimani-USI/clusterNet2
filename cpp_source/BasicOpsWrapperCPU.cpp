@@ -508,6 +508,7 @@ float BasicOpsWrapperCPU::sum(Matrix<float> *a)
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
 	    {
+			#pragma omp atomic
 			sumValue += A[i];
 		}
 	}
@@ -529,6 +530,7 @@ float BasicOpsWrapperCPU::max(Matrix<float> *a)
 	#pragma omp parallel for
 	for(int i=0; i < size ;i++)
     {
+		#pragma omp atomic
 		maxValue = fmaxf(maxValue,A[i]);
 	}
 
@@ -696,14 +698,32 @@ void BasicOpsWrapperCPU::to_gpu(float *cpu, Matrix<float> *gpu)
 }
 Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu)
 {
+
+	//1. creat empty matrix, 2. free Xeon Phi memory, 3. assign host memory to matrix
 	Matrix<float> *out = empty(rows, cols);
-	to_host(out, cpu);
+	float *acc_data = out->data;
+	int size = out->size;
+
+	std::memcpy(out->data,cpu, out->bytes);
+	#pragma offload target(mic:0) \
+	inout(acc_data: length(size) alloc_if(0) free_if(0)) 
+	{
+	}
+
 	return out;
 }
 Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu, size_t bytes_to_copy)
 {
 	Matrix<float> *out = empty(rows, cols);
+	float *acc_data = out->data;
+	int size = out->size;
+
 	std::memcpy(out->data,cpu, bytes_to_copy);
+	#pragma offload target(mic:0) \
+	inout(acc_data: length(size) alloc_if(0) free_if(0)) 
+	{
+	}
+
 	return out;
 }
 Matrix<float> *BasicOpsWrapperCPU::get_pinned(int rows, int cols){ return empty(rows, cols); }

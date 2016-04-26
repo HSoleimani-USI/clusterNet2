@@ -63,7 +63,9 @@ void ErrorHandler::add_error(Matrix<float> *predictions, Matrix<float> *labels)
 	if(_errors.size() == 0){ init_buffers(predictions, labels); }
 	GPU->OPS->argmax(predictions, result);
 	GPU->OPS->equal(result,labels,eq);
+
 	float sum_value = GPU->OPS->sum(eq);
+	cout << sum_value << endl;
 	_errors.push_back(((predictions->rows  - sum_value)/(float)predictions->rows));
 	RUNNING_ERROR += (predictions->rows  - sum_value);
 	RUNNING_SAMPLE_SIZE += predictions->rows;
@@ -82,6 +84,7 @@ void ErrorHandler::print_error(std::string message)
 	float standard_error = (1.96*sqrtf(RUNNING_VARIANCE)/sqrtf(RUNNING_BATCHES));
 
 
+	cout << RUNNING_MEAN << endl;
 	printf("%s %s %1.4f (%1.4f,%1.4f)\n", message.c_str(), strEmpty.c_str(), (RUNNING_ERROR/RUNNING_SAMPLE_SIZE), (RUNNING_MEAN - standard_error),(RUNNING_MEAN + standard_error));
 
 	reset();
