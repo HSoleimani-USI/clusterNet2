@@ -23,7 +23,9 @@ Matrix<float> *BasicOpsWrapperCPU::fill_matrix(int rows, int cols, float fill_va
 	
 	int size = ret->size;
 	float *data = ret->data;
+#ifdef PHI
 	#pragma offload target(mic:0) in(size) in(data : length(0) alloc_if(0) free_if(0))
+#endif
 	{
 		#pragma omp parallel for
 		for(int i = 0; i < size; i++)
@@ -47,11 +49,12 @@ Matrix<float> *BasicOpsWrapperCPU::empty(int rows, int cols)
 	float *data = ret-> data;
 	int size = rows*cols;
 
-	
+#ifdef PHI
 	#pragma offload target(mic:0) in(size) inout(data: length(size) alloc_if(1) free_if(0)) 
 	{
 	}
-	
+#endif
+
 	return ret;
 
 }
@@ -75,9 +78,11 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 	float *B = b->data;
 	float *out = c->data;
 
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	in(A,B,out : length(0) alloc_if(0) free_if(0)) \
 	in(scalar)
+#endif
 
 	#pragma omp parallel for
 	for(int i=0; i < size ;i++)
@@ -108,9 +113,10 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 		float *A = a->data;
 		float *out = c->data;
 
+#ifdef PHI
 		#pragma offload target(mic:0) \
 		in(A,out : length(0) alloc_if(0) free_if(0)) \
-
+#endif
 
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
@@ -146,9 +152,11 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 		float *A = a->data;
 		float *out = c->data;
 
+#ifdef PHI
 		#pragma offload target(mic:0) \
 		in(A,out : length(0) alloc_if(0) free_if(0)) \
 		in(scalar)
+#endif
 
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
@@ -184,9 +192,10 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 	float *B = b->data;
 	float *out = c->data;
 
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	in(A,B,out : length(0) alloc_if(0) free_if(0))
-
+#endif
 
 	#pragma omp parallel for
 	for(int i=0; i < size ;i++)
@@ -250,10 +259,11 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 	int rows = c->rows;
 	int cols = c->cols;
 
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	in(A,v,out : length(0) alloc_if(0) free_if(0)) \
 	in(size, cols, rows)
-
+#endif
 
 	#pragma omp parallel for
 	for(int i = 0; i < size ;i++)
@@ -275,10 +285,11 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 	int rows = c->rows;
 	int cols = c->cols;
 
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	in(v,out : length(0) alloc_if(0) free_if(0)) \
 	in(size, cols, rows)
-
+#endif
 
 	#pragma omp parallel for
 	for(int i = 0; i < size ;i++)
@@ -312,10 +323,11 @@ void BasicOpsWrapperCPU::slice(Matrix<float> *a, Matrix<float>*c, int rstart, in
 	float *A = a->data;
 	float *out = c->data;
 
-
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	in(A,out : length(0) alloc_if(0) free_if(0)) \
 	in(size, rstart, rend, cstart, cend, cols_out, rows_out, cols)
+#endif
 
 	#pragma omp parallel for
 	for (unsigned int i = 0;i < size; i++)
@@ -338,10 +350,11 @@ void BasicOpsWrapperCPU::reduceToRowsMean(Matrix<float> *A, Matrix<float> *vout)
 	int size = vout->size;
 	int cols = A->cols;
 
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(out:length(0) alloc_if(0) free_if(0)) \
 	in(size)
-
+#endif
 	#pragma omp parallel for
 	for(int i = 0; i < size; i++)
 	{
@@ -360,9 +373,11 @@ void BasicOpsWrapperCPU::reduceToRowsSum(Matrix<float> *a, Matrix<float> *vout)
 	int Asize = a->size;
 	int cols = a->cols;
 
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(vsize,Asize)
+#endif
 	{
 
 		#pragma omp parallel for
@@ -388,9 +403,11 @@ void BasicOpsWrapperCPU::reduceToRowsMax(Matrix<float> *a, Matrix<float> *vout)
 	int Asize = a->size;
 	int cols = a->cols;
 
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(vsize,Asize)
+#endif
 	{
 
 		#pragma omp parallel for
@@ -415,10 +432,11 @@ void BasicOpsWrapperCPU::reduceToColsMean(Matrix<float> *a, Matrix<float> *vout)
 	int size = vout->size;
 	int rows = a->rows;
 
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(out:length(0) alloc_if(0) free_if(0)) \
 	in(size)
-
+#endif
 	#pragma omp parallel for
 	for(int i = 0; i < size; i++)
 		out[i] /= rows;
@@ -435,9 +453,11 @@ void BasicOpsWrapperCPU::reduceToColsSum(Matrix<float> *a, Matrix<float> *vout)
 	int Asize = a->size;
 	int cols = a->cols;
 
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(vsize,Asize)
+#endif
 	{
 
 		#pragma omp parallel for
@@ -464,9 +484,11 @@ void BasicOpsWrapperCPU::reduceToColsMax(Matrix<float> *a, Matrix<float> *vout)
 	int Asize = a->size;
 	int cols = a->cols;
 
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(vsize,Asize)
+#endif
 	{
 
 		#pragma omp parallel for
@@ -499,11 +521,12 @@ float BasicOpsWrapperCPU::sum(Matrix<float> *a)
 	float sumValue = 0.0f;
 	int size = a->size;
 
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(A:length(0) alloc_if(0) free_if(0)) \
 	in(size) \
 	inout(sumValue)
-
+#endif
 	{
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
@@ -522,10 +545,12 @@ float BasicOpsWrapperCPU::max(Matrix<float> *a)
 	float maxValue = -std::numeric_limits<float>::max();
 	int size = a->size;
 
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(A:length(0) alloc_if(0) free_if(0)) \
 	in(size) \
 	inout(maxValue)
+#endif
 
 	#pragma omp parallel for
 	for(int i=0; i < size ;i++)
@@ -574,10 +599,11 @@ void BasicOpsWrapperCPU::transpose(Matrix<float> *a, Matrix<float> *c, int rows,
 	float *out = c->data;
 	int size = a->size;
 
-
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(size, rows, cols)
+#endif
 
 	#pragma omp parallel for
 	for(int row=0; row < rows ;row++)
@@ -632,9 +658,11 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 
 	int vsum_size = Vsum->size;
 
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(A,out,vsum:length(0) alloc_if(0) free_if(0)) \
 	in(size, cols)
+#endif
 	{
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
@@ -644,10 +672,11 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 		exp(c, c);
 		reduceToRowsSum(c, Vsum);
 
-
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(A,out,vsum:length(0) alloc_if(0) free_if(0)) \
 	in(size, cols)
+#endif
 	{
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
@@ -655,11 +684,12 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 
 	}
 
-	//free vsum
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(vsum:length(vsum_size) alloc_if(0) free_if(1))
 	{
 	}
+#endif
 }
 
 
@@ -670,11 +700,12 @@ void BasicOpsWrapperCPU::to_host(Matrix<float> *gpu, float *cpu)
 	int size = gpu->size;
 	float *data = gpu->data;
 
-
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	out(data: length(size) alloc_if(0) free_if(0)) 
 	{
 	}
+#endif
 	std::memcpy(cpu, data, size*sizeof(float));
 
 }
@@ -691,10 +722,13 @@ void BasicOpsWrapperCPU::to_gpu(float *cpu, Matrix<float> *gpu)
 	float *A = gpu->data;
 	int size = gpu->size;
 	std::memcpy(gpu->data, cpu, gpu->bytes);
+
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	in(A: length(size) alloc_if(0) free_if(0)) 
 	{
 	}
+#endif
 }
 Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu)
 {
@@ -705,11 +739,13 @@ Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu)
 	int size = out->size;
 
 	std::memcpy(out->data,cpu, out->bytes);
+
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	inout(acc_data: length(size) alloc_if(0) free_if(0)) 
 	{
 	}
-
+#endif
 	return out;
 }
 Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu, size_t bytes_to_copy)
@@ -719,11 +755,13 @@ Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu, siz
 	int size = out->size;
 
 	std::memcpy(out->data,cpu, bytes_to_copy);
+
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	inout(acc_data: length(size) alloc_if(0) free_if(0)) 
 	{
 	}
-
+#endif
 	return out;
 }
 Matrix<float> *BasicOpsWrapperCPU::get_pinned(int rows, int cols){ return empty(rows, cols); }
@@ -771,11 +809,13 @@ void BasicOpsWrapperCPU::WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> 
 	float *xw = w->data;
 	int size = w->size;
 
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(xRMS,xgrad,xw:length(0) alloc_if(0) free_if(0)) \
 	in(size, rms_reciprocal, grad_value, RMS_value)
+#endif
 
-	#pragma omp parallel for
+	#pragma omp parallel for default(none) shared(xgrad,RMS_multiplier, xRMS, xw, rms_reciprocal, learning_rate, size) private(grad_value, RMS_value)
 	for(int i = 0; i < size; i++)
 	{
 		grad_value = xgrad[i];
@@ -792,10 +832,12 @@ void BasicOpsWrapperCPU::free_matrix(Matrix<float> *A)
 	float *xA = A->data;
 	int size = A->size;
 
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(xA:length(size) alloc_if(0) free_if(1))
 	{
 	}
+#endif
 }
 
 void BasicOpsWrapperCPU::lookup(Matrix<float> *embedding, Matrix<float> *idx_batch, Matrix<float> *out){}
@@ -815,9 +857,11 @@ void BasicOpsWrapperCPU::argmax(Matrix<float> *A, Matrix<float> *out)
 	int cols = A->cols;
 	int vmaxbuffer_size = vmaxbuffer->size;
 
+#ifdef PHI
 	#pragma offload target(mic:0)\
 	in(xA,xout,xvmaxbuffer:length(0) alloc_if(0) free_if(0)) \
 	in(size, cols,vmaxbuffer_size)
+#endif
 	{
 		#pragma omp parallel for
 		for(int i=0; i < vmaxbuffer_size ;i++)

@@ -33,9 +33,11 @@ Matrix<float> *ClusterNetCPU::rand(int rows, int cols)
 	int size = ret->size;
 	float *xret = ret->data;
 
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	in(xret : length(0) alloc_if(0) free_if(0)) \
     in(size)
+#endif
 
 	#pragma omp parallel for
 	for(int i = 0; i < size; i++)
@@ -51,9 +53,11 @@ Matrix<float> *ClusterNetCPU::randn(int rows, int cols)
 	int size = ret->size;
 	float *xret = ret->data;
 
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	in(xret : length(0) alloc_if(0) free_if(0)) \
     in(size)
+#endif
 
 	#pragma omp parallel for
 	for(int i = 0; i < size; i++)
@@ -72,9 +76,11 @@ Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 	int size = ret->size;
 	float *xret = ret->data;
 
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	in(xret : length(0) alloc_if(0) free_if(0)) \
     in(size)
+#endif
 
 	#pragma omp parallel for
 	for(int i = 0; i < size; i++)
@@ -91,12 +97,13 @@ void ClusterNetCPU::dropout(Matrix<float> *A, Matrix <float> *out, const float d
     int size = out->size;
 	float *xout = out->data;
 
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	in(xout : length(0) alloc_if(0) free_if(0)) \
     in(size)
+#endif
 
 	#pragma omp parallel for
-
 	for(int i = 0; i < out; i++)
 		out[i] = (float)((double) ::rand() / (RAND_MAX) * (2));
 
@@ -130,9 +137,11 @@ void ClusterNetCPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, 
 
 	OPS->check_matrix_multiplication(A, B, out, T1, T2);
 
+#ifdef PHI
 	#pragma offload target(mic:0) \
 	in(xA, xB, xout:length(0) alloc_if(0) free_if(0)) \
 	in(T1, T2, A_rows, B_cols, A_cols, alpha, beta)
+#endif
 	{
 
 		cblas_sgemm(CblasRowMajor,
