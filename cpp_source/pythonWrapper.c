@@ -51,8 +51,11 @@ float wSum(ClusterNet *gpu, FloatMatrix *A){ return gpu->OPS->sum(A); }
 float wMean(ClusterNet *gpu, FloatMatrix *A){ return gpu->OPS->mean(A); }
 #ifdef PHI
 #else
-	void freemat(FloatMatrix *A){ cudaFree(A->data); free(A); }
-	ClusterNet *get_clusterNet(){ return new ClusterNetGPU(); }
+	#ifdef CPU
+	#else
+		void freemat(FloatMatrix *A){ cudaFree(A->data); free(A); }
+		ClusterNet *get_clusterNet(){ return new ClusterNetGPU(); }
+	#endif
 #endif
 
 FloatMatrix *wto_pinned(ClusterNet *gpu, int rows, int cols, float *cpu){ return gpu->OPS->to_pinned(rows, cols, cpu); }

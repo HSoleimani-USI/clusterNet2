@@ -6,11 +6,14 @@
  */
 
 #include "ClusterNetCPU.h"
+
 #ifdef PHI
 	#include <mkl.h>
-#else
-	#include "cblas.h"
 #endif
+#ifdef CPU
+	#include <cblas.h>
+#endif
+
 #include <BasicOpsWrapperCPU.h>
 #include <math.h>
 
@@ -79,14 +82,14 @@ Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 #ifdef PHI
 	#pragma offload target(mic:0) \
 	in(xret : length(0) alloc_if(0) free_if(0)) \
-    in(size)
+    	in(size)
 #endif
 
 	#pragma omp parallel for
 	for(int i = 0; i < size; i++)
 	{
 		float rdm = (float)((double) ::rand() / (RAND_MAX) * (2));
-		ret->data[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
+		xret[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
 	}
 
 	return ret;
@@ -94,18 +97,18 @@ Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 
 void ClusterNetCPU::dropout(Matrix<float> *A, Matrix <float> *out, const float dropout)
 {
-    int size = out->size;
+        int size = out->size;
 	float *xout = out->data;
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
 	in(xout : length(0) alloc_if(0) free_if(0)) \
-    in(size)
+        in(size)
 #endif
 
 	#pragma omp parallel for
-	for(int i = 0; i < out; i++)
-		out[i] = (float)((double) ::rand() / (RAND_MAX) * (2));
+	for(int i = 0; i < size; i++)
+		xout[i] = (float)((double) ::rand() / (RAND_MAX) * (2));
 
 	OPS->dropout(A, out, out, dropout);
 }

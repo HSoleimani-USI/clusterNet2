@@ -11,14 +11,17 @@ typedef CPUtoCPUBatchAllocator FloatCPUtoCPUBatchAllocator;
 
 #ifdef PHI
 #else
-	#include <ClusterNetGPU.h>
-	#include <CPUBatchAllocator.h>
-	#include <GPUBatchAllocator.h>
-	#include <Timer.cuh>
-	typedef GPUBatchAllocator FloatGPUBatchAllocator;
-	typedef CPUBatchAllocator FloatCPUBatchAllocator;
-	ClusterNet *get_clusterNet();
-	void freemat(FloatMatrix *A);
+	#ifdef CPU
+	#else
+		#include <ClusterNetGPU.h>
+		#include <CPUBatchAllocator.h>
+		#include <GPUBatchAllocator.h>
+		#include <Timer.cuh>
+		typedef GPUBatchAllocator FloatGPUBatchAllocator;
+		typedef CPUBatchAllocator FloatCPUBatchAllocator;
+		ClusterNet *get_clusterNet();
+		void freemat(FloatMatrix *A);
+	#endif
 #endif
 
 ClusterNet *get_clusterNetCPU();

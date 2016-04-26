@@ -86,16 +86,21 @@ extern "C"
 	ClusterNet *fget_clusterNet(){ return 0; }
 	void ffree(FloatMatrix *A){}
 #else
-	void ffree(FloatMatrix *A){ freemat(A); }
-	ClusterNet *fget_clusterNet(){ return get_clusterNet(); }
-	Timer *fget_Timer(){ return new Timer(); }
-	void ftick(Timer *t, char *name){ t->tick(std::string(name));}
-	float ftock(Timer *t, char *name){ return t->tock(std::string(name));}
+	#ifdef CPU
+		ClusterNet *fget_clusterNet(){ return 0; }
+		void ffree(FloatMatrix *A){}
+	#else
+		void ffree(FloatMatrix *A){ freemat(A); }
+		ClusterNet *fget_clusterNet(){ return get_clusterNet(); }
+		Timer *fget_Timer(){ return new Timer(); }
+		void ftick(Timer *t, char *name){ t->tick(std::string(name));}
+		float ftock(Timer *t, char *name){ return t->tock(std::string(name));}
 
-	FloatCPUBatchAllocator *fget_CPUBatchAllocator(ClusterNet *gpu, float *X, float *y, int rows, int colsX, int colsY, int batch_size)
-	{ return new FloatCPUBatchAllocator(gpu, X, y, rows, colsX, colsY, batch_size); }
-	FloatGPUBatchAllocator *fget_GPUBatchAllocator(ClusterNet *gpu, float *X, float *y, int rows, int colsX, int colsY, int batch_size)
-	{ return new FloatGPUBatchAllocator(gpu, X, y, rows, colsX, colsY, batch_size); }
+		FloatCPUBatchAllocator *fget_CPUBatchAllocator(ClusterNet *gpu, float *X, float *y, int rows, int colsX, int colsY, int batch_size)
+		{ return new FloatCPUBatchAllocator(gpu, X, y, rows, colsX, colsY, batch_size); }
+		FloatGPUBatchAllocator *fget_GPUBatchAllocator(ClusterNet *gpu, float *X, float *y, int rows, int colsX, int colsY, int batch_size)
+		{ return new FloatGPUBatchAllocator(gpu, X, y, rows, colsX, colsY, batch_size); }
+	#endif
 #endif
 	void fprintmat(ClusterNet *gpu, FloatMatrix *A, int rstart, int rend, int cstart, int cend){ wprintmat(gpu,A,rstart,rend,cstart,cend); }
 

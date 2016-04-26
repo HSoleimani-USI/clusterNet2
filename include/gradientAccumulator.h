@@ -9,7 +9,6 @@
 #ifndef GRADIENTACCUMULATOR_H_
 #define GRADIENTACCUMULATOR_H_
 
-#include <mpi.h>
 #include <Matrix.h>
 #include <vector>
 #include <ClusterNet.h>
@@ -29,13 +28,14 @@ public:
 	std :: vector<Matrix <float> *> v;
 	std :: vector<Matrix <float> *> b;
 
+#ifdef CPU
 	void init_MPI(int argc, char** argv);
 	void init_Matrix (Matrix<float> * m);
 	void send_MPI();
 	void recv_MPI();
 
-
-    GradientAccumulator(ClusterNet *clusterNet);
+        GradientAccumulator(ClusterNet *clusterNet);
+#endif
 
 
 };

@@ -9,8 +9,8 @@ import time
 
 
 def setup():
-    gpu.setGPU()
-    gpu.lib.load_gpu_funcs()
+    gpu.setCPU()
+    #gpu.lib.load_gpu_funcs()
     pass
 
 def teardown():
@@ -33,7 +33,6 @@ def test_togpu():
     C = B.tocpu()
     t.assert_array_almost_equal(A,C,4,"array.tocpu not equal to init array!")   
     
-    
 def test_dot():
     A1 = np.float32(np.random.rand(2,4))
     A2 = np.float32(np.random.rand(4,2))
@@ -42,11 +41,6 @@ def test_dot():
     B3 = gpu.dot(B1,B2)
     C = B3.tocpu()
     
-    '''
-    gpu.printmat(B3)
-    print C
-    assert False
-    '''
     
     t.assert_array_almost_equal(np.dot(A1,A2),C,4,"array.tocpu not equal to init array!")     
     B1 = gpu.array(A1)
@@ -58,6 +52,7 @@ def test_dot():
     t.assert_array_almost_equal(np.dot(A1,A2),B3.tocpu(),4,"array.tocpu not equal to init array!")   
     
 
+'''
 def test_Transpose():
     A = np.float32(np.random.rand(17,83))    
     B = gpu.array(A.T)
@@ -233,13 +228,12 @@ def argmax_test():
     
     t.assert_almost_equal(C, np.argmax(A,1), 3, "Softmax not working")
     
-'''
-def test_to_pinned():
-    A = np.float32(np.random.rand(10,10))
-    B = gpu.to_pinned(A)    
-    
-    t.assert_almost_equal(A,B , 3, "Pinned not working")
-'''
+#def test_to_pinned():
+#    A = np.float32(np.random.rand(10,10))
+#    B = gpu.to_pinned(A)    
+#    
+#    t.assert_almost_equal(A,B , 3, "Pinned not working")
+
 
      
 def test_timer():
@@ -272,6 +266,7 @@ def test_timer():
     
 
 '''       
+'''
 def test_euclidean_distance():
     x = np.float32(np.random.rand(10,100))
     rows = x.shape[0]

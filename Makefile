@@ -7,7 +7,7 @@ NERVANA_DIR := /home/tim/git/nervanagpu/nervanagpu/kernels/C_interface
 INCLUDE :=  -I /usr/local/cuda/include -I $(ROOT_DIR)/include -I $(NERVANA_DIR) -I $(HDF5_DIR)
 LIB := -L /usr/local/cuda/lib64 -L $(HDF5_DIR)lib -L $(NERVANA_DIR) 
 FLAGS_GPU := -lcudart -lcuda -lcublas -lcurand -lhdf5 -lhdf5_hl -lcblas
-FLAGS_CPU := -lmpi -lcblas
+FLAGS_CPU := -lopenblas
 FLAGS_PHI := -mkl -openmp
 FILES := $(ROOT_DIR_CU)/BasicOpsCUDA.cu $(ROOT_DIR_CU)/clusterKernels.cu $(ROOT_DIR_CU)/Timer.cu $(ROOT_DIR_CCP)/Matrix.cpp 
 FILES_CPP := $(wildcard $(ROOT_DIR_CCP)/*.cpp) $(wildcard $(ROOT_DIR_CCP)/*.c)
@@ -28,9 +28,9 @@ test:
 	
 		
 c:
-	g++ -std=c++11 -shared -fPIC $(INCLUDE) $(FILES_CPP) -o $(ROOT_DIR)/lib/libClusterNet.so $(FLAGS_CPU)	
+	g++ -DCPU -std=c++11 -shared -fPIC $(INCLUDE) $(FILES_CPP) -o $(ROOT_DIR)/lib/libClusterNet.so $(FLAGS_CPU)	
 testc:
-	g++ -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/mainCPU.cpp -o main -L $(FLAGS_CPU) -lClusterNet
+	g++ -DCPU -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/mainCPU.cpp -o main -L $(FLAGS_CPU) -lClusterNet
 	
 	
 	

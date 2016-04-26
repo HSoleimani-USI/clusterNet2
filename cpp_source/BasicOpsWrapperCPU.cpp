@@ -116,6 +116,7 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 #ifdef PHI
 		#pragma offload target(mic:0) \
 		in(A,out : length(0) alloc_if(0) free_if(0)) \
+		in(size)
 #endif
 
 		#pragma omp parallel for
@@ -555,8 +556,7 @@ float BasicOpsWrapperCPU::max(Matrix<float> *a)
 	#pragma omp parallel for
 	for(int i=0; i < size ;i++)
     {
-		#pragma omp atomic
-		maxValue = fmaxf(maxValue,A[i]);
+		maxValue = A[i] > maxValue ? A[i] : maxValue;
 	}
 
 	return maxValue;

@@ -159,7 +159,6 @@ void test_neural_network()
 
 	Matrix<float> *X = gpu->OPS->read_csv("/home/dettmers/data/X.csv");
 	Matrix<float> *y = gpu->OPS->read_csv("/home/dettmers/data/y.csv");
-	p
 	//Matrix<float> *X = read_hdf5<float>("/home/tim/data/astro/X.hdf5");
 	//Matrix<float> *y = read_hdf5<float>("/home/tim/data/astro/y.hdf5");
 
@@ -233,8 +232,7 @@ void test_neural_network()
 
 }
 
-
-
+/*
 void test_MPI(int argc, char const *argv[]){
 
 	ClusterNet *gpu = new ClusterNetCPU();
@@ -275,6 +273,7 @@ void test_MPI(int argc, char const *argv[]){
 
 
 }
+*/
 
 
 

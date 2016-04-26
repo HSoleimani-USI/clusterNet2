@@ -10,3 +10,5 @@
 job_name*
 test*
 *.swp
+*.optrpt
+main
