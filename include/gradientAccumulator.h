@@ -28,7 +28,7 @@ public:
 	std :: vector<Matrix <float> *> v;
 	std :: vector<Matrix <float> *> b;
 
-#ifdef CPU
+#ifdef PHI
 	void init_MPI(int argc, char** argv);
 	void init_Matrix (Matrix<float> * m);
 	void send_MPI();
