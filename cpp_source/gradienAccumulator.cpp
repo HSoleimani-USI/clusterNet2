@@ -39,6 +39,7 @@ using std::endl;
 	  MPI_Comm_size(MPI_COMM_WORLD, &matrix_size);
 	  node_count = matrix_size;
 
+<<<<<<< Updated upstream
 
 	  
 
@@ -46,6 +47,13 @@ using std::endl;
 
 
 	void GradientAccumulator::init_Matrix(Matrix<float> * m){
+=======
+}
+
+
+
+void GradientAccumulator::init_Matrix(Matrix<float> * m){
+>>>>>>> Stashed changes
 
 	  matrix = m;
 	  buffer = cn->OPS->zeros(m->rows, m->cols);
@@ -60,6 +68,7 @@ using std::endl;
 	}
 
 
+<<<<<<< Updated upstream
 	void GradientAccumulator::send_MPI(){
 
 
@@ -75,6 +84,32 @@ using std::endl;
 		i,
 		MPI_COMM_WORLD);
 	  }
+=======
+
+void GradientAccumulator::send_MPI(){
+
+
+  for(int i=0; i<=node_count; i++){ 
+
+      #pragma offload target(mic:i) \
+        in(matrix,v, size: length(node_count) alloc_if(0) free_if(0)) \
+        inout()
+
+
+        MPI_Scatter(
+          matrix,
+          v[1]->size,
+          MPI_FLOAT,
+          b[i],
+          v[1]->size,
+          MPI_FLOAT,
+          i,
+          MPI_COMM_WORLD);
+
+      }
+      
+  }
+>>>>>>> Stashed changes
 
 	}
 
@@ -89,6 +124,7 @@ using std::endl;
 
 	  }
 
+<<<<<<< Updated upstream
 	  MPI_Allgather(
 		b[my_rank],
 		b[1] ->size,
@@ -100,6 +136,27 @@ using std::endl;
 
 
 	}
+=======
+    #pragma offload target(mic:i) \
+        in(matrix,v,b, size : length(node_count) alloc_if(0) free_if(0)) \
+        inout()
+        
+
+
+  MPI_Allgather(
+        b[my_rank],
+        b[1] ->size,
+        MPI_FLOAT,
+        matrix,
+        v[1]-> size,
+        MPI_FLOAT,
+        MPI_COMM_WORLD);
+
+
+
+
+}
+>>>>>>> Stashed changes
 
 
 
