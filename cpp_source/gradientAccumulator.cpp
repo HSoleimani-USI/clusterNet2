@@ -84,7 +84,7 @@ using std::endl;
 	void GradientAccumulator::recv_MPI(){
 
 
-		cn->OPS->to_host(b);
+		cn->OPS->to_host(matrix);
 
 	  for(int i=0; i< node_count; i++){
 
