@@ -353,10 +353,10 @@ int main(int argc, char *argv[]) {
 	cout << "a" << endl;
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
-	test_neural_network();
-	//test_phi();
+	//test_neural_network();
+	test_phi();
 	//test_lookup_time();
-	//test_MPI(argc, argv);
+	test_MPI(argc, argv);
 	//test_gem();
 
 
