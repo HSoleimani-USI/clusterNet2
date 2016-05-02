@@ -103,7 +103,7 @@ using std::endl;
         MPI_COMM_WORLD);
 
 
-
+  cn->OPS->to_gpu(matrix);
 
 }
 
