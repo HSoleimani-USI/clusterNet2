@@ -61,7 +61,7 @@ using std::endl;
 	void GradientAccumulator::send_MPI(){
 
 		
-	   cn->OPS->to_host(matrix);
+	   // cn->OPS->to_host(b, matrix);
 
 	cout << "The root  is " << node_count;
 	  for(int i=0; i<node_count; i++){ 
@@ -84,7 +84,7 @@ using std::endl;
 	void GradientAccumulator::recv_MPI(){
 
 
-		cn->OPS->to_host(matrix);
+		// cn->OPS->to_host(matrix);
 
 	  for(int i=0; i< node_count; i++){
 
@@ -103,7 +103,7 @@ using std::endl;
         MPI_COMM_WORLD);
 
 
-  cn->OPS->to_gpu(matrix);
+  // cn->OPS->to_gpu(matrix);
 
 }
 
