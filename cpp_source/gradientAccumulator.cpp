@@ -101,12 +101,10 @@ using std::endl;
         v[0]-> size,
         MPI_FLOAT,
         MPI_COMM_WORLD);
-
-
-  cn->OPS->to_gpu(v, matrix);
-
+   
+       // cn->OPS->to_gpu(matrix);
 }
-
+ 
 
 
 #endif
