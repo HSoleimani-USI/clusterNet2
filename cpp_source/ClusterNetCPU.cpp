@@ -44,7 +44,7 @@ Matrix<float> *ClusterNetCPU::rand(int rows, int cols)
 
 	#pragma omp parallel for
 	for(int i = 0; i < size; i++)
-		xret[i] =(float)((double) ::rand() / (RAND_MAX) * (2));
+		xret[i] =(float)((double) ::rand() / (RAND_MAX));
 
 	return ret;
 }
@@ -65,8 +65,9 @@ Matrix<float> *ClusterNetCPU::randn(int rows, int cols)
 	#pragma omp parallel for
 	for(int i = 0; i < size; i++)
 	{
-		float rdm = (float)((double) ::rand() / (RAND_MAX) * (2));
-		xret[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
+		float rdm = (float)((double) ::rand() / (RAND_MAX) );
+		xret[i] = rdm > 0.5f ? sqrtf(-1.57079632679*logf(1-powf((2*rdm-1),2))) :
+				    -sqrtf(-1.57079632679*logf(1-powf((1-2*rdm),2)));
 	}
 
 	return ret;
