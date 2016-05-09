@@ -25,7 +25,6 @@ Matrix<float> *BasicOpsWrapperCPU::fill_matrix(int rows, int cols, float fill_va
 	
 	int size = ret->size;
 	float *data = ret->data;
-	__assume_aligned(data,32);
 #ifdef PHI
 	#pragma offload target(mic:0) in(size) in(data : length(0) alloc_if(0) free_if(0))
 #endif
@@ -42,7 +41,7 @@ Matrix<float> *BasicOpsWrapperCPU::empty(int rows, int cols)
 {
 	Matrix<float> *ret = new Matrix<float>();
 
-	float *data = (float*)_mm_malloc(rows*cols*sizeof(float), 32);
+	float *data = (float*)malloc(rows*cols*sizeof(float));
 	ret->data = data;
 
 	ret->rows = rows;
