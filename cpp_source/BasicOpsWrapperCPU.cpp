@@ -242,7 +242,7 @@ void BasicOpsWrapperCPU::less_equal(Matrix<float> *A, Matrix<float> *B, Matrix<f
 void BasicOpsWrapperCPU::not_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 { elementWise<kne>(A,B,out); }
 void BasicOpsWrapperCPU::squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ elementWise<ksquared_diff>(A,B,out, 2.0f); }
+{ elementWise<ksquared_diff>(A,B,out); }
 void BasicOpsWrapperCPU::dropout(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar)
 { elementWise<kdropout>(A,B,out,scalar); }
 
@@ -267,6 +267,7 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 	in(size, cols, rows)
 #endif
 
+
 	#pragma omp parallel for
 	for(int i = 0; i < size ;i++)
 	{
@@ -281,7 +282,7 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 template void BasicOpsWrapperCPU::vectorWise<ktmatrix>(Matrix<float> *v, Matrix<float>*out);
 template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matrix<float>*c)
 {
-	int size = a->size;
+	int size = c->size;
 	float *v = a->data;
 	float *out = c->data;
 	int rows = c->rows;
@@ -305,7 +306,7 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 
 
 void BasicOpsWrapperCPU::vadd(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
-{ vectorWise<kadd>(A,v,out); }
+{ vectorWise<kvadd>(A,v,out); }
 
 void BasicOpsWrapperCPU::vsub(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
 { vectorWise<ksub>(A,v,out); }
