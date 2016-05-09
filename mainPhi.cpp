@@ -202,7 +202,6 @@ void test_neural_network()
 	Matrix<float> *y = gpu->OPS->read_csv("/home/dettmers/data/y.csv");
 
 
-	gpu->OPS->printmat(y,0,5,0,1);
 
 	int samples = X->rows;
 	int cv = 10000;
@@ -353,10 +352,10 @@ int main(int argc, char *argv[]) {
 	cout << "a" << endl;
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
-	//test_neural_network();
+	test_neural_network();
 	test_phi();
 	//test_lookup_time();
-	test_MPI(argc, argv);
+	//test_MPI(argc, argv);
 	//test_gem();
 
 
