@@ -22,7 +22,7 @@ using std::endl;
 Matrix<float> *BasicOpsWrapperCPU::fill_matrix(int rows, int cols, float fill_value)
 {
 	Matrix<float> *ret = empty(rows, cols);
-	
+
 	int size = ret->size;
 	float *data = ret->data;
 #ifdef PHI
@@ -44,7 +44,7 @@ Matrix<float> *BasicOpsWrapperCPU::empty(int rows, int cols)
 #ifdef PHI
 	float *data = (float*)_mm_malloc(rows*cols*sizeof(float), 64);
 #else
-	float *data = (float*)malloc(rows*cols*sizeof(float), 64);
+	float *data = (float*)malloc(rows*cols*sizeof(float));
 #endif
 	ret->data = data;
 
@@ -56,7 +56,7 @@ Matrix<float> *BasicOpsWrapperCPU::empty(int rows, int cols)
 	int size = rows*cols;
 
 #ifdef PHI
-	#pragma offload target(mic:0) in(size) inout(data: length(size) alloc_if(1) free_if(0)) 
+	#pragma offload target(mic:0) in(size) inout(data: length(size) alloc_if(1) free_if(0))
 	{
 	}
 #endif
@@ -132,44 +132,44 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 
 			switch(action)
 			{
-			   case kabs: 
-				#pragma omp parallel for 
+			   case kabs:
+				#pragma omp parallel for
 				for(int i=0; i < size ;i++) out[i] = fabsf(A[i]); break;
-			   case klog: 
-				#pragma omp parallel for 
+			   case klog:
+				#pragma omp parallel for
 					for(int i=0; i < size ;i++) out[i] = logf(A[i]); break;
-			   case ksqrt: 
-				#pragma omp parallel for 
+			   case ksqrt:
+				#pragma omp parallel for
 					for(int i=0; i < size ;i++) out[i] = sqrtf(A[i]); break;
-			   case klogistic: 
-				#pragma omp parallel for 
+			   case klogistic:
+				#pragma omp parallel for
 					for(int i=0; i < size ;i++) out[i] = 1.0f/(1.0f + expf(-A[i])); break;
-			   case klogistic_grad: 
-				#pragma omp parallel for 
+			   case klogistic_grad:
+				#pragma omp parallel for
 					for(int i=0; i < size ;i++) out[i] = A[i]*(1.0f-A[i]); break;
-			   case kELU: 
-				#pragma omp parallel for 
+			   case kELU:
+				#pragma omp parallel for
 					for(int i=0; i < size ;i++) out[i] = A[i] > 0.0f ? A[i] : expf(A[i])-1.0f; break;
-			   case kELU_grad: 
-				#pragma omp parallel for 
+			   case kELU_grad:
+				#pragma omp parallel for
 					for(int i=0; i < size ;i++) out[i] = A[i] > 0.0f ? 1.0f : A[i] + 1.0f; break;
-			   case krectified: 
-				#pragma omp parallel for 
+			   case krectified:
+				#pragma omp parallel for
 					for(int i=0; i < size ;i++) out[i] = A[i] > 0.0f ? A[i] : 0.0f; break;
-			   case krectified_grad: 
-				#pragma omp parallel for 
+			   case krectified_grad:
+				#pragma omp parallel for
 					for(int i=0; i < size ;i++) out[i] = A[i] > 0.0f ? 1.0f : 0.0f; break;
-			   case kcopy: 
-				#pragma omp parallel for 
+			   case kcopy:
+				#pragma omp parallel for
 					for(int i=0; i < size ;i++) out[i] = A[i]; break;
-			   case ktanh: 
-				#pragma omp parallel for 
+			   case ktanh:
+				#pragma omp parallel for
 					for(int i=0; i < size ;i++) out[i] = tanhf(A[i]); break;
-			   case ktanh_grad: 
-				#pragma omp parallel for 
+			   case ktanh_grad:
+				#pragma omp parallel for
 					for(int i=0; i < size ;i++) out[i] = 1.0f - (A[i]*A[i]); break;
-			   case kexp: 
-				#pragma omp parallel for 
+			   case kexp:
+				#pragma omp parallel for
 					for(int i=0; i < size ;i++) out[i] = expf(A[i]); break;
 			}
 }
@@ -195,23 +195,23 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 
 			switch(action)
 			{
-			   case kpow: 
+			   case kpow:
 				#pragma omp parallel for
 				for(int i=0; i < size ;i++)
 				out[i] = powf(A[i],scalar); break;
-			   case ksmul: 
+			   case ksmul:
 				#pragma omp parallel for
 				for(int i=0; i < size ;i++)
 				out[i] = A[i] * scalar; break;
-			   case kssub: 
+			   case kssub:
 				#pragma omp parallel for
 				for(int i=0; i < size ;i++)
 				out[i] = A[i] - scalar; break;
-			   case ksgt: 
+			   case ksgt:
 				#pragma omp parallel for
 				for(int i=0; i < size ;i++)
 				out[i] = (float)(A[i] > scalar); break;
-			   case kmod: 
+			   case kmod:
 				#pragma omp parallel for
 				for(int i=0; i < size ;i++)
 				out[i] = (float)((int)A[i] % (int)scalar); break;
@@ -249,7 +249,7 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 
 		switch(action)
 		{
-		   case kadd: 
+		   case kadd:
 			#pragma omp parallel for
 			for(int i=0; i < size ;i++)
 			out[i] = A[i] + B[i]; break;
@@ -257,39 +257,39 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 			#pragma omp parallel for
 			for(int i=0; i < size ;i++)
 			out[i] = A[i] - B[i]; break;
-		   case kdiv: 
+		   case kdiv:
 			#pragma omp parallel for
 			for(int i=0; i < size ;i++)
 			out[i] = A[i] / B[i]; break;
-		   case kmul: 
+		   case kmul:
 			#pragma omp parallel for
 			for(int i=0; i < size ;i++)
 			out[i] = A[i] * B[i]; break;
-		   case keq: 
+		   case keq:
 			#pragma omp parallel for
 			for(int i=0; i < size ;i++)
 			out[i] = (float)(A[i] == B[i]); break;
-		   case klt: 
+		   case klt:
 			#pragma omp parallel for
 			for(int i=0; i < size ;i++)
 			out[i] = (float)(A[i] < B[i]); break;
-		   case kgt: 
+		   case kgt:
 			#pragma omp parallel for
 			for(int i=0; i < size ;i++)
 			out[i] = (float)(A[i] > B[i]); break;
-		   case kge: 
+		   case kge:
 			#pragma omp parallel for
 			for(int i=0; i < size ;i++)
 			out[i] = (float)(A[i] >= B[i]); break;
-		   case kle: 
+		   case kle:
 			#pragma omp parallel for
 			for(int i=0; i < size ;i++)
 			out[i] = (float)(A[i] <= B[i]); break;
-		   case kne: 
+		   case kne:
 			#pragma omp parallel for
 			for(int i=0; i < size ;i++)
 			out[i] = (float)(A[i] != B[i]); break;
-		   case ksquared_diff: 
+		   case ksquared_diff:
 			#pragma omp parallel for
 			for(int i=0; i < size ;i++)
 			out[i] = powf(A[i]-B[i],2.0f); break;
@@ -350,11 +350,11 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 
 	switch(action)
 	{
-		case kvadd: 
+		case kvadd:
 		#pragma omp parallel for
 		for(int i = 0; i < size ;i++)
 			out[i] =  A[i] + v[i - ((i / cols)*cols)]; break;
-		case kvsub: 
+		case kvsub:
 		#pragma omp parallel for
 		for(int i = 0; i < size ;i++)
 			out[i] =  A[i] - v[i - ((i / cols)*cols)]; break;
@@ -399,7 +399,7 @@ void BasicOpsWrapperCPU::get_t_matrix(Matrix<float> *v, Matrix<float> *out)
 
 void BasicOpsWrapperCPU::slice(Matrix<float> *a, Matrix<float>*c, int rstart, int rend, int cstart, int cend)
 {
-  
+
 	int rows_out = (rend - rstart);
 	int cols_out = (cend - cstart);
 	int size = rows_out*cols_out;
@@ -805,7 +805,7 @@ void BasicOpsWrapperCPU::to_host(Matrix<float> *gpu, float *cpu)
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
-	out(data: length(size) alloc_if(0) free_if(0)) 
+	out(data: length(size) alloc_if(0) free_if(0))
 	{
 	}
 #endif
@@ -828,7 +828,7 @@ void BasicOpsWrapperCPU::to_gpu(float *cpu, Matrix<float> *gpu)
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
-	in(A: length(size) alloc_if(0) free_if(0)) 
+	in(A: length(size) alloc_if(0) free_if(0))
 	{
 	}
 #endif
@@ -845,7 +845,7 @@ Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu)
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
-	inout(acc_data: length(size) alloc_if(0) free_if(0)) 
+	inout(acc_data: length(size) alloc_if(0) free_if(0))
 	{
 	}
 #endif
@@ -861,7 +861,7 @@ Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu, siz
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
-	inout(acc_data: length(size) alloc_if(0) free_if(0)) 
+	inout(acc_data: length(size) alloc_if(0) free_if(0))
 	{
 	}
 #endif
