@@ -213,7 +213,6 @@ void test_neural_network()
 
 	Matrix<float> *cvX = gpu->OPS->zeros(cv,dim);
 	Matrix<float> *cvy = gpu->OPS->zeros(cv,1);
-
 	gpu->OPS->slice(X,trainX,0,samples-cv,0,dim);
 	gpu->OPS->slice(y,trainy,0,samples-cv,0,1);
 
@@ -256,8 +255,6 @@ void test_neural_network()
 	net.train(b_train, b_cv, 11);
 
 	//t.tock();
-	/*
-	*/
 }
 
 

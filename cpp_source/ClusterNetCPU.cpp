@@ -17,6 +17,9 @@
 #include <BasicOpsWrapperCPU.h>
 #include <math.h>
 
+using std::cout;
+using std::endl;
+
 ClusterNetCPU::ClusterNetCPU()
 {
 	// TODO Auto-generated constructor stub
