@@ -118,7 +118,7 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 		in(A,out : length(0) alloc_if(0) free_if(0)) \
 		in(size)
 #endif
-
+		#pragma ivdep
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
 		{
@@ -141,6 +141,7 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 			}
 		}
 }
+
 
 template void BasicOpsWrapperCPU::elementWise<kpow>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template void BasicOpsWrapperCPU::elementWise<ksmul>(Matrix<float> *A, Matrix<float>*out, float scalar);

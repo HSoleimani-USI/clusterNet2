@@ -24,7 +24,7 @@ kepler:
 	nvcc -DHDF5 -gencode arch=compute_30,code=sm_30 -Xcompiler '-fPIC' -dlink $(BUILD_DIR)/Matrix.o $(BUILD_DIR)/BasicOpsCUDA.o $(BUILD_DIR)/clusterKernels.o $(BUILD_DIR)/Timer.o -o $(BUILD_DIR)/link.o 
 	g++ -DHDF5 -std=c++11 -shared -fPIC $(INCLUDE) $(wildcard $(BUILD_DIR)/*.o) $(FILES_CPP) $(FILES_CPP_GPU) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) $(FLAGS_GPU)
 test:
-	g++ -DHDF5 -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/main.cpp -o main $(LIB) $(FLAGS_GPU) -lClusterNet  
+	g++ -qopt-report=5 -DHDF5 -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/main.cpp -o main $(LIB) $(FLAGS_GPU) -lClusterNet  
 	
 		
 c:
