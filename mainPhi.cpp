@@ -350,10 +350,10 @@ int main(int argc, char *argv[]) {
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
 	test_phi();
-	test_neural_network();
-	//test_lookup_time();
-	//test_MPI(argc, argv);
 	//test_gem();
+	test_MPI(argc, argv);
+	//test_neural_network();
+	//test_lookup_time();
 
 
 	return 0;

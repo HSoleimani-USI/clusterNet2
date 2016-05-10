@@ -88,7 +88,7 @@ using std::endl;
 		
 	      cn->OPS->add(b[i], b[my_rank], b[my_rank]);
 			#pragma omp parallel for
-			for(int j=0; j < size ;i++)
+			for(int j=0; j < b[my_rank]->size ;j++)
 				b[my_rank]->data[i] = b[my_rank]->data[i] + b[i]->data[i];
            }
 
