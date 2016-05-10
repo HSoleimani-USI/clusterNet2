@@ -116,7 +116,7 @@ void ClusterNetCPU::dropout(Matrix<float> *A, Matrix <float> *out, const float d
 
 Matrix<float> *ClusterNetCPU::get_uniformsqrt_weight(int input, int output)
 {
-	Matrix<float> *out = rand(input,output);
+	Matrix<float> *out = rand(input,output);	
 	float range = 8.0f*sqrtf(6.0f/((float)input + output));
 	OPS->mul(out,out,range);
 	OPS->sub(out,out,range/2.0f);
