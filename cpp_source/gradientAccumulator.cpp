@@ -62,8 +62,8 @@ using std::endl;
 
 		
 	    cn->OPS->to_host(matrix);
-
-	cout << "The root  is " << node_count;
+        #pragma ivdep
+	//cout << "The root  is " << node_count;
 	  for(int i=0; i<node_count; i++){ 
 	  
 	      MPI_Scatter(
@@ -102,7 +102,7 @@ using std::endl;
         MPI_FLOAT,
         MPI_COMM_WORLD);
    
-      // cn->OPS->to_gpu(matrix);
+     //cn->OPS->to_gpu(b,matrix);
 }
  
 

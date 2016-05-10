@@ -149,7 +149,7 @@ void test_lookup_time()
 
 void test_phi()
 {
-	
+
 	float test[4] = {1.7,1.3,1.2,1.1};
 	float test2[4] = {1.7,1.3,1.2,1.1};
 	ClusterNet *gpu = new ClusterNetCPU();
@@ -173,14 +173,14 @@ void test_phi()
 
 	for(int i =0; i < 4; i++)
 		cout << test[i] << " ";
-	cout << endl; 
+	cout << endl;
 
 	cout << gpu->OPS->sum(a) << endl;
 	cout << gpu->OPS->sum(b) << endl;
 	cout << gpu->OPS->sum(c) << endl;
 	cout << "Sum should be: " << 4 + 1.7+1.3+1.2+1.1 << endl;
 
-	
+
 }
 
 void test_neural_network()
@@ -196,13 +196,12 @@ void test_neural_network()
 
 //	gpu->useNervanaGPU = true;
 
-	
+
 	printf("loading data\n");
 	Matrix<float> *X = gpu->OPS->read_csv("/home/dettmers/data/X.csv");
 	Matrix<float> *y = gpu->OPS->read_csv("/home/dettmers/data/y.csv");
 
 
-	gpu->OPS->printmat(y,0,5,0,1);
 
 	int samples = X->rows;
 	int cv = 10000;
@@ -214,7 +213,6 @@ void test_neural_network()
 
 	Matrix<float> *cvX = gpu->OPS->zeros(cv,dim);
 	Matrix<float> *cvy = gpu->OPS->zeros(cv,1);
-
 	gpu->OPS->slice(X,trainX,0,samples-cv,0,dim);
 	gpu->OPS->slice(y,trainy,0,samples-cv,0,1);
 
@@ -257,8 +255,6 @@ void test_neural_network()
 	net.train(b_train, b_cv, 11);
 
 	//t.tock();
-	/*
-	*/
 }
 
 
@@ -288,7 +284,7 @@ void test_MPI(int argc, char *argv[]){
 
 	cout << "pre gpu" << endl;
 	gpu->OPS->to_gpu(a, B);
-	
+
 
 
 	cout << "pre init matrix" << endl;
@@ -299,7 +295,7 @@ void test_MPI(int argc, char *argv[]){
 	ga->recv_MPI();
 
 	gpu->OPS->to_host(ga->buffer,a);
-	
+
 	if(ga->my_rank == 0)
 	{
 		cout << "Myrank " << ga->my_rank << endl;
@@ -323,8 +319,8 @@ void test_gem()
 	Matrix<float> *B = acc->OPS->zeros(2,2);
 	Matrix<float> *C = acc->OPS->zeros(2,2);
 
-	acc->OPS->to_gpu(a->data, A);	
-	acc->OPS->to_gpu(b->data, B);	
+	acc->OPS->to_gpu(a->data, A);
+	acc->OPS->to_gpu(b->data, B);
 
 	cout << C->data[0] << endl;
 
@@ -353,10 +349,10 @@ int main(int argc, char *argv[]) {
 	cout << "a" << endl;
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
-	//test_neural_network();
 	test_phi();
+	test_neural_network();
 	//test_lookup_time();
-	test_MPI(argc, argv);
+	//test_MPI(argc, argv);
 	//test_gem();
 
 

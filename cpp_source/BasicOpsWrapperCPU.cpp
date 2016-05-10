@@ -13,6 +13,8 @@
 #include <algorithm>
 #include <cstring>
 #include <iostream>
+#include <assert.h>
+
 
 using std::cout;
 using std::endl;
@@ -20,11 +22,12 @@ using std::endl;
 Matrix<float> *BasicOpsWrapperCPU::fill_matrix(int rows, int cols, float fill_value)
 {
 	Matrix<float> *ret = empty(rows, cols);
-	
+
 	int size = ret->size;
 	float *data = ret->data;
 #ifdef PHI
 	#pragma offload target(mic:0) in(size) in(data : length(0) alloc_if(0) free_if(0))
+	//__assume_aligned(data, 64);
 #endif
 	{
 		#pragma omp parallel for
@@ -38,19 +41,22 @@ Matrix<float> *BasicOpsWrapperCPU::fill_matrix(int rows, int cols, float fill_va
 Matrix<float> *BasicOpsWrapperCPU::empty(int rows, int cols)
 {
 	Matrix<float> *ret = new Matrix<float>();
-	{
-		ret->data = (float*)malloc(sizeof(float)*rows*cols);
-	}
+#ifdef PHI
+	float *data = (float*)_mm_malloc(rows*cols*sizeof(float), 64);
+#else
+	float *data = (float*)malloc(rows*cols*sizeof(float));
+#endif
+	ret->data = data;
+
 	ret->rows = rows;
 	ret->cols = cols;
 	ret->size = rows*cols;
 	ret->bytes = rows*cols*sizeof(float);
 	ret->isRowMajor = true;
-	float *data = ret-> data;
 	int size = rows*cols;
 
 #ifdef PHI
-	#pragma offload target(mic:0) in(size) inout(data: length(size) alloc_if(1) free_if(0)) 
+	#pragma offload target(mic:0) in(size) inout(data: length(size) alloc_if(1) free_if(0))
 	{
 	}
 #endif
@@ -79,9 +85,12 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 	float *out = c->data;
 
 #ifdef PHI
+	//__assume_aligned(A, 64);
+	//__assume_aligned(B, 64);
+	//__assume_aligned(out, 64);
 	#pragma offload target(mic:0) \
 	in(A,B,out : length(0) alloc_if(0) free_if(0)) \
-	in(scalar)
+	in(scalar, size)
 #endif
 
 	#pragma omp parallel for
@@ -114,32 +123,60 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 		float *out = c->data;
 
 #ifdef PHI
+	//__assume_aligned(A, 64);
+	//__assume_aligned(out, 64);
 		#pragma offload target(mic:0) \
 		in(A,out : length(0) alloc_if(0) free_if(0)) \
 		in(size)
 #endif
+
 		#pragma ivdep
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
 		{
+
 			switch(action)
 			{
-			   case kabs: out[i] = fabsf(A[i]); break;
-			   case klog: out[i] = logf(A[i]); break;
-			   case ksqrt: out[i] = sqrtf(A[i]); break;
-			   case klogistic: out[i] = 1.0f/(1.0f + expf(-A[i])); break;
-			   case klogistic_grad: out[i] = A[i]*(1.0f-A[i]); break;
-			   case kELU: out[i] = A[i] > 0.0f ? A[i] : expf(A[i])-1.0f; break;
-			   case kELU_grad: out[i] = A[i] > 0.0f ? 1.0f : A[i] + 1.0f; break;
-			   case krectified: out[i] = A[i] > 0.0f ? A[i] : 0.0f; break;
-			   case krectified_grad: out[i] = A[i] > 0.0f ? 1.0f : 0.0f; break;
-			   case kcopy: out[i] = A[i]; break;
-			   case ktanh: out[i] = tanhf(A[i]); break;
-			   case ktanh_grad: out[i] = 1.0f - (A[i]*A[i]); break;
-			   case kexp: out[i] = expf(A[i]); break;
-
+			   case kabs:
+				#pragma omp parallel for
+				for(int i=0; i < size ;i++) out[i] = fabsf(A[i]); break;
+			   case klog:
+				#pragma omp parallel for
+					for(int i=0; i < size ;i++) out[i] = logf(A[i]); break;
+			   case ksqrt:
+				#pragma omp parallel for
+					for(int i=0; i < size ;i++) out[i] = sqrtf(A[i]); break;
+			   case klogistic:
+				#pragma omp parallel for
+					for(int i=0; i < size ;i++) out[i] = 1.0f/(1.0f + expf(-A[i])); break;
+			   case klogistic_grad:
+				#pragma omp parallel for
+					for(int i=0; i < size ;i++) out[i] = A[i]*(1.0f-A[i]); break;
+			   case kELU:
+				#pragma omp parallel for
+					for(int i=0; i < size ;i++) out[i] = A[i] > 0.0f ? A[i] : expf(A[i])-1.0f; break;
+			   case kELU_grad:
+				#pragma omp parallel for
+					for(int i=0; i < size ;i++) out[i] = A[i] > 0.0f ? 1.0f : A[i] + 1.0f; break;
+			   case krectified:
+				#pragma omp parallel for
+					for(int i=0; i < size ;i++) out[i] = A[i] > 0.0f ? A[i] : 0.0f; break;
+			   case krectified_grad:
+				#pragma omp parallel for
+					for(int i=0; i < size ;i++) out[i] = A[i] > 0.0f ? 1.0f : 0.0f; break;
+			   case kcopy:
+				#pragma omp parallel for
+					for(int i=0; i < size ;i++) out[i] = A[i]; break;
+			   case ktanh:
+				#pragma omp parallel for
+					for(int i=0; i < size ;i++) out[i] = tanhf(A[i]); break;
+			   case ktanh_grad:
+				#pragma omp parallel for
+					for(int i=0; i < size ;i++) out[i] = 1.0f - (A[i]*A[i]); break;
+			   case kexp:
+				#pragma omp parallel for
+					for(int i=0; i < size ;i++) out[i] = expf(A[i]); break;
 			}
-		}
 }
 
 
@@ -155,24 +192,37 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 		float *out = c->data;
 
 #ifdef PHI
+	//__assume_aligned(A, 64);
+	//__assume_aligned(out, 64);
 		#pragma offload target(mic:0) \
 		in(A,out : length(0) alloc_if(0) free_if(0)) \
-		in(scalar)
+		in(scalar, size)
 #endif
 
-		#pragma omp parallel for
-		for(int i=0; i < size ;i++)
-		{
 			switch(action)
 			{
-			   case kpow: out[i] = powf(A[i],scalar); break;
-			   case ksmul: out[i] = A[i] * scalar; break;
-			   case kssub: out[i] = A[i] - scalar; break;
-			   case ksgt: out[i] = (float)(A[i] > scalar); break;
-			   case kmod: out[i] = (float)((int)A[i] % (int)scalar); break;
+			   case kpow:
+				#pragma omp parallel for
+				for(int i=0; i < size ;i++)
+				out[i] = powf(A[i],scalar); break;
+			   case ksmul:
+				#pragma omp parallel for
+				for(int i=0; i < size ;i++)
+				out[i] = A[i] * scalar; break;
+			   case kssub:
+				#pragma omp parallel for
+				for(int i=0; i < size ;i++)
+				out[i] = A[i] - scalar; break;
+			   case ksgt:
+				#pragma omp parallel for
+				for(int i=0; i < size ;i++)
+				out[i] = (float)(A[i] > scalar); break;
+			   case kmod:
+				#pragma omp parallel for
+				for(int i=0; i < size ;i++)
+				out[i] = (float)((int)A[i] % (int)scalar); break;
 
 			}
-		}
 }
 
 //BasicOpsWrapperCPU::elementWise operation with a two matrix arguments
@@ -195,29 +245,62 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 	float *out = c->data;
 
 #ifdef PHI
+	//__assume_aligned(A, 64);
+	//__assume_aligned(B, 64);
+	//__assume_aligned(out, 64);
 	#pragma offload target(mic:0) \
-	in(A,B,out : length(0) alloc_if(0) free_if(0))
+	in(A,B,out : length(0) alloc_if(0) free_if(0)) \
+	in(size)
 #endif
 
-	#pragma omp parallel for
-	for(int i=0; i < size ;i++)
-	{
 		switch(action)
 		{
-		   case kadd: out[i] = A[i] + B[i]; break;
-		   case ksub: out[i] = A[i] - B[i]; break;
-		   case kdiv: out[i] = A[i] / B[i]; break;
-		   case kmul: out[i] = A[i] * B[i]; break;
-		   case keq: out[i] = (float)(A[i] == B[i]); break;
-		   case klt: out[i] = (float)(A[i] < B[i]); break;
-		   case kgt: out[i] = (float)(A[i] > B[i]); break;
-		   case kge: out[i] = (float)(A[i] >= B[i]); break;
-		   case kle: out[i] = (float)(A[i] <= B[i]); break;
-		   case kne: out[i] = (float)(A[i] != B[i]); break;
-       	   case ksquared_diff: out[i] = powf(A[i]-B[i],2.0f); break;
+		   case kadd:
+			#pragma omp parallel for
+			for(int i=0; i < size ;i++)
+			out[i] = A[i] + B[i]; break;
+		   case ksub:
+			#pragma omp parallel for
+			for(int i=0; i < size ;i++)
+			out[i] = A[i] - B[i]; break;
+		   case kdiv:
+			#pragma omp parallel for
+			for(int i=0; i < size ;i++)
+			out[i] = A[i] / B[i]; break;
+		   case kmul:
+			#pragma omp parallel for
+			for(int i=0; i < size ;i++)
+			out[i] = A[i] * B[i]; break;
+		   case keq:
+			#pragma omp parallel for
+			for(int i=0; i < size ;i++)
+			out[i] = (float)(A[i] == B[i]); break;
+		   case klt:
+			#pragma omp parallel for
+			for(int i=0; i < size ;i++)
+			out[i] = (float)(A[i] < B[i]); break;
+		   case kgt:
+			#pragma omp parallel for
+			for(int i=0; i < size ;i++)
+			out[i] = (float)(A[i] > B[i]); break;
+		   case kge:
+			#pragma omp parallel for
+			for(int i=0; i < size ;i++)
+			out[i] = (float)(A[i] >= B[i]); break;
+		   case kle:
+			#pragma omp parallel for
+			for(int i=0; i < size ;i++)
+			out[i] = (float)(A[i] <= B[i]); break;
+		   case kne:
+			#pragma omp parallel for
+			for(int i=0; i < size ;i++)
+			out[i] = (float)(A[i] != B[i]); break;
+		   case ksquared_diff:
+			#pragma omp parallel for
+			for(int i=0; i < size ;i++)
+			out[i] = powf(A[i]-B[i],2.0f); break;
 
 		}
-	}
 }
 
 
@@ -262,20 +345,25 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 	int cols = c->cols;
 
 #ifdef PHI
+	//__assume_aligned(A, 64);
+	//__assume_aligned(v, 64);
+	//__assume_aligned(out, 64);
 	#pragma offload target(mic:0) \
 	in(A,v,out : length(0) alloc_if(0) free_if(0)) \
 	in(size, cols, rows)
 #endif
 
 
-	#pragma omp parallel for
-	for(int i = 0; i < size ;i++)
+	switch(action)
 	{
-		switch(action)
-		{
-			case kvadd: out[i] =  A[i] + v[i - ((i / cols)*cols)]; break;
-			case kvsub: out[i] =  A[i] - v[i - ((i / cols)*cols)]; break;
-		}
+		case kvadd:
+		#pragma omp parallel for
+		for(int i = 0; i < size ;i++)
+			out[i] =  A[i] + v[i - ((i / cols)*cols)]; break;
+		case kvsub:
+		#pragma omp parallel for
+		for(int i = 0; i < size ;i++)
+			out[i] =  A[i] - v[i - ((i / cols)*cols)]; break;
 	}
 }
 
@@ -289,18 +377,18 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 	int cols = c->cols;
 
 #ifdef PHI
+	//__assume_aligned(v, 64);
+	//__assume_aligned(out, 64);
 	#pragma offload target(mic:0) \
 	in(v,out : length(0) alloc_if(0) free_if(0)) \
 	in(size, cols, rows)
 #endif
 
+	assert(action == ktmatrix);
 	#pragma omp parallel for
 	for(int i = 0; i < size ;i++)
 	{
-		switch(action)
-		{
-			case ktmatrix: out[i] = i-((i / cols)*cols) == (int)v[(i / cols)] ? 1.0f : 0.0f; break;
-		}
+		out[i] = i-((i / cols)*cols) == (int)v[(i / cols)] ? 1.0f : 0.0f;
 	}
 }
 
@@ -317,7 +405,7 @@ void BasicOpsWrapperCPU::get_t_matrix(Matrix<float> *v, Matrix<float> *out)
 
 void BasicOpsWrapperCPU::slice(Matrix<float> *a, Matrix<float>*c, int rstart, int rend, int cstart, int cend)
 {
-  
+
 	int rows_out = (rend - rstart);
 	int cols_out = (cend - cstart);
 	int size = rows_out*cols_out;
@@ -327,6 +415,8 @@ void BasicOpsWrapperCPU::slice(Matrix<float> *a, Matrix<float>*c, int rstart, in
 	float *out = c->data;
 
 #ifdef PHI
+	//__assume_aligned(A, 64);
+	//__assume_aligned(out, 64);
 	#pragma offload target(mic:0) \
 	in(A,out : length(0) alloc_if(0) free_if(0)) \
 	in(size, rstart, rend, cstart, cend, cols_out, rows_out, cols)
@@ -354,6 +444,7 @@ void BasicOpsWrapperCPU::reduceToRowsMean(Matrix<float> *A, Matrix<float> *vout)
 	int cols = A->cols;
 
 #ifdef PHI
+	//__assume_aligned(out, 64);
 	#pragma offload target(mic:0)\
 	in(out:length(0) alloc_if(0) free_if(0)) \
 	in(size)
@@ -377,6 +468,8 @@ void BasicOpsWrapperCPU::reduceToRowsSum(Matrix<float> *a, Matrix<float> *vout)
 	int cols = a->cols;
 
 #ifdef PHI
+	//__assume_aligned(out, 64);
+	//__assume_aligned(A, 64);
 	#pragma offload target(mic:0)\
 	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(vsize,Asize)
@@ -407,6 +500,8 @@ void BasicOpsWrapperCPU::reduceToRowsMax(Matrix<float> *a, Matrix<float> *vout)
 	int cols = a->cols;
 
 #ifdef PHI
+	//__assume_aligned(out, 64);
+	//__assume_aligned(A, 64);
 	#pragma offload target(mic:0)\
 	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(vsize,Asize)
@@ -436,6 +531,7 @@ void BasicOpsWrapperCPU::reduceToColsMean(Matrix<float> *a, Matrix<float> *vout)
 	int rows = a->rows;
 
 #ifdef PHI
+	//__assume_aligned(out, 64);
 	#pragma offload target(mic:0)\
 	in(out:length(0) alloc_if(0) free_if(0)) \
 	in(size)
@@ -457,6 +553,8 @@ void BasicOpsWrapperCPU::reduceToColsSum(Matrix<float> *a, Matrix<float> *vout)
 	int cols = a->cols;
 
 #ifdef PHI
+	//__assume_aligned(out, 64);
+	//__assume_aligned(A, 64);
 	#pragma offload target(mic:0)\
 	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(vsize,Asize)
@@ -488,6 +586,8 @@ void BasicOpsWrapperCPU::reduceToColsMax(Matrix<float> *a, Matrix<float> *vout)
 	int cols = a->cols;
 
 #ifdef PHI
+	//__assume_aligned(out, 64);
+	//__assume_aligned(A, 64);
 	#pragma offload target(mic:0)\
 	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(vsize,Asize)
@@ -525,6 +625,7 @@ float BasicOpsWrapperCPU::sum(Matrix<float> *a)
 	int size = a->size;
 
 #ifdef PHI
+	//__assume_aligned(A, 64);
 	#pragma offload target(mic:0)\
 	in(A:length(0) alloc_if(0) free_if(0)) \
 	in(size) \
@@ -549,6 +650,7 @@ float BasicOpsWrapperCPU::max(Matrix<float> *a)
 	int size = a->size;
 
 #ifdef PHI
+	//__assume_aligned(A, 64);
 	#pragma offload target(mic:0)\
 	in(A:length(0) alloc_if(0) free_if(0)) \
 	in(size) \
@@ -602,6 +704,8 @@ void BasicOpsWrapperCPU::transpose(Matrix<float> *a, Matrix<float> *c, int rows,
 	int size = a->size;
 
 #ifdef PHI
+	//__assume_aligned(A, 64);
+	//__assume_aligned(out, 64);
 	#pragma offload target(mic:0)\
 	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(size, rows, cols)
@@ -661,6 +765,9 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 	int vsum_size = Vsum->size;
 
 #ifdef PHI
+	//__assume_aligned(A, 64);
+	//__assume_aligned(out, 64);
+	//__assume_aligned(vsum, 64);
 	#pragma offload target(mic:0)\
 	in(A,out,vsum:length(0) alloc_if(0) free_if(0)) \
 	in(size, cols)
@@ -704,7 +811,7 @@ void BasicOpsWrapperCPU::to_host(Matrix<float> *gpu, float *cpu)
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
-	out(data: length(size) alloc_if(0) free_if(0)) 
+	out(data: length(size) alloc_if(0) free_if(0))
 	{
 	}
 #endif
@@ -727,7 +834,7 @@ void BasicOpsWrapperCPU::to_gpu(float *cpu, Matrix<float> *gpu)
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
-	in(A: length(size) alloc_if(0) free_if(0)) 
+	in(A: length(size) alloc_if(0) free_if(0))
 	{
 	}
 #endif
@@ -744,7 +851,7 @@ Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu)
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
-	inout(acc_data: length(size) alloc_if(0) free_if(0)) 
+	inout(acc_data: length(size) alloc_if(0) free_if(0))
 	{
 	}
 #endif
@@ -760,7 +867,7 @@ Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu, siz
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
-	inout(acc_data: length(size) alloc_if(0) free_if(0)) 
+	inout(acc_data: length(size) alloc_if(0) free_if(0))
 	{
 	}
 #endif
@@ -812,6 +919,9 @@ void BasicOpsWrapperCPU::WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> 
 	int size = w->size;
 
 #ifdef PHI
+	//__assume_aligned(xRMS, 64);
+	//__assume_aligned(xgrad, 64);
+	//__assume_aligned(xw, 64);
 	#pragma offload target(mic:0)\
 	in(xRMS,xgrad,xw:length(0) alloc_if(0) free_if(0)) \
 	in(size, rms_reciprocal, grad_value, RMS_value)
@@ -860,6 +970,8 @@ void BasicOpsWrapperCPU::argmax(Matrix<float> *A, Matrix<float> *out)
 	int vmaxbuffer_size = vmaxbuffer->size;
 
 #ifdef PHI
+	//__assume_aligned(xout, 64);
+	//__assume_aligned(xA, 64);
 	#pragma offload target(mic:0)\
 	in(xA,xout,xvmaxbuffer:length(0) alloc_if(0) free_if(0)) \
 	in(size, cols,vmaxbuffer_size)

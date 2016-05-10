@@ -157,8 +157,8 @@ void test_neural_network()
 	gpu->useNervanaGPU = true;
 
 
-	Matrix<float> *X = gpu->OPS->read_csv("/home/dettmers/data/X.csv");
-	Matrix<float> *y = gpu->OPS->read_csv("/home/dettmers/data/y.csv");
+	Matrix<float> *X = gpu->OPS->read_csv("/home/tim/data/mnist/X.csv");
+	Matrix<float> *y = gpu->OPS->read_csv("/home/tim/data/mnist/y.csv");
 	//Matrix<float> *X = read_hdf5<float>("/home/tim/data/astro/X.hdf5");
 	//Matrix<float> *y = read_hdf5<float>("/home/tim/data/astro/y.hdf5");
 
@@ -256,14 +256,14 @@ void test_MPI(int argc, char const *argv[]){
 	}
 
 	to_gpu(B,a);
-	
+
 
 
 
 	ga.init_Matrix(B);
 	ga.send_MPI();
 	ga.recv_MPI();
-	
+
 	if(ga->my_rank == 0)
 	{
 		cout << "Myrank " << ga->my_rank << endl;
