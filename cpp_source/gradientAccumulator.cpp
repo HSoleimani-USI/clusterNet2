@@ -62,8 +62,8 @@ using std::endl;
 
 		
 	    cn->OPS->to_host(matrix);
-        #pragma ivdep
-	//cout << "The root  is " << node_count;
+        
+	cout << "The root  is " << node_count;
 	  for(int i=0; i<node_count; i++){ 
 	  
 	      MPI_Scatter(
@@ -84,13 +84,13 @@ using std::endl;
 	void GradientAccumulator::recv_MPI(){
 
 
-		 cn->OPS->to_host(matrix);
-
 	  for(int i=0; i< node_count; i++){
-
+		
 	      cn->OPS->add(b[i], b[my_rank], b[my_rank]);
-
-	  }
+			#pragma omp parallel for
+			for(int j=0; j < size ;i++)
+				b[my_rank]->data[i] = b[my_rank]->data[i] + b[i]->data[i];
+           }
 
 
   MPI_Allgather(
@@ -102,7 +102,7 @@ using std::endl;
         MPI_FLOAT,
         MPI_COMM_WORLD);
    
-     //cn->OPS->to_gpu(b,matrix);
+     cn->OPS->to_gpu(buffer->data,matrix);
 }
  
 
