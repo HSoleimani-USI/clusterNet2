@@ -236,29 +236,238 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 
 
 void BasicOpsWrapperCPU::add(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ elementWise<kadd>(A,B,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xB,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xB,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	  xout[i] = xA[i] + xB[i];
+}
+
+
 void BasicOpsWrapperCPU::sub(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ elementWise<ksub>(A,B,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xB,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xB,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	  xout[i] = xA[i] - xB[i];
+}
+
 void BasicOpsWrapperCPU::div(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ elementWise<kdiv>(A,B,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xB,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xB,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	  xout[i] = xA[i] / xB[i];
+}
+
+
 void BasicOpsWrapperCPU::mul(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ elementWise<kmul>(A,B,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xB,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xB,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	  xout[i] = xA[i] * xB[i];
+}
+
+
 void BasicOpsWrapperCPU::equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ elementWise<keq>(A,B,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xB,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xB,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	  xout[i] = (float)(xA[i] == xB[i]);
+}
+
+
 void BasicOpsWrapperCPU::less_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ elementWise<klt>(A,B,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xB,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xB,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	  xout[i] = (float)(xA[i] < xB[i]);
+}
+
+
 void BasicOpsWrapperCPU::greater_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ elementWise<kgt>(A,B,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xB,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xB,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	  xout[i] = (float)(xA[i] > xB[i]);
+}
+
+
 void BasicOpsWrapperCPU::greater_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ elementWise<kge>(A,B,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xB,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xB,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	  xout[i] = (float)(xA[i] >= xB[i]);
+}
+
+
 void BasicOpsWrapperCPU::less_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ elementWise<kle>(A,B,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xB,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xB,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	  xout[i] = (float)(xA[i] <= xB[i]);
+}
+
+
 void BasicOpsWrapperCPU::not_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ elementWise<kne>(A,B,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xB,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xB,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	  xout[i] = (float)(xA[i] != xB[i]);
+}
+
+
+
+
 void BasicOpsWrapperCPU::squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 { elementWise<ksquared_diff>(A,B,out, 2.0f); }
 void BasicOpsWrapperCPU::dropout(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar)
-{ elementWise<kdropout>(A,B,out,scalar); }
+{
+	int size = a->size;
+	float *xA = a->data;
+	float *xB = b->data;
+	float *xout = c->data;
+
+#ifdef PHI
+	__assume_aligned(xA, 64);
+	__assume_aligned(xB, 64);
+	__assume_aligned(xout, 64);
+	#pragma offload target(mic:0) \
+	in(xA,xB,xout : length(0) alloc_if(0) free_if(0)) \
+	in(scalar)
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		out[i] = xB[i] > scalar ? xA[i] : 0.0f;
+}
 
 
 
@@ -327,14 +536,76 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 
 
 void BasicOpsWrapperCPU::vadd(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
-{ vectorWise<kadd>(A,v,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xv = v->data;
+	float *xout = out->data;
+	int rows = out->rows;
+	int cols = out->cols;
+
+#ifdef PHI
+	__assume_aligned(xv,64);
+	__assume_aligned(xout,64);
+	__assume_aligned(xA,64);
+	#pragma offload target(mic:0) \
+	in(xA,xv,xout : length(0) alloc_if(0) free_if(0)) \
+	in(size, cols, rows)
+#endif
+
+	
+	#pragma omp parallel for
+	for(int i = 0; i < size ;i++)
+		xout[i] =  xA[i] + xv[i - ((i / cols)*cols)]; 
+}
 
 void BasicOpsWrapperCPU::vsub(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
-{ vectorWise<ksub>(A,v,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xv = v->data;
+	float *xout = out->data;
+	int rows = out->rows;
+	int cols = out->cols;
+
+#ifdef PHI
+	__assume_aligned(xv,64);
+	__assume_aligned(xout,64);
+	__assume_aligned(xA,64);
+	#pragma offload target(mic:0) \
+	in(v,out : length(0) alloc_if(0) free_if(0)) \
+	in(size, cols, rows)
+#endif
+
+	
+	#pragma ivdep
+	#pragma omp parallel for
+	for(int i = 0; i < size ;i++)
+		xout[i] =  xA[i] - xv[i - ((i / cols)*cols)]; 
+}
+
 
 void BasicOpsWrapperCPU::get_t_matrix(Matrix<float> *v, Matrix<float> *out)
-{ vectorWise<ktmatrix>(v,out); }
+{
+	int size = out->size;
+	float *xv = v->data;
+	float *xout = out->data;
+	int rows = out->rows;
+	int cols = out->cols;
 
+#ifdef PHI
+	__assume_aligned(xv,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xv,xout : length(0) alloc_if(0) free_if(0)) \
+	in(size, cols, rows)
+#endif
+
+	
+	#pragma omp parallel for
+	for(int i = 0; i < size ;i++)
+		xout[i] = i-((i / cols)*cols) == (int)xv[(i / cols)] ? 1.0f : 0.0f; 
+}
 
 void BasicOpsWrapperCPU::slice(Matrix<float> *a, Matrix<float>*c, int rstart, int rend, int cstart, int cend)
 {
@@ -597,24 +868,105 @@ float BasicOpsWrapperCPU::max(Matrix<float> *a)
 
 
 void BasicOpsWrapperCPU::pow(Matrix<float> *A, Matrix<float> *out, float scalar)
-{ elementWise<kpow>(A,out, scalar); }
+{
+		int size = A->size;
+		float *xA = A->data;
+		float *xout = out->data;
+
+#ifdef PHI
+		__assume_aligned(xA,64);
+		__assume_aligned(xout,64);
+		#pragma offload target(mic:0) \
+		in(xA,xout : length(0) alloc_if(0) free_if(0)) \
+		in(scalar)
+#endif
+
+		#pragma omp parallel for
+		for(int i=0; i < size ;i++)
+		  xout[i] = powf(xA[i],scalar); 
+}
 
 
 void BasicOpsWrapperCPU::mul(Matrix<float> *A, Matrix<float> *out, float scalar)
-{ elementWise<ksmul>(A,out,scalar); }
+{
+		int size = A->size;
+		float *xA = A->data;
+		float *xout = out->data;
+
+#ifdef PHI
+		__assume_aligned(xA,64);
+		__assume_aligned(xout,64);
+		#pragma offload target(mic:0) \
+		in(xA,xout : length(0) alloc_if(0) free_if(0)) \
+		in(scalar)
+#endif
+
+		#pragma omp parallel for
+		for(int i=0; i < size ;i++)
+		   xout[i] = xA[i] * scalar; 
+}
 
 
 void BasicOpsWrapperCPU::sub(Matrix<float> *A, Matrix<float> *out, float scalar)
-{ elementWise<kssub>(A,out, scalar); }
+{
+		int size = A->size;
+		float *xA = A->data;
+		float *xout = out->data;
+
+#ifdef PHI
+		__assume_aligned(xA,64);
+		__assume_aligned(xout,64);
+		#pragma offload target(mic:0) \
+		in(xA,xout : length(0) alloc_if(0) free_if(0)) \
+		in(scalar)
+#endif
+
+		#pragma ivdep
+		#pragma omp parallel for
+		for(int i=0; i < size ;i++)
+		   xout[i] = xA[i] - scalar;
+}
 
 
 
 void BasicOpsWrapperCPU::greater_than(Matrix<float> *A, Matrix<float> *out, float scalar)
-{ elementWise<ksgt>(A,out, scalar); }
+{
+		int size = A->size;
+		float *xA = A->data;
+		float *xout = out->data;
+
+#ifdef PHI
+		__assume_aligned(xA,64);
+		__assume_aligned(xout,64);
+		#pragma offload target(mic:0) \
+		in(xA,xout : length(0) alloc_if(0) free_if(0)) \
+		in(scalar)
+#endif
+
+		#pragma omp parallel for
+		for(int i=0; i < size ;i++)
+		   xout[i] = (float)(xA[i] > scalar); 
+}
 
 
 void BasicOpsWrapperCPU::mod(Matrix<float> *A, Matrix<float> *out, float scalar)
-{ elementWise<kmod>(A,out,scalar); }
+{
+		int size = A->size;
+		float *xA = A->data;
+		float *xout = out->data;
+
+#ifdef PHI
+		__assume_aligned(xA,64);
+		__assume_aligned(xout,64);
+		#pragma offload target(mic:0) \
+		in(xA,xout : length(0) alloc_if(0) free_if(0)) \
+		in(scalar)
+#endif
+
+		#pragma omp parallel for
+		for(int i=0; i < size ;i++)
+		   out[i] = (float)((int)A[i] % (int)scalar); 
+}
 
 
 
@@ -650,31 +1002,229 @@ void BasicOpsWrapperCPU::transpose(Matrix<float> *a, Matrix<float> *c, int rows,
 }
 
 void BasicOpsWrapperCPU::exp(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<kexp>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		xout[i] = expf(xA[i]);
+}
+
+
 void BasicOpsWrapperCPU::abs(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<kabs>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		xout[i] = fabsf(xA[i]);
+}
 void BasicOpsWrapperCPU::log(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<klog>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		xout[i] = logf(xA[i]);
+}
 void BasicOpsWrapperCPU::sqrt(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<ksqrt>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		xout[i] = sqrtf(xA[i]);
+}
 void BasicOpsWrapperCPU::logistic(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<klogistic>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		xout[i] = 1.0f/(1.0f + expf(-xA[i])); 
+}
 void BasicOpsWrapperCPU::logistic_grad(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<klogistic_grad>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		xout[i] = xA[i]*(1.0f-xA[i]);
+}
 void BasicOpsWrapperCPU::tanh(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<ktanh>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		xout[i] = tanhf(xA[i]);
+}
 void BasicOpsWrapperCPU::tanh_grad(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<ktanh_grad>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		xout[i] = 1.0f - (xA[i]*xA[i]);
+}
 void BasicOpsWrapperCPU::ELU(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<kELU>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		 xout[i] = xA[i] > 0.0f ? xA[i] : expf(xA[i])-1.0f;
+}
 void BasicOpsWrapperCPU::ELU_grad(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<kELU_grad>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	 xout[i] = xA[i] > 0.0f ? 1.0f : xA[i] + 1.0f; 
+
+}
 void BasicOpsWrapperCPU::rectified(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<krectified>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		xout[i] = xA[i] > 0.0f ? xA[i] : 0.0f;
+}
 void BasicOpsWrapperCPU::rectified_grad(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<krectified_grad>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		xout[i] = xA[i] > 0.0f ? 1.0f : 0.0f;
+}
 void BasicOpsWrapperCPU::copy(Matrix<float> *A, Matrix<float> *out)
-{ elementWise<kcopy>(A,out); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+		xout[i] = xA[i];
+}
 
 void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 {
