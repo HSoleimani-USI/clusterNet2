@@ -215,6 +215,7 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 	#pragma omp parallel for
 	for(int i=0; i < size ;i++)
 	{
+		out[i] = A[i] + B[i]; 
 		switch(action)
 		{
 		   case kadd: out[i] = A[i] + B[i]; break;
@@ -305,11 +306,15 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 	int cols = c->cols;
 
 #ifdef PHI
+	__assume_aligned(v,64);
+	__assume_aligned(out,64);
 	#pragma offload target(mic:0) \
 	in(v,out : length(0) alloc_if(0) free_if(0)) \
 	in(size, cols, rows)
 #endif
 
+	
+	#pragma ivdep
 	#pragma omp parallel for
 	for(int i = 0; i < size ;i++)
 	{
@@ -343,11 +348,15 @@ void BasicOpsWrapperCPU::slice(Matrix<float> *a, Matrix<float>*c, int rstart, in
 	float *out = c->data;
 
 #ifdef PHI
+
+	__assume_aligned(A,64);
+	__assume_aligned(out,64);
 	#pragma offload target(mic:0) \
 	in(A,out : length(0) alloc_if(0) free_if(0)) \
 	in(size, rstart, rend, cstart, cend, cols_out, rows_out, cols)
 #endif
 
+	#pragma ivdep
 	#pragma omp parallel for
 	for (unsigned int i = 0;i < size; i++)
 	{
@@ -370,6 +379,7 @@ void BasicOpsWrapperCPU::reduceToRowsMean(Matrix<float> *A, Matrix<float> *vout)
 	int cols = A->cols;
 
 #ifdef PHI
+	__assume_aligned(out,64);
 	#pragma offload target(mic:0)\
 	in(out:length(0) alloc_if(0) free_if(0)) \
 	in(size)
@@ -423,6 +433,8 @@ void BasicOpsWrapperCPU::reduceToRowsMax(Matrix<float> *a, Matrix<float> *vout)
 	int cols = a->cols;
 
 #ifdef PHI
+	__assume_aligned(A,64);
+	__assume_aligned(out,64);
 	#pragma offload target(mic:0)\
 	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(vsize,Asize)
@@ -452,6 +464,7 @@ void BasicOpsWrapperCPU::reduceToColsMean(Matrix<float> *a, Matrix<float> *vout)
 	int rows = a->rows;
 
 #ifdef PHI
+	__assume_aligned(out,64);
 	#pragma offload target(mic:0)\
 	in(out:length(0) alloc_if(0) free_if(0)) \
 	in(size)
@@ -618,11 +631,14 @@ void BasicOpsWrapperCPU::transpose(Matrix<float> *a, Matrix<float> *c, int rows,
 	int size = a->size;
 
 #ifdef PHI
+	__assume_aligned(A,64);
+	__assume_aligned(out,64);
 	#pragma offload target(mic:0)\
 	in(A,out:length(0) alloc_if(0) free_if(0)) \
 	in(size, rows, cols)
 #endif
 
+	#pragma ivdep
 	#pragma omp parallel for
 	for(int row=0; row < rows ;row++)
 	{
@@ -677,11 +693,15 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 	int vsum_size = Vsum->size;
 
 #ifdef PHI
+	__assume_aligned(A,64);
+	__assume_aligned(out,64);
+	__assume_aligned(vsum,64);
 	#pragma offload target(mic:0)\
 	in(A,out,vsum:length(0) alloc_if(0) free_if(0)) \
 	in(size, cols)
 #endif
 	{
+		#pragma ivdep
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
 			out[i] = A[i] - vsum[i/cols];
@@ -828,6 +848,9 @@ void BasicOpsWrapperCPU::WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> 
 	int size = w->size;
 
 #ifdef PHI
+	__assume_aligned(xRMS,64);
+	__assume_aligned(xgrad,64);
+	__assume_aligned(xw,64);
 	#pragma offload target(mic:0)\
 	in(xRMS,xgrad,xw:length(0) alloc_if(0) free_if(0)) \
 	in(size, rms_reciprocal, grad_value, RMS_value)
@@ -876,6 +899,8 @@ void BasicOpsWrapperCPU::argmax(Matrix<float> *A, Matrix<float> *out)
 	int vmaxbuffer_size = vmaxbuffer->size;
 
 #ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xout,64);
 	#pragma offload target(mic:0)\
 	in(xA,xout,xvmaxbuffer:length(0) alloc_if(0) free_if(0)) \
 	in(size, cols,vmaxbuffer_size)

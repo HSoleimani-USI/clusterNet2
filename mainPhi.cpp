@@ -17,6 +17,7 @@
 #include <BasicOpsWrapperCPU.h>
 #include <CPUtoCPUBatchAllocator.h>
 #include <gradientAccumulator.h>
+#include <omp.h>
 
 
 using std::endl;
@@ -312,12 +313,16 @@ void test_gem()
 {
 	ClusterNet *acc = new ClusterNetCPU();
 
-	Matrix<float> *a = acc->rand(2,2);
-	Matrix<float> *b = acc->rand(2,2);
+	int size = 10000;
 
-	Matrix<float> *A = acc->OPS->zeros(2,2);
-	Matrix<float> *B = acc->OPS->zeros(2,2);
-	Matrix<float> *C = acc->OPS->zeros(2,2);
+	Matrix<float> *a = acc->rand(size,size);
+	Matrix<float> *b = acc->rand(size,size);
+	acc->OPS->to_host(a,a->data);
+	acc->OPS->to_host(b,b->data);
+
+	Matrix<float> *A = acc->OPS->zeros(size,size);
+	Matrix<float> *B = acc->OPS->zeros(size,size);
+	Matrix<float> *C = acc->OPS->zeros(size,size);
 
 	acc->OPS->to_gpu(a->data, A);
 	acc->OPS->to_gpu(b->data, B);
@@ -326,14 +331,29 @@ void test_gem()
 
 	acc->OPS->to_host(C,C->data);
 	cout << C->data[0] << endl;
+
+	//warm up
 	acc->dot(A,B,C);
+	double t0 = omp_get_wtime();
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+
+
+	cout << "time: " << omp_get_wtime()-t0 << endl;
+	cout << "GFLOP: " << ((double)size*size*size*100) /((omp_get_wtime() - t0) *10e9)<< endl;
+	for(int i = 0; i < 4; i++)
+		cout << a->data[i] << " ";
+	cout << endl;
+	for(int i = 0; i < 4; i++)
+		cout << b->data[i] << " ";
+	cout << endl;
 
 	float *aa = a->data;
 	float *bb = b->data;
 	cout << aa[0]*bb[0] + (aa[1]*bb[2]) << endl;
 
-	acc->OPS->printmat(A);
-	acc->OPS->printmat(B);
+//	acc->OPS->printmat(A);
+//	acc->OPS->printmat(B);
 
 	acc->OPS->to_host(C,aa);
 
@@ -350,8 +370,8 @@ int main(int argc, char *argv[]) {
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
 	test_phi();
-	//test_gem();
-	test_MPI(argc, argv);
+	test_gem();
+//	test_MPI(argc, argv);
 	//test_neural_network();
 	//test_lookup_time();
 

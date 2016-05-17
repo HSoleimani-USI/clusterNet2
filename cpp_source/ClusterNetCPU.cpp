@@ -142,9 +142,13 @@ void ClusterNetCPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, 
 	OPS->check_matrix_multiplication(A, B, out, T1, T2);
 
 #ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xB,64);
+	__assume_aligned(xout,64);
 	#pragma offload target(mic:0) \
 	in(xA, xB, xout:length(0) alloc_if(0) free_if(0)) \
-	in(T1, T2, A_rows, B_cols, A_cols, alpha, beta)
+	in(T1, T2, A_rows, B_cols, A_cols, alpha, beta) \
+	in(ldA,ldB, ldout)
 #endif
 	{
 
