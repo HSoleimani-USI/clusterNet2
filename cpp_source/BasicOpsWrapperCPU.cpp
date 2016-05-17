@@ -20,7 +20,7 @@ using std::endl;
 Matrix<float> *BasicOpsWrapperCPU::fill_matrix(int rows, int cols, float fill_value)
 {
 	Matrix<float> *ret = empty(rows, cols);
-	
+
 	int size = ret->size;
 	float *data = ret->data;
 #ifdef PHI
@@ -50,7 +50,7 @@ Matrix<float> *BasicOpsWrapperCPU::empty(int rows, int cols)
 	int size = rows*cols;
 
 #ifdef PHI
-	#pragma offload target(mic:0) in(size) inout(data: length(size) alloc_if(1) free_if(0)) 
+	#pragma offload target(mic:0) in(size) inout(data: length(size) alloc_if(1) free_if(0))
 	{
 	}
 #endif
@@ -215,7 +215,7 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 	#pragma omp parallel for
 	for(int i=0; i < size ;i++)
 	{
-		out[i] = A[i] + B[i]; 
+		out[i] = A[i] + B[i];
 		switch(action)
 		{
 		   case kadd: out[i] = A[i] + B[i]; break;
@@ -447,13 +447,31 @@ void BasicOpsWrapperCPU::not_equal(Matrix<float> *A, Matrix<float> *B, Matrix<fl
 
 
 void BasicOpsWrapperCPU::squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
-{ elementWise<ksquared_diff>(A,B,out, 2.0f); }
+{
+	int size = A->size;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
+
+#ifdef PHI
+	__assume_aligned(xA,64);
+	__assume_aligned(xB,64);
+	__assume_aligned(xout,64);
+	#pragma offload target(mic:0) \
+	in(xA,xB,xout : length(0) alloc_if(0) free_if(0))
+#endif
+
+	#pragma omp parallel for
+	for(int i=0; i < size ;i++)
+	  xout[i] = (xA[i]-xB[i])*(xA[i]-xB[i]);
+}
+
 void BasicOpsWrapperCPU::dropout(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar)
 {
-	int size = a->size;
-	float *xA = a->data;
-	float *xB = b->data;
-	float *xout = c->data;
+	int size = A->size;
+	float *xA = A->data;
+	float *xB = B->data;
+	float *xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA, 64);
@@ -466,7 +484,7 @@ void BasicOpsWrapperCPU::dropout(Matrix<float> *A, Matrix<float> *B, Matrix<floa
 
 	#pragma omp parallel for
 	for(int i=0; i < size ;i++)
-		out[i] = xB[i] > scalar ? xA[i] : 0.0f;
+		xout[i] = xB[i] > scalar ? xA[i] : 0.0f;
 }
 
 
@@ -522,7 +540,7 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 	in(size, cols, rows)
 #endif
 
-	
+
 	#pragma ivdep
 	#pragma omp parallel for
 	for(int i = 0; i < size ;i++)
@@ -553,10 +571,10 @@ void BasicOpsWrapperCPU::vadd(Matrix<float> *A, Matrix<float> *v, Matrix<float> 
 	in(size, cols, rows)
 #endif
 
-	
+
 	#pragma omp parallel for
 	for(int i = 0; i < size ;i++)
-		xout[i] =  xA[i] + xv[i - ((i / cols)*cols)]; 
+		xout[i] =  xA[i] + xv[i - ((i / cols)*cols)];
 }
 
 void BasicOpsWrapperCPU::vsub(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
@@ -577,11 +595,11 @@ void BasicOpsWrapperCPU::vsub(Matrix<float> *A, Matrix<float> *v, Matrix<float> 
 	in(size, cols, rows)
 #endif
 
-	
+
 	#pragma ivdep
 	#pragma omp parallel for
 	for(int i = 0; i < size ;i++)
-		xout[i] =  xA[i] - xv[i - ((i / cols)*cols)]; 
+		xout[i] =  xA[i] - xv[i - ((i / cols)*cols)];
 }
 
 
@@ -601,15 +619,15 @@ void BasicOpsWrapperCPU::get_t_matrix(Matrix<float> *v, Matrix<float> *out)
 	in(size, cols, rows)
 #endif
 
-	
+
 	#pragma omp parallel for
 	for(int i = 0; i < size ;i++)
-		xout[i] = i-((i / cols)*cols) == (int)xv[(i / cols)] ? 1.0f : 0.0f; 
+		xout[i] = i-((i / cols)*cols) == (int)xv[(i / cols)] ? 1.0f : 0.0f;
 }
 
 void BasicOpsWrapperCPU::slice(Matrix<float> *a, Matrix<float>*c, int rstart, int rend, int cstart, int cend)
 {
-  
+
 	int rows_out = (rend - rstart);
 	int cols_out = (cend - cstart);
 	int size = rows_out*cols_out;
@@ -883,7 +901,7 @@ void BasicOpsWrapperCPU::pow(Matrix<float> *A, Matrix<float> *out, float scalar)
 
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
-		  xout[i] = powf(xA[i],scalar); 
+		  xout[i] = powf(xA[i],scalar);
 }
 
 
@@ -903,7 +921,7 @@ void BasicOpsWrapperCPU::mul(Matrix<float> *A, Matrix<float> *out, float scalar)
 
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
-		   xout[i] = xA[i] * scalar; 
+		   xout[i] = xA[i] * scalar;
 }
 
 
@@ -945,7 +963,7 @@ void BasicOpsWrapperCPU::greater_than(Matrix<float> *A, Matrix<float> *out, floa
 
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
-		   xout[i] = (float)(xA[i] > scalar); 
+		   xout[i] = (float)(xA[i] > scalar);
 }
 
 
@@ -965,7 +983,7 @@ void BasicOpsWrapperCPU::mod(Matrix<float> *A, Matrix<float> *out, float scalar)
 
 		#pragma omp parallel for
 		for(int i=0; i < size ;i++)
-		   out[i] = (float)((int)A[i] % (int)scalar); 
+		   xout[i] = (float)((int)xA[i] % (int)scalar);
 }
 
 
@@ -1086,7 +1104,7 @@ void BasicOpsWrapperCPU::logistic(Matrix<float> *A, Matrix<float> *out)
 
 	#pragma omp parallel for
 	for(int i=0; i < size ;i++)
-		xout[i] = 1.0f/(1.0f + expf(-xA[i])); 
+		xout[i] = 1.0f/(1.0f + expf(-xA[i]));
 }
 void BasicOpsWrapperCPU::logistic_grad(Matrix<float> *A, Matrix<float> *out)
 {
@@ -1171,7 +1189,7 @@ void BasicOpsWrapperCPU::ELU_grad(Matrix<float> *A, Matrix<float> *out)
 
 	#pragma omp parallel for
 	for(int i=0; i < size ;i++)
-	 xout[i] = xA[i] > 0.0f ? 1.0f : xA[i] + 1.0f; 
+	 xout[i] = xA[i] > 0.0f ? 1.0f : xA[i] + 1.0f;
 
 }
 void BasicOpsWrapperCPU::rectified(Matrix<float> *A, Matrix<float> *out)
@@ -1290,7 +1308,7 @@ void BasicOpsWrapperCPU::to_host(Matrix<float> *gpu, float *cpu)
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
-	out(data: length(size) alloc_if(0) free_if(0)) 
+	out(data: length(size) alloc_if(0) free_if(0))
 	{
 	}
 #endif
@@ -1313,7 +1331,7 @@ void BasicOpsWrapperCPU::to_gpu(float *cpu, Matrix<float> *gpu)
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
-	in(A: length(size) alloc_if(0) free_if(0)) 
+	in(A: length(size) alloc_if(0) free_if(0))
 	{
 	}
 #endif
@@ -1330,7 +1348,7 @@ Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu)
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
-	inout(acc_data: length(size) alloc_if(0) free_if(0)) 
+	inout(acc_data: length(size) alloc_if(0) free_if(0))
 	{
 	}
 #endif
@@ -1346,7 +1364,7 @@ Matrix<float> *BasicOpsWrapperCPU::to_pinned(int rows, int cols, float *cpu, siz
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
-	inout(acc_data: length(size) alloc_if(0) free_if(0)) 
+	inout(acc_data: length(size) alloc_if(0) free_if(0))
 	{
 	}
 #endif
