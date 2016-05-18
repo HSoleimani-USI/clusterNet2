@@ -116,7 +116,7 @@ void ClusterNetCPU::dropout(Matrix<float> *A, Matrix <float> *out, const float d
 
 Matrix<float> *ClusterNetCPU::get_uniformsqrt_weight(int input, int output)
 {
-	Matrix<float> *out = rand(input,output);	
+	Matrix<float> *out = rand(input,output);
 	float range = 8.0f*sqrtf(6.0f/((float)input + output));
 	OPS->mul(out,out,range);
 	OPS->sub(out,out,range/2.0f);
@@ -154,12 +154,16 @@ void ClusterNetCPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, 
 	in(ldA,ldB, ldout)
 #endif
 	{
+
+#ifdef PHI
 		sgemm(&chrT1,&chrT2, &A_rows, &B_cols, &A_cols, &alpha, xA, &ldA, xB, &ldB, &beta, xout, &ldout);
-	//	cblas_sgemm(CblasRowMajor,
-	//			 T1 ? CblasTrans : CblasNoTrans,
-	//			 T2 ? CblasTrans : CblasNoTrans,
-	//			 A_rows, B_cols, A_cols, alpha,
-	//			 xA, ldA, xB, ldB,
-	//			 beta, xout, ldout);
+#else
+		cblas_sgemm(CblasRowMajor,
+				 T1 ? CblasTrans : CblasNoTrans,
+				 T2 ? CblasTrans : CblasNoTrans,
+				 A_rows, B_cols, A_cols, alpha,
+				 xA, ldA, xB, ldB,
+				 beta, xout, ldout);
+#endif
 	}
 }
