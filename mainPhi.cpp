@@ -313,7 +313,7 @@ void test_gem()
 {
 	ClusterNet *acc = new ClusterNetCPU();
 
-	int size = 10000;
+	int size = 1200;
 
 	Matrix<float> *a = acc->rand(size,size);
 	Matrix<float> *b = acc->rand(size,size);
@@ -372,7 +372,7 @@ int main(int argc, char *argv[]) {
 	test_phi();
 	test_gem();
 //	test_MPI(argc, argv);
-	//test_neural_network();
+	test_neural_network();
 	//test_lookup_time();
 
 

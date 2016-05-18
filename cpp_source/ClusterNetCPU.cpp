@@ -139,6 +139,9 @@ void ClusterNetCPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, 
 	if (T1){ A_rows = A->cols; A_cols = A->rows; }
 	if (T2){ B_cols = B->rows; B_rows = B->cols; }
 
+        const char chrT1 = T1 ? 'N' : 'T';
+        const char chrT2 = T2 ? 'N' : 'T';
+
 	OPS->check_matrix_multiplication(A, B, out, T1, T2);
 
 #ifdef PHI
@@ -147,16 +150,16 @@ void ClusterNetCPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, 
 	__assume_aligned(xout,64);
 	#pragma offload target(mic:0) \
 	in(xA, xB, xout:length(0) alloc_if(0) free_if(0)) \
-	in(T1, T2, A_rows, B_cols, A_cols, alpha, beta) \
+	in(chrT1, chrT2, A_rows, B_cols, A_cols, alpha, beta) \
 	in(ldA,ldB, ldout)
 #endif
 	{
-
-		cblas_sgemm(CblasRowMajor,
-				 T1 ? CblasTrans : CblasNoTrans,
-				 T2 ? CblasTrans : CblasNoTrans,
-				 A_rows, B_cols, A_cols, alpha,
-				 xA, ldA, xB, ldB,
-				 beta, xout, ldout);
+		sgemm(&chrT1,&chrT2, &A_rows, &B_cols, &A_cols, &alpha, xA, &ldA, xB, &ldB, &beta, xout, &ldout);
+	//	cblas_sgemm(CblasRowMajor,
+	//			 T1 ? CblasTrans : CblasNoTrans,
+	//			 T2 ? CblasTrans : CblasNoTrans,
+	//			 A_rows, B_cols, A_cols, alpha,
+	//			 xA, ldA, xB, ldB,
+	//			 beta, xout, ldout);
 	}
 }

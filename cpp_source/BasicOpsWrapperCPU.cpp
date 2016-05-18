@@ -591,7 +591,7 @@ void BasicOpsWrapperCPU::vsub(Matrix<float> *A, Matrix<float> *v, Matrix<float> 
 	__assume_aligned(xout,64);
 	__assume_aligned(xA,64);
 	#pragma offload target(mic:0) \
-	in(v,out : length(0) alloc_if(0) free_if(0)) \
+	in(xA,xv,xout : length(0) alloc_if(0) free_if(0)) \
 	in(size, cols, rows)
 #endif
 
