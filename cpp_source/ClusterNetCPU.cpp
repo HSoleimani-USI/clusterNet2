@@ -156,7 +156,14 @@ void ClusterNetCPU::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, 
 	{
 
 #ifdef PHI
-		sgemm(&chrT1,&chrT2, &A_rows, &B_cols, &A_cols, &alpha, xA, &ldA, xB, &ldB, &beta, xout, &ldout);
+		cblas_sgemm(CblasRowMajor,
+				 T1 ? CblasTrans : CblasNoTrans,
+				 T2 ? CblasTrans : CblasNoTrans,
+				 A_rows, B_cols, A_cols, alpha,
+				 xA, ldA, xB, ldB,
+				 beta, xout, ldout);
+
+		//sgemm(&chrT1,&chrT2, &A_rows, &B_cols, &A_cols, &alpha, xA, &ldA, xB, &ldB, &beta, xout, &ldout);
 #else
 		cblas_sgemm(CblasRowMajor,
 				 T1 ? CblasTrans : CblasNoTrans,

@@ -108,6 +108,8 @@ void Network::fit_partial(BatchAllocator *b, int batches)
 
 	for(int i = 0; i < batches; i++)
 	{
+		//cout << "pre alloc" << endl;	
+		cout << "batch number: " << i << endl;
 		b->replace_current_with_next_batch();
 		b->allocate_next_batch_async();
 
@@ -115,10 +117,13 @@ void Network::fit_partial(BatchAllocator *b, int batches)
 
 		_layers.front()->activation = b->get_current_batchX();
 		_layers.back()->target = b->get_current_batchY();
+		//cout << "pre forward" << endl;	
 		_layers.front()->forward();
 		_errorhandler->add_error(_layers.back()->activation, _layers.back()->target);
+		//cout << "pre backward" << endl;	
 		_layers.front()->backward_errors();
 
+		//cout << "pre update" << endl;	
 		for(int j = 0; j < _layers.size()-1; j++)
 		{
 			_opt->weight_update(_layers[j]->w_rms_next, _layers[j]->w_next,_layers[j]->w_grad_next,_conf->RMSPROP_MOMENTUM,_conf->LEARNING_RATE);
@@ -147,15 +152,19 @@ void Network::train(BatchAllocator *train, BatchAllocator *CV, int epochs)
 		cout << "EPOCH: " << epoch + 1 << endl;
 
 
+		cout << "pre fit" << endl;
 		fit_partial(train, train->BATCHES);
 		//TODO: Why was this here?
 		//train->replace_current_with_next_batch();
 		//train->allocate_next_batch_async();
 
+		cout << "get errors" << endl;
 		get_errors(train, "Train error: ");
 
+		cout << "get errors2" << endl;
 		get_errors(CV, "CV error: ");
 
+		cout << "update LR" << endl;
 		_conf->LEARNING_RATE *= _conf->LEARNING_RATE_DECAY;
 		for(int i = 0; i < _layers.size(); i++)
 			_layers[i]->_conf->LEARNING_RATE *= _layers[i]->_conf->LEARNING_RATE_DECAY;

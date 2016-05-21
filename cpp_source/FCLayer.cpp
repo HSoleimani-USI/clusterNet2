@@ -12,13 +12,22 @@ FCLayer::FCLayer(int unitcount, Unittype_t unitType){ init(unitcount, unitType, 
 
 void FCLayer::forward()
 {
-	if(!prev){ apply_transformations(); next->forward(); return; }
+	if(!prev){
 
+	//cout << "pre input dropout" << endl;
+ //apply_transformations();
+ next->forward();
+ return; }
+
+	//cout << "pre dot" << endl;
 	GPU->dot(prev->get_forward_activation(),prev->w_next,activation);
-	GPU->OPS->vadd(activation, prev->b_next, activation);
+	//cout << "pre vector add" << endl;
+	//GPU->OPS->vadd(activation, prev->b_next, activation);
+	//cout << "pre activation" << endl;
 	_func->activation(activation,activation);
 
-	apply_transformations();
+	//cout << "pre dropout" << endl;
+	//apply_transformations();
 
     if(next){ next->forward(); }
 }
@@ -59,7 +68,7 @@ void FCLayer::backward_grads()
 {
 	GPU->Tdot(activation, next->error, w_grad_next);
 	if(!next->target){ next->backward_grads(); }
-	GPU->OPS->reduceToColsMean(next->error,b_grad_next);
+	//GPU->OPS->reduceToColsMean(next->error,b_grad_next);
 }
 
 

@@ -28,6 +28,9 @@ CPUtoCPUBatchAllocator::CPUtoCPUBatchAllocator(ClusterNet *gpu, float *X, float 
 	batch_bufferX = GPU->OPS->to_pinned(BATCHES*batch_size,colsX, X, sizeof(float)*BATCHES*batch_size*colsX);
 	batch_bufferY = GPU->OPS->to_pinned(BATCHES*batch_size,colsY, y,sizeof(float)*BATCHES*batch_size*colsY);
 
+
+	GPU->OPS->to_gpu(batch_bufferX->data, batch_bufferX);
+	GPU->OPS->to_gpu(batch_bufferY->data, batch_bufferY);
 }
 
 

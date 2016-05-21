@@ -73,6 +73,7 @@ Matrix<float> *BasicOpsWrapperCPU::ones(int rows, int cols)
 template void BasicOpsWrapperCPU::elementWise<kdropout>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar);
 template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Matrix<float> *b, Matrix<float> *c, float scalar)
 {
+/*
 	int size = a->size;
 	float *A = a->data;
 	float *B = b->data;
@@ -96,6 +97,7 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
     	   case kdropout: out[i] = B[i] > scalar ? A[i] : 0.0f; break;
 		}
 	}
+*/
 }
 
 //BasicOpsWrapperCPU::elementWise operation with a single matrix argument
@@ -113,6 +115,7 @@ template void BasicOpsWrapperCPU::elementWise<krectified_grad>(Matrix<float> *A,
 template void BasicOpsWrapperCPU::elementWise<kcopy>(Matrix<float> *A, Matrix<float>*out);
 template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Matrix<float>*c)
 {
+/*
 		int size = a->size;
 		float *A = a->data;
 		float *out = c->data;
@@ -146,6 +149,7 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 
 			}
 		}
+*/
 }
 
 
@@ -156,6 +160,7 @@ template void BasicOpsWrapperCPU::elementWise<ksgt>(Matrix<float> *A, Matrix<flo
 template void BasicOpsWrapperCPU::elementWise<kmod>(Matrix<float> *A, Matrix<float>*out, float scalar);
 template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Matrix<float>*c, float scalar)
 {
+/*
 		int size = a->size;
 		float *A = a->data;
 		float *out = c->data;
@@ -182,6 +187,7 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 
 			}
 		}
+*/
 }
 
 //BasicOpsWrapperCPU::elementWise operation with a two matrix arguments
@@ -198,6 +204,7 @@ template void BasicOpsWrapperCPU::elementWise<kne>(Matrix<float> *A, Matrix<floa
 template void BasicOpsWrapperCPU::elementWise<ksquared_diff>(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out);
 template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Matrix<float> *b, Matrix<float> *c)
 {
+/*
 	int size = a->size;
 	float *A = a->data;
 	float *B = b->data;
@@ -232,15 +239,16 @@ template <int action> void BasicOpsWrapperCPU::elementWise(Matrix<float> *a, Mat
 
 		}
 	}
+*/
 }
 
 
 void BasicOpsWrapperCPU::add(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xB = B->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xB = B->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -259,9 +267,9 @@ void BasicOpsWrapperCPU::add(Matrix<float> *A, Matrix<float> *B, Matrix<float> *
 void BasicOpsWrapperCPU::sub(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xB = B->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xB = B->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -279,9 +287,9 @@ void BasicOpsWrapperCPU::sub(Matrix<float> *A, Matrix<float> *B, Matrix<float> *
 void BasicOpsWrapperCPU::div(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xB = B->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xB = B->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -300,9 +308,9 @@ void BasicOpsWrapperCPU::div(Matrix<float> *A, Matrix<float> *B, Matrix<float> *
 void BasicOpsWrapperCPU::mul(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xB = B->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xB = B->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -321,9 +329,9 @@ void BasicOpsWrapperCPU::mul(Matrix<float> *A, Matrix<float> *B, Matrix<float> *
 void BasicOpsWrapperCPU::equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xB = B->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xB = B->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -342,9 +350,9 @@ void BasicOpsWrapperCPU::equal(Matrix<float> *A, Matrix<float> *B, Matrix<float>
 void BasicOpsWrapperCPU::less_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xB = B->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xB = B->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -363,9 +371,9 @@ void BasicOpsWrapperCPU::less_than(Matrix<float> *A, Matrix<float> *B, Matrix<fl
 void BasicOpsWrapperCPU::greater_than(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xB = B->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xB = B->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -384,9 +392,9 @@ void BasicOpsWrapperCPU::greater_than(Matrix<float> *A, Matrix<float> *B, Matrix
 void BasicOpsWrapperCPU::greater_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xB = B->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xB = B->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -405,9 +413,9 @@ void BasicOpsWrapperCPU::greater_equal(Matrix<float> *A, Matrix<float> *B, Matri
 void BasicOpsWrapperCPU::less_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xB = B->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xB = B->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -426,9 +434,9 @@ void BasicOpsWrapperCPU::less_equal(Matrix<float> *A, Matrix<float> *B, Matrix<f
 void BasicOpsWrapperCPU::not_equal(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xB = B->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xB = B->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -449,9 +457,9 @@ void BasicOpsWrapperCPU::not_equal(Matrix<float> *A, Matrix<float> *B, Matrix<fl
 void BasicOpsWrapperCPU::squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xB = B->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xB = B->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -469,9 +477,9 @@ void BasicOpsWrapperCPU::squared_diff(Matrix<float> *A, Matrix<float> *B, Matrix
 void BasicOpsWrapperCPU::dropout(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, float scalar)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xB = B->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xB = B->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA, 64);
@@ -495,6 +503,7 @@ template void BasicOpsWrapperCPU::vectorWise<kvadd>(Matrix<float> *A, Matrix<flo
 template void BasicOpsWrapperCPU::vectorWise<kvsub>(Matrix<float> *A, Matrix<float> *v, Matrix<float>*out);
 template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matrix<float> *b, Matrix<float>*c)
 {
+/*
 	int size = a->size;
 	float *A = a->data;
 	float *v = b->data;
@@ -521,11 +530,13 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 			case kvsub: out[i] =  A[i] - v[i - ((i / cols)*cols)]; break;
 		}
 	}
+*/
 }
 
 template void BasicOpsWrapperCPU::vectorWise<ktmatrix>(Matrix<float> *v, Matrix<float>*out);
 template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matrix<float>*c)
 {
+/*
 	int size = a->size;
 	float *v = a->data;
 	float *out = c->data;
@@ -550,15 +561,16 @@ template <int action> void BasicOpsWrapperCPU::vectorWise(Matrix<float> *a, Matr
 			case ktmatrix: out[i] = i-((i / cols)*cols) == (int)v[(i / cols)] ? 1.0f : 0.0f; break;
 		}
 	}
+*/
 }
 
 
 void BasicOpsWrapperCPU::vadd(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xv = v->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xv = v->data;
+	float *__restrict__ xout = out->data;
 	int rows = out->rows;
 	int cols = out->cols;
 
@@ -580,9 +592,9 @@ void BasicOpsWrapperCPU::vadd(Matrix<float> *A, Matrix<float> *v, Matrix<float> 
 void BasicOpsWrapperCPU::vsub(Matrix<float> *A, Matrix<float> *v, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xv = v->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xv = v->data;
+	float *__restrict__ xout = out->data;
 	int rows = out->rows;
 	int cols = out->cols;
 
@@ -606,8 +618,8 @@ void BasicOpsWrapperCPU::vsub(Matrix<float> *A, Matrix<float> *v, Matrix<float> 
 void BasicOpsWrapperCPU::get_t_matrix(Matrix<float> *v, Matrix<float> *out)
 {
 	int size = out->size;
-	float *xv = v->data;
-	float *xout = out->data;
+	float *__restrict__ xv = v->data;
+	float *__restrict__ xout = out->data;
 	int rows = out->rows;
 	int cols = out->cols;
 
@@ -633,8 +645,8 @@ void BasicOpsWrapperCPU::slice(Matrix<float> *a, Matrix<float>*c, int rstart, in
 	int size = rows_out*cols_out;
 
 	int cols = a->cols;
-	float *A = a->data;
-	float *out = c->data;
+	float *__restrict__ A = a->data;
+	float *__restrict__ out = c->data;
 
 #ifdef PHI
 
@@ -663,7 +675,7 @@ void BasicOpsWrapperCPU::reduceToRowsMean(Matrix<float> *A, Matrix<float> *vout)
 {
 	reduceToRowsSum(A, vout);
 
-	float *out = vout->data;
+	float *__restrict__ out = vout->data;
 	int size = vout->size;
 	int cols = A->cols;
 
@@ -685,8 +697,8 @@ void BasicOpsWrapperCPU::reduceToRowsMean(Matrix<float> *A, Matrix<float> *vout)
 void BasicOpsWrapperCPU::reduceToRowsSum(Matrix<float> *a, Matrix<float> *vout)
 {
 
-	float *A = a->data;
-	float *out = vout->data;
+	float *__restrict__ A = a->data;
+	float *__restrict__ out = vout->data;
 	int vsize = vout->size;
 	int Asize = a->size;
 	int cols = a->cols;
@@ -715,8 +727,8 @@ void BasicOpsWrapperCPU::reduceToRowsSum(Matrix<float> *a, Matrix<float> *vout)
 void BasicOpsWrapperCPU::reduceToRowsMax(Matrix<float> *a, Matrix<float> *vout)
 {
 
-	float *A = a->data;
-	float *out = vout->data;
+	float *__restrict__ A = a->data;
+	float *__restrict__ out = vout->data;
 	int vsize = vout->size;
 	int Asize = a->size;
 	int cols = a->cols;
@@ -748,7 +760,7 @@ void BasicOpsWrapperCPU::reduceToColsMean(Matrix<float> *a, Matrix<float> *vout)
 {
 	reduceToColsSum(a, vout);
 
-	float *out = vout->data;
+	float *__restrict__ out = vout->data;
 	int size = vout->size;
 	int rows = a->rows;
 
@@ -768,8 +780,8 @@ void BasicOpsWrapperCPU::reduceToColsSum(Matrix<float> *a, Matrix<float> *vout)
 {
 
 
-	float *A = a->data;
-	float *out = vout->data;
+	float *__restrict__ A = a->data;
+	float *__restrict__ out = vout->data;
 	int vsize = vout->size;
 	int Asize = a->size;
 	int cols = a->cols;
@@ -799,8 +811,8 @@ void BasicOpsWrapperCPU::reduceToColsSum(Matrix<float> *a, Matrix<float> *vout)
 
 void BasicOpsWrapperCPU::reduceToColsMax(Matrix<float> *a, Matrix<float> *vout)
 {
-	float *A = a->data;
-	float *out = vout->data;
+	float *__restrict__ A = a->data;
+	float *__restrict__ out = vout->data;
 	int vsize = vout->size;
 	int Asize = a->size;
 	int cols = a->cols;
@@ -838,7 +850,7 @@ float BasicOpsWrapperCPU::mean(Matrix<float> *A)
 float BasicOpsWrapperCPU::sum(Matrix<float> *a)
 {
 
-	float *A = a->data;
+	float *__restrict__ A = a->data;
 	float sumValue = 0.0f;
 	int size = a->size;
 
@@ -862,7 +874,7 @@ float BasicOpsWrapperCPU::sum(Matrix<float> *a)
 float BasicOpsWrapperCPU::max(Matrix<float> *a)
 {
 
-	float *A = a->data;
+	float *__restrict__ A = a->data;
 	float maxValue = -std::numeric_limits<float>::max();
 	int size = a->size;
 
@@ -888,8 +900,8 @@ float BasicOpsWrapperCPU::max(Matrix<float> *a)
 void BasicOpsWrapperCPU::pow(Matrix<float> *A, Matrix<float> *out, float scalar)
 {
 		int size = A->size;
-		float *xA = A->data;
-		float *xout = out->data;
+		float *__restrict__ xA = A->data;
+		float *__restrict__ xout = out->data;
 
 #ifdef PHI
 		__assume_aligned(xA,64);
@@ -908,8 +920,8 @@ void BasicOpsWrapperCPU::pow(Matrix<float> *A, Matrix<float> *out, float scalar)
 void BasicOpsWrapperCPU::mul(Matrix<float> *A, Matrix<float> *out, float scalar)
 {
 		int size = A->size;
-		float *xA = A->data;
-		float *xout = out->data;
+		float *__restrict__ xA = A->data;
+		float *__restrict__ xout = out->data;
 
 #ifdef PHI
 		__assume_aligned(xA,64);
@@ -928,8 +940,8 @@ void BasicOpsWrapperCPU::mul(Matrix<float> *A, Matrix<float> *out, float scalar)
 void BasicOpsWrapperCPU::sub(Matrix<float> *A, Matrix<float> *out, float scalar)
 {
 		int size = A->size;
-		float *xA = A->data;
-		float *xout = out->data;
+		float *__restrict__ xA = A->data;
+		float *__restrict__ xout = out->data;
 
 #ifdef PHI
 		__assume_aligned(xA,64);
@@ -950,8 +962,8 @@ void BasicOpsWrapperCPU::sub(Matrix<float> *A, Matrix<float> *out, float scalar)
 void BasicOpsWrapperCPU::greater_than(Matrix<float> *A, Matrix<float> *out, float scalar)
 {
 		int size = A->size;
-		float *xA = A->data;
-		float *xout = out->data;
+		float *__restrict__ xA = A->data;
+		float *__restrict__ xout = out->data;
 
 #ifdef PHI
 		__assume_aligned(xA,64);
@@ -970,8 +982,8 @@ void BasicOpsWrapperCPU::greater_than(Matrix<float> *A, Matrix<float> *out, floa
 void BasicOpsWrapperCPU::mod(Matrix<float> *A, Matrix<float> *out, float scalar)
 {
 		int size = A->size;
-		float *xA = A->data;
-		float *xout = out->data;
+		float *__restrict__ xA = A->data;
+		float *__restrict__ xout = out->data;
 
 #ifdef PHI
 		__assume_aligned(xA,64);
@@ -996,8 +1008,8 @@ Matrix<float> *BasicOpsWrapperCPU::transpose(Matrix<float> *A)
 }
 void BasicOpsWrapperCPU::transpose(Matrix<float> *a, Matrix<float> *c, int rows, int cols)
 {
-	float *A = a->data;
-	float *out = c->data;
+	float *__restrict__ A = a->data;
+	float *__restrict__ out = c->data;
 	int size = a->size;
 
 #ifdef PHI
@@ -1022,8 +1034,8 @@ void BasicOpsWrapperCPU::transpose(Matrix<float> *a, Matrix<float> *c, int rows,
 void BasicOpsWrapperCPU::exp(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1041,8 +1053,8 @@ void BasicOpsWrapperCPU::exp(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::abs(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1058,8 +1070,8 @@ void BasicOpsWrapperCPU::abs(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::log(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1075,8 +1087,8 @@ void BasicOpsWrapperCPU::log(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::sqrt(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1092,8 +1104,8 @@ void BasicOpsWrapperCPU::sqrt(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::logistic(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1109,8 +1121,8 @@ void BasicOpsWrapperCPU::logistic(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::logistic_grad(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1126,8 +1138,8 @@ void BasicOpsWrapperCPU::logistic_grad(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::tanh(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1143,8 +1155,8 @@ void BasicOpsWrapperCPU::tanh(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::tanh_grad(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1160,8 +1172,8 @@ void BasicOpsWrapperCPU::tanh_grad(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::ELU(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1177,8 +1189,8 @@ void BasicOpsWrapperCPU::ELU(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::ELU_grad(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1195,8 +1207,8 @@ void BasicOpsWrapperCPU::ELU_grad(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::rectified(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1212,8 +1224,8 @@ void BasicOpsWrapperCPU::rectified(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::rectified_grad(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1229,8 +1241,8 @@ void BasicOpsWrapperCPU::rectified_grad(Matrix<float> *A, Matrix<float> *out)
 void BasicOpsWrapperCPU::copy(Matrix<float> *A, Matrix<float> *out)
 {
 	int size = A->size;
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 
 #ifdef PHI
 	__assume_aligned(xA,64);
@@ -1252,9 +1264,9 @@ void BasicOpsWrapperCPU::softmax(Matrix<float> *a, Matrix<float> *c)
 	reduceToRowsMax(a, Vsum);
 
 
-	float *A = a->data;
-	float *out = c->data;
-	float *vsum = Vsum->data;
+	float *__restrict__ A = a->data;
+	float *__restrict__ out = c->data;
+	float *__restrict__ vsum = Vsum->data;
 	int size = a->size;
 	int cols = a->cols;
 
@@ -1410,9 +1422,9 @@ void BasicOpsWrapperCPU::WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> 
 
 
 
-	float *xRMS = RMS->data;
-	float *xgrad = grad->data;
-	float *xw = w->data;
+	float *__restrict__ xRMS = RMS->data;
+	float *__restrict__ xgrad = grad->data;
+	float *__restrict__ xw = w->data;
 	int size = w->size;
 
 #ifdef PHI
@@ -1438,7 +1450,7 @@ void BasicOpsWrapperCPU::WeightUpdate_RMSProp(Matrix<float> *RMS, Matrix<float> 
 
 void BasicOpsWrapperCPU::free_matrix(Matrix<float> *A)
 {
-	float *xA = A->data;
+	float *__restrict__ xA = A->data;
 	int size = A->size;
 
 #ifdef PHI
@@ -1458,10 +1470,10 @@ void BasicOpsWrapperCPU::argmax(Matrix<float> *A, Matrix<float> *out)
 
 	Matrix<float> *vmaxbuffer = empty(out->rows, out->cols);
 
-	float *xvmaxbuffer = vmaxbuffer->data;
+	float *__restrict__ xvmaxbuffer = vmaxbuffer->data;
 
-	float *xA = A->data;
-	float *xout = out->data;
+	float *__restrict__ xA = A->data;
+	float *__restrict__ xout = out->data;
 	int size = A->size;
 	int cols = A->cols;
 	int vmaxbuffer_size = vmaxbuffer->size;

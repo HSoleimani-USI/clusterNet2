@@ -230,8 +230,8 @@ void test_neural_network()
 	net._conf->RMSPROP_MOMENTUM = 0.99f;
 
 	net.add(new FCLayer(784,Input));
-	net.add(new FCLayer(1024,Exponential_linear));
-	net.add(new FCLayer(1024,Exponential_linear));
+	net.add(new FCLayer(1200,Exponential_linear));
+	net.add(new FCLayer(1200,Exponential_linear));
 	net.add(new FCLayer(10,Softmax));
 
 	net.copy_global_params_to_layers();
