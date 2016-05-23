@@ -49,10 +49,13 @@ using std::endl;
 
 
 	  matrix = m;
+	  //cn->OPS->to_host(m, matrix->data);
 	  buffer = cn->OPS->zeros(m->rows, m->cols);
+	  buffer-> data = (float*)malloc(m->bytes); 
+	  //cn->OPS->to_host(buffer,buffer->data);
 	  int slice_size = m->rows/node_count;
 	  for(int i=0; i< m->rows; i = i+slice_size){
-		v.push_back (cn->OPS->get_view( m, i, i+slice_size));
+		v.push_back (cn->OPS->get_view( matrix, i, i+slice_size));
 	        b.push_back (cn->OPS->get_view( buffer, i, i+slice_size));
 
 	  }
@@ -62,18 +65,21 @@ using std::endl;
 	void GradientAccumulator::send_MPI(){
 
 		
-	   // cn->OPS->to_host(matrix);
+	    //cn->OPS->to_host(matrix,matrix->data);
         
 	cout << "The root  is ************* " << node_count;
 	//cout <<"the size of v is" <<  endl << v.size();//sizeof(v)/sizeof(v[0]);
 //	cout<<endl<<b.size();//sizeof(b)/sizeof(b[0]); 
+	//cn->OPS->to_host(matrix, matrix->data);
+	//cn->OPS->to_host(buffer,buffer->data);
 	 for(int i=0; i<node_count; i++){ 
 	  
+	//cn->OPS->to_host(b[i],b[i]->data);
 	      MPI_Scatter(
-		matrix,
+		matrix->data,
 		v[0]->size,
 		MPI_FLOAT,
-		b[i],
+		b[i]->data,
 		v[0]->size,
 		MPI_FLOAT,
 		i,
@@ -86,27 +92,33 @@ using std::endl;
 
 	void GradientAccumulator::recv_MPI(){
 
-
+	cout << "pre loop" << endl;
+cout << "my rank is" << my_rank << endl;
+cout << "my b length`is" << b.size() << endl;
 	  for(int i=0; i< node_count; i++){
 		
-	      cn->OPS->add(b[i], b[my_rank], b[my_rank]);
+		if(my_rank == i) continue;
+	      //cn->OPS->add(b[i], b[my_rank], b[my_rank]);
 
 			#pragma omp parallel for
 			for(int j=0; j < b[my_rank]->size ;j++)
-				b[my_rank]->data[i] = b[my_rank]->data[i] + b[i]->data[i];
+				b[my_rank]->data[j] = b[my_rank]->data[j] + b[i]->data[j];
            }
 
 
+	cout << "pre MPI" << endl;
+MPI_Barrier(MPI_COMM_WORLD);
   MPI_Allgather(
-        b[my_rank],
+        b[my_rank]->data,
         b[0] ->size,
         MPI_FLOAT,
-        matrix,
-        v[0]-> size,
+        matrix->data,
+        v[0]->size,
         MPI_FLOAT,
         MPI_COMM_WORLD);
    
-     cn->OPS->to_gpu(buffer->data,matrix);
+	cout << "pre to gpu" << endl;
+     //cn->OPS->to_gpu(buffer->data,matrix);
 }
  
 
