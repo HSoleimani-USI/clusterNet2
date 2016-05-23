@@ -9,6 +9,7 @@
 
 #ifdef PHI
 	#include <mkl.h>
+	#include <mkl_vsl.h>
 #endif
 #ifdef CPU
 	#include <cblas.h>
@@ -21,6 +22,16 @@ ClusterNetCPU::ClusterNetCPU()
 {
 	// TODO Auto-generated constructor stub
 	OPS = new BasicOpsWrapperCPU();
+
+#ifdef PHI
+	// Initialize RNG
+	vslNewStream(&rdm_uniform,	VSL_BRNG_MT19937,1 );
+	vslNewStream(&rdm_standard_normal,	VSL_BRNG_MT19937,1 );
+	vslNewStream(&rdm_normal,	VSL_BRNG_MT19937,1 );
+
+	//vRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER, rdm_standard_normal, N, 0.0f,1.0f);
+#endif
+
 
 }
 
@@ -36,15 +47,22 @@ Matrix<float> *ClusterNetCPU::rand(int rows, int cols)
 	int size = ret->size;
 	float *xret = ret->data;
 
+
 #ifdef PHI
 	#pragma offload target(mic:0) \
 	in(xret : length(0) alloc_if(0) free_if(0)) \
-    in(size)
-#endif
+    in(size, rdm_uniform)
 
+
+
+	vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD,	rdm_uniform, size, xret ,0.0f, 1.0f);
+#else
 	#pragma omp parallel for
 	for(int i = 0; i < size; i++)
 		xret[i] =(float)((double) ::rand() / (RAND_MAX));
+#endif
+
+
 
 	return ret;
 }

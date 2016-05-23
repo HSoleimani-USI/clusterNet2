@@ -11,6 +11,10 @@
 #include <Matrix.h>
 #include <ClusterNet.h>
 
+#ifdef PHI
+	#include <mkl_vsl.h>
+#endif
+
 class ClusterNetCPU : public ClusterNet
 {
 public:
@@ -35,6 +39,12 @@ public:
 	//  for regularization , using random numbers
 	//  getting the simplest model ...random between 0 and 1 , matrix
 	void dropout(Matrix<float> *A, Matrix <float> *out, const float dropout);
+
+#ifdef PHI
+	VSLStreamStatePtr rdm_uniform;
+	VSLStreamStatePtr rdm_standard_normal;
+	VSLStreamStatePtr rdm_normal;
+#endif
 };
 
 #endif /* CLUSTERNETCPU_H_ */
