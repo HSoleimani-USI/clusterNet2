@@ -308,6 +308,8 @@ void test_neural_network()
 
 	t.tock();
 
+	cout << "The root  is ************* " << node_count;
+	cout << "The root  is ************* " << node_count;
 }
 
 void run_astro()
@@ -386,6 +388,6 @@ int main(int argc, char const *argv[]) {
 	test_neural_network();
 	//test_lookup_time();
 
-
+         freader fr("/home/soleimah/clusterNet2/hanieh.txt");
 	return 0;
 }

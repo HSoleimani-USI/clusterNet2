@@ -17,6 +17,8 @@
 #include <BasicOpsWrapperCPU.h>
 #include <CPUtoCPUBatchAllocator.h>
 #include <gradientAccumulator.h>
+
+#include <mpi.h>
 #include <omp.h>
 
 
@@ -284,24 +286,41 @@ void test_MPI(int argc, char *argv[]){
 	}
 
 	cout << "pre gpu" << endl;
-	gpu->OPS->to_gpu(a, B);
+	//gpu->OPS->to_gpu(a, B);
 
 
+	Matrix<float> *M = new Matrix<float>();
+	M->rows = 2;
+	M->cols = 2;
+	M->size = 4;
+	M->bytes = 4*4;
+	M->data = a;
+        M->isRowMajor = true;
 
 	cout << "pre init matrix" << endl;
-	ga->init_Matrix(B);
+	ga->init_Matrix(M);
 	cout << "pre send matrix" << endl;
 	ga->send_MPI();
 	cout << "pre recv matrix" << endl;
 	ga->recv_MPI();
+	cout <<"testingg"<< endl;
+	//gpu->OPS->to_host(ga->buffer,a);
 
-	gpu->OPS->to_host(ga->buffer,a);
-
+	MPI_Barrier(MPI_COMM_WORLD);
 	if(ga->my_rank == 0)
 	{
 		cout << "Myrank " << ga->my_rank << endl;
 		for(int i = 0; i < 4; i++)
-			ga->buffer->data[i];
+	cout <<		ga->matrix->data[i] << " ";
+	cout << endl;
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(ga->my_rank == 1)
+	{
+		cout << "Myrank " << ga->my_rank << endl;
+		for(int i = 0; i < 4; i++)
+	cout <<		ga->matrix->data[i] << " ";
+	cout << endl;
 	}
 
 
@@ -391,6 +410,9 @@ void test_rdm()
 
 
 
+
+ 
+
 int main(int argc, char *argv[]) {
 
 	printf("abc2\n");
@@ -400,7 +422,7 @@ int main(int argc, char *argv[]) {
 	test_phi();
 	test_rdm();
 	//test_gem();
-//	test_MPI(argc, argv);
+	test_MPI(argc, argv);
 	//test_neural_network();
 	//test_lookup_time();
 
