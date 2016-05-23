@@ -41,6 +41,7 @@ using std::endl;
 
 	  
 
+
 	}
 
 
@@ -61,10 +62,12 @@ using std::endl;
 	void GradientAccumulator::send_MPI(){
 
 		
-	    cn->OPS->to_host(matrix);
+	   // cn->OPS->to_host(matrix);
         
-	cout << "The root  is " << node_count;
-	  for(int i=0; i<node_count; i++){ 
+	cout << "The root  is ************* " << node_count;
+	//cout <<"the size of v is" <<  endl << v.size();//sizeof(v)/sizeof(v[0]);
+//	cout<<endl<<b.size();//sizeof(b)/sizeof(b[0]); 
+	 for(int i=0; i<node_count; i++){ 
 	  
 	      MPI_Scatter(
 		matrix,
@@ -87,6 +90,7 @@ using std::endl;
 	  for(int i=0; i< node_count; i++){
 		
 	      cn->OPS->add(b[i], b[my_rank], b[my_rank]);
+
 			#pragma omp parallel for
 			for(int j=0; j < b[my_rank]->size ;j++)
 				b[my_rank]->data[i] = b[my_rank]->data[i] + b[i]->data[i];

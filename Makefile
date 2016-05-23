@@ -35,9 +35,9 @@ testc:
 	
 	
 phi:
-	mpiicpc  -qopt-report=5 -qopt-report-phase:vec -DPHI -std=c++11 -shared -fPIC $(INCLUDE) $(FILES_CPP) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) $(FLAGS_PHI)	
+	mpiicpc -qopt-report=5 -qopt-report-phase:vec -DPHI -std=c++11 -shared -fPIC $(INCLUDE) $(FILES_CPP) -o $(ROOT_DIR)/lib/libClusterNet.so $(LIB) $(FLAGS_PHI)	
 testphi:
-	mpiicpc  -qopt-report=5 -qopt-report-phase:vec -DPHI -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/mainPhi.cpp -o main $(FLAGS_PHI) -lClusterNet 
+	mpiicpc -qopt-report=5 -qopt-report-phase:vec -DPHI -std=c++11 $(INCLUDE) -L $(ROOT_DIR)/lib $(ROOT_DIR)/mainPhi.cpp -o main $(FLAGS_PHI) -lClusterNet 
 	
 	
 	
