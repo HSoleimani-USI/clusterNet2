@@ -28,7 +28,6 @@ ClusterNetCPU::ClusterNetCPU()
 	vslNewStream(&rdm_uniform,	VSL_BRNG_MT19937,1 );
 	vslNewStream(&rdm_standard_normal,	VSL_BRNG_MT19937,1 );
 	vslNewStream(&rdm_normal,	VSL_BRNG_MT19937,1 );
-
 	//vRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER, rdm_standard_normal, N, 0.0f,1.0f);
 #endif
 
@@ -47,15 +46,17 @@ Matrix<float> *ClusterNetCPU::rand(int rows, int cols)
 	int size = ret->size;
 	float *xret = ret->data;
 
+	int seed = ::rand();
 
 #ifdef PHI
 	#pragma offload target(mic:0) \
 	in(xret : length(0) alloc_if(0) free_if(0)) \
-    in(size, rdm_uniform)
+	in(size, seed) 
+{ 
 
-
-
+	vslNewStream(&rdm_uniform,	VSL_BRNG_MT19937,seed );
 	vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD,	rdm_uniform, size, xret ,0.0f, 1.0f);
+}
 #else
 	#pragma omp parallel for
 	for(int i = 0; i < size; i++)
@@ -73,12 +74,29 @@ Matrix<float> *ClusterNetCPU::randn(int rows, int cols)
 
 	int size = ret->size;
 	float *xret = ret->data;
+	int seed = ::rand();
 
-#ifdef PHI
+ #ifdef PHI
 	#pragma offload target(mic:0) \
 	in(xret : length(0) alloc_if(0) free_if(0)) \
-    in(size)
-#endif
+	in(size, seed) 
+{ 
+
+	//vslNewStream(&rdm_standard_normal,	VSL_BRNG_MT19937,seed );
+	//vRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER, rdm_standard_normal, size, xret, 0.0f,1.0f);
+	vslNewStream(&rdm_uniform,	VSL_BRNG_MT19937,seed );
+	vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD,	rdm_uniform, size, xret ,0.0f, 1.0f);
+
+	#pragma omp parallel for
+	for(int i = 0; i < size; i++)
+	{
+		float rdm = xret[i];
+		xret[i] = rdm > 0.5f ? sqrtf(-1.57079632679*logf(1-powf((2*rdm-1),2))) :
+				    -sqrtf(-1.57079632679*logf(1-powf((1-2*rdm),2)));
+	}
+
+}
+#else
 
 	#pragma omp parallel for
 	for(int i = 0; i < size; i++)
@@ -87,7 +105,7 @@ Matrix<float> *ClusterNetCPU::randn(int rows, int cols)
 		xret[i] = rdm > 0.5f ? sqrtf(-1.57079632679*logf(1-powf((2*rdm-1),2))) :
 				    -sqrtf(-1.57079632679*logf(1-powf((1-2*rdm),2)));
 	}
-
+#endif
 	return ret;
 }
 
@@ -97,12 +115,30 @@ Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 	Matrix<float> *ret = OPS->empty(rows,cols);
 	int size = ret->size;
 	float *xret = ret->data;
+	int seed = ::rand();
 
-#ifdef PHI
+ #ifdef PHI
 	#pragma offload target(mic:0) \
 	in(xret : length(0) alloc_if(0) free_if(0)) \
-    	in(size)
-#endif
+	in(size, seed, mean, std) 
+{ 
+
+	//vslNewStream(&rdm_normal,	VSL_BRNG_MT19937,seed );
+	//vRngGaussian(VSL_RNG_METHOD_GAUSSIAN_BOXMULLER, rdm_standard_normal, size, xret, mean,std);
+	vslNewStream(&rdm_uniform,	VSL_BRNG_MT19937,seed );
+	vsRngUniform(VSL_RNG_METHOD_UNIFORM_STD,	rdm_uniform, size, xret ,0.0f, 1.0f);
+
+	#pragma omp parallel for
+	for(int i = 0; i < size; i++)
+	{
+		float rdm = xret[i];
+		xret[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
+	}
+
+}
+#else
+
+
 
 	#pragma omp parallel for
 	for(int i = 0; i < size; i++)
@@ -110,6 +146,7 @@ Matrix<float> *ClusterNetCPU::normal(int rows, int cols, float mean, float std)
 		float rdm = (float)((double) ::rand() / (RAND_MAX) * (2));
 		xret[i] =  1.0f/(1.0f + expf((-0.07056* (rdm*rdm*rdm)) - (1.5976*rdm)));
 	}
+#endif
 
 	return ret;
 }

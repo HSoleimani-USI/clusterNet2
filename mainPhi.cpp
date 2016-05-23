@@ -361,6 +361,34 @@ void test_gem()
 	cout << C->data[0] << endl;
 }
 
+void test_rdm()
+{
+	ClusterNet *acc = new ClusterNetCPU();
+
+	int size = 4;
+
+	Matrix<float> *a = acc->rand(size,size);
+	acc->OPS->to_host(a,a->data);
+
+	for(int i = 0; i < size; i++)
+		cout << a->data[i] << " ";
+	cout << endl;
+
+	Matrix<float> *b = acc->randn(size,size);
+	acc->OPS->to_host(b,b->data);
+
+	for(int i = 0; i < size; i++)
+		cout << b->data[i] << " ";
+	cout << endl;
+
+	Matrix<float> *c = acc->normal(size,size,10.0f,0.2f);
+	acc->OPS->to_host(c,c->data);
+
+	for(int i = 0; i < size; i++)
+		cout << c->data[i] << " ";
+	cout << endl;
+}
+
 
 
 int main(int argc, char *argv[]) {
@@ -370,9 +398,10 @@ int main(int argc, char *argv[]) {
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
 	test_phi();
-	test_gem();
+	test_rdm();
+	//test_gem();
 //	test_MPI(argc, argv);
-	test_neural_network();
+	//test_neural_network();
 	//test_lookup_time();
 
 
