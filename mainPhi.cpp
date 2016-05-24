@@ -410,8 +410,140 @@ void test_rdm()
 
 
 
+void test_nonvectorized()
+{
+	ClusterNet *acc = new ClusterNetCPU();
 
- 
+	int size = 1200;
+
+	Matrix<float> *a = acc->rand(128,10);
+	Matrix<float> *b = acc->rand(128,10);
+
+
+	Matrix<float> *A = acc->OPS->zeros(size,size);
+	Matrix<float> *B = acc->OPS->zeros(size,size);
+	Matrix<float> *C = acc->OPS->zeros(size,size);
+
+
+
+	//warm up
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+
+
+	double t0 = omp_get_wtime();
+	acc->OPS->softmax(a,b);
+	cout << "time softmax: " << omp_get_wtime()-t0 << endl;
+	
+
+	Matrix<float> *y = acc->OPS->read_csv("/home/dettmers/data/y.csv");
+
+	Matrix<float> *X = acc->OPS->zeros(60000,10);
+
+	//warm up
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+
+
+	t0 = omp_get_wtime();
+	acc->OPS->get_t_matrix(y,X);
+	cout << "time t matrix: " << omp_get_wtime()-t0 << endl;
+
+
+	Matrix<float> *x = acc->rand(128,784);
+	Matrix<float> *w1 = acc->rand(784,1200);
+	Matrix<float> *a1 = acc->rand(128,1200);
+
+	Matrix<float> *w2 = acc->rand(1200,1200);
+	Matrix<float> *a2 = acc->rand(128,1200);
+	Matrix<float> *w3 = acc->rand(1200,10);
+	Matrix<float> *a3 = acc->rand(128,10);
+
+
+	Matrix<float> *w4 = acc->rand(1200,1200);
+	Matrix<float> *a4 = acc->rand(128,1200);
+
+
+	Matrix<float> *w5 = acc->rand(1200,1200);
+	Matrix<float> *a5 = acc->rand(128,1200);
+
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+
+	t0 = omp_get_wtime();
+	for(int i = 0; i < 100; i++)
+	{
+		acc->dot(x,w1,a1);
+		acc->dot(a1,w2,a2);
+		acc->dot(a2,w3,a3);
+	}
+	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	t0 = omp_get_wtime();
+	for(int i = 0; i < 100; i++)
+	{
+		acc->dot(a1,w2,a2);
+		acc->dot(a2,w4,a4);
+		acc->dot(a4,w5,a5);
+	}
+	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	
+	t0 = omp_get_wtime();
+	for(int i = 0; i < 100; i++)
+	{
+		acc->dot(x,w1,a1);
+		acc->dot(a1,w2,a2);
+		acc->dot(a2,w4,a4);
+		acc->dot(a4,w5,a5);
+		acc->dot(a5,w3,a3);
+	}
+	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t0 = omp_get_wtime();
+	for(int i = 0; i < 100; i++)
+	{
+	acc->dot(x,w1,a1);
+	}
+	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t0 = omp_get_wtime();
+	for(int i = 0; i < 100; i++)
+	{
+	acc->dot(a1,w2,a2);
+	}
+	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t0 = omp_get_wtime();
+	for(int i = 0; i < 100; i++)
+	{
+	acc->dot(a2,w3,a3);
+	}
+	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t0 = omp_get_wtime();
+	acc->dot(x,w1,a1);
+	acc->dot(a1,w2,a2);
+	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t0 = omp_get_wtime();
+	acc->dot(a1,w2,a2);
+	acc->dot(a2,w3,a3);
+	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+
+
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t0 = omp_get_wtime();
+	acc->dot(x,w1,a1);
+	acc->dot(a2,w3,a3);
+	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+} 
 
 int main(int argc, char *argv[]) {
 
@@ -421,9 +553,10 @@ int main(int argc, char *argv[]) {
 	//deeplearningdb_test();
 	test_phi();
 	test_rdm();
+	test_nonvectorized();
 	//test_gem();
 	test_MPI(argc, argv);
-	//test_neural_network();
+	test_neural_network();
 	//test_lookup_time();
 
 
