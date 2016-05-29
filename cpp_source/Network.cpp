@@ -108,12 +108,14 @@ void Network::fit_partial(BatchAllocator *b, int batches)
 
 	for(int i = 0; i < batches; i++)
 	{
+		cout << "current batchno: " << i << endl;
 		//cout << "pre alloc" << endl;	
-		cout << "batch number: " << i << endl;
 		b->replace_current_with_next_batch();
 		b->allocate_next_batch_async();
 
+		//cout << "sum batch: " << _gpu->OPS->sum(b->get_current_batchX()) << endl;
 		//cout << _gpu->OPS->sum(b->get_current_batchX()) << endl;
+		cout << "w sum: " << _gpu->OPS->sum(_layers.front()->w_next) << endl;
 
 		_layers.front()->activation = b->get_current_batchX();
 		_layers.back()->target = b->get_current_batchY();
@@ -152,19 +154,14 @@ void Network::train(BatchAllocator *train, BatchAllocator *CV, int epochs)
 		cout << "EPOCH: " << epoch + 1 << endl;
 
 
-		cout << "pre fit" << endl;
 		fit_partial(train, train->BATCHES);
 		//TODO: Why was this here?
 		//train->replace_current_with_next_batch();
 		//train->allocate_next_batch_async();
 
-		cout << "get errors" << endl;
 		get_errors(train, "Train error: ");
-
-		cout << "get errors2" << endl;
 		get_errors(CV, "CV error: ");
 
-		cout << "update LR" << endl;
 		_conf->LEARNING_RATE *= _conf->LEARNING_RATE_DECAY;
 		for(int i = 0; i < _layers.size(); i++)
 			_layers[i]->_conf->LEARNING_RATE *= _layers[i]->_conf->LEARNING_RATE_DECAY;

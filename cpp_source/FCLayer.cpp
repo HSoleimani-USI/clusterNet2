@@ -15,19 +15,19 @@ void FCLayer::forward()
 	if(!prev){
 
 	//cout << "pre input dropout" << endl;
- //apply_transformations();
+apply_transformations();
  next->forward();
  return; }
 
 	//cout << "pre dot" << endl;
 	GPU->dot(prev->get_forward_activation(),prev->w_next,activation);
 	//cout << "pre vector add" << endl;
-	//GPU->OPS->vadd(activation, prev->b_next, activation);
+	GPU->OPS->vadd(activation, prev->b_next, activation);
 	//cout << "pre activation" << endl;
 	_func->activation(activation,activation);
 
 	//cout << "pre dropout" << endl;
-	//apply_transformations();
+	apply_transformations();
 
     if(next){ next->forward(); }
 }
@@ -50,7 +50,7 @@ void FCLayer::backward_errors()
 
 
 		GPU->OPS->mul(error,error,1.0f/error->rows);
-		//GPU->Tdot(prev->activation, error, prev->w_grad_next);
+		GPU->Tdot(prev->activation, error, prev->w_grad_next);
 
 		return;
 
@@ -61,7 +61,7 @@ void FCLayer::backward_errors()
 	_func->activation_gradient(activation, activation_grad);
 	GPU->dotT(next->error, w_next,error);
 	GPU->OPS->mul(error, activation_grad, error);
-	//GPU->Tdot(prev->activation, error, prev->w_grad_next);
+	GPU->Tdot(prev->activation, error, prev->w_grad_next);
 }
 
 void FCLayer::backward_grads()

@@ -207,6 +207,9 @@ void test_neural_network()
 	Matrix<float> *y = gpu->OPS->read_csv("/home/dettmers/data/y.csv");
 
 
+	for(int i = 0; i < 20; i++)
+	cout << y->data[i] << " ";
+	cout << endl;
 
 	int samples = X->rows;
 	int cv = 10000;
@@ -221,12 +224,19 @@ void test_neural_network()
 	gpu->OPS->slice(X,trainX,0,samples-cv,0,dim);
 	gpu->OPS->slice(y,trainy,0,samples-cv,0,1);
 
+	gpu->OPS->mul(trainX,trainX,1.0f/255.0f);
 
 	gpu->OPS->slice(X,cvX,samples-cv,samples,0,dim);
 	gpu->OPS->slice(y,cvy,samples-cv,samples,0,1);
+	gpu->OPS->mul(cvX,cvX,1.0f/255.0f);
+
+	//gpu->OPS->to_host(trainX,trainX->data);
+	//gpu->OPS->to_host(cvX,cvX->data);
+
+	cout << gpu->OPS->max(cvX) << endl;
 
 	BatchAllocator *b_train = new CPUtoCPUBatchAllocator(gpu, trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
-	BatchAllocator *b_cv = new CPUtoCPUBatchAllocator(gpu, cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,100);
+	BatchAllocator *b_cv = new CPUtoCPUBatchAllocator(gpu, cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,128);
 
 	Network net = Network(gpu);
 
@@ -238,11 +248,15 @@ void test_neural_network()
 	net.add(new FCLayer(1200,Exponential_linear));
 	net.add(new FCLayer(10,Softmax));
 
+	for(int i = 0; i < net._layers.size(); i++)
+		net._layers[i]->_transformer.clear();
+
 	net.copy_global_params_to_layers();
 	net._layers.front()->_conf->DROPOUT = 0.2f;
 
 	net._opt = new Optimizer(gpu, RMSProp);
 	net.init_weights(UniformSqrt);
+
 
 
 
@@ -711,8 +725,8 @@ int main(int argc, char *argv[]) {
 	//test_nonvectorized();
 	//test_gem();
 	//test_MPI(argc, argv);
-	test_MPI_MIC(argc, argv);
-	//test_neural_network();
+	//test_MPI_MIC(argc, argv);
+	test_neural_network();
 	//test_lookup_time();
 
 
