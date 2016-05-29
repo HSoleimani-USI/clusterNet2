@@ -51,7 +51,8 @@ using std::endl;
 	  matrix = m;
 	  //cn->OPS->to_host(m, matrix->data);
 	  buffer = cn->OPS->zeros(m->rows, m->cols);
-	  buffer-> data = (float*)malloc(m->bytes); 
+	  cn->OPS->to_host(buffer, buffer->data);
+	  //buffer-> data = (float*)malloc(m->bytes); 
 	  //cn->OPS->to_host(buffer,buffer->data);
 	  int slice_size = m->rows/node_count;
 	  for(int i=0; i< m->rows; i = i+slice_size){
@@ -65,7 +66,7 @@ using std::endl;
 	void GradientAccumulator::send_MPI(){
 
 		
-	    //cn->OPS->to_host(matrix,matrix->data);
+	    cn->OPS->to_host(matrix,matrix->data);
         
 	cout << "The root  is ************* " << node_count;
 	//cout <<"the size of v is" <<  endl << v.size();//sizeof(v)/sizeof(v[0]);
@@ -118,7 +119,7 @@ MPI_Barrier(MPI_COMM_WORLD);
         MPI_COMM_WORLD);
    
 	cout << "pre to gpu" << endl;
-     //cn->OPS->to_gpu(buffer->data,matrix);
+     cn->OPS->to_gpu(matrix->data,matrix);
 }
  
 

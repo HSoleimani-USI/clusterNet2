@@ -7,6 +7,7 @@
 #include <vector>
 #include <Matrix.h>
 #include <ClusterNet.h>
+#include <string.h>
 
 class freader {
 public:
@@ -21,6 +22,7 @@ public:
     float& operator[]( const char& k );
     std::vector<float> getValues();
     const std::string filename() const;
+    std::string read_chunk(std::string path, int offset, int size);
 
 private:
     const std::string _fname;

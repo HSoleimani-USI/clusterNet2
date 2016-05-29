@@ -22,6 +22,7 @@
 #include <omp.h>
 #include <freader.h>
 
+#include <vector>
 
 using std::endl;
 using std::cout;
@@ -262,7 +263,6 @@ void test_neural_network()
 }
 
 
-
 void test_MPI(int argc, char *argv[]){
 
 	ClusterNet *gpu = new ClusterNetCPU();
@@ -278,12 +278,12 @@ void test_MPI(int argc, char *argv[]){
 	if(ga->my_rank == 0)
 	{
 		for(int i = 0; i < 4; i++)
-			a[i] = 1.7;
+			a[i] = (float)i;
 	}
 	else
 	{
 		for(int i = 0; i < 4; i++)
-			a[i] = 1.2;
+			a[i] = (float)i*2;
 	}
 
 	cout << "pre gpu" << endl;
@@ -548,15 +548,156 @@ void test_nonvectorized()
 
 void filereader_test()
 {
-	freader r = new freader("hanieh.txt");
+	ClusterNet *acc = new ClusterNetCPU();
+	freader *r = new freader("/data/NLP/out.txt", acc);
 
-	r.buildMap();
-	r.printMap();
-	r.getMatrix(3);
+	r->printMap();
+	std::string ret = r->read_chunk("/data/NLP/out.txt", 0, 1000);
+	//r->getMatrix(128, 3);
+	cout << ret << endl;
 
 
 }
 
+
+int test_MPI_simple(int argc, char *argv[]) 
+{
+	ClusterNet *gpu = new ClusterNetCPU();
+	  MPI_Init(&argc , &argv);
+	  
+	  int my_rank;
+	  MPI_Comm_rank(MPI_COMM_WORLD, &my_rank);
+	  int size;
+	  MPI_Comm_size(MPI_COMM_WORLD, &size);
+
+	int print_size = 4;
+
+	if(my_rank == 0) gpu->setRandomState(234234);
+
+
+	Matrix<float> *A = gpu->rand(2,2);
+	Matrix<float> *recv = gpu->OPS->zeros(2,2);
+
+	std::vector<Matrix<float>*> b;
+	std::vector<Matrix<float>*> v;
+
+	v.push_back(gpu->OPS->get_view(A,0, 1));
+	b.push_back(gpu->OPS->get_view(recv,0, 1));
+	v.push_back(gpu->OPS->get_view(A,1, 2));
+	b.push_back(gpu->OPS->get_view(recv,1, 2));
+
+	gpu->OPS->to_host(A, A->data);
+	gpu->OPS->to_host(recv, recv->data);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(my_rank ==0)
+	{
+		for(int i = 0; i < print_size; i++)
+			cout << A->data[i] << " ";
+		cout << endl;
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(my_rank ==1)
+	{
+		for(int i = 0; i < print_size; i++)
+			cout << A->data[i] << " ";
+		cout << endl;
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
+	
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
+	/*
+	if(my_rank == 0)
+	{
+	  MPI_Send(v[1]->data,v[1]->size, MPI_FLOAT,1,999,MPI_COMM_WORLD);
+	}
+	else
+	{
+	  MPI_Recv(b[1]->data, b[1]->size, MPI_FLOAT,0,999,MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+	}
+
+*/
+
+
+sleep(1);
+for(int i =0; i < size; i++)
+	MPI_Scatter(A->data, A->size/size, MPI_FLOAT, b[i]->data, recv->size/size, MPI_FLOAT, i, MPI_COMM_WORLD);
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(my_rank ==0)
+	{
+		for(int i = 0; i < print_size; i++)
+			cout << recv->data[i] << " ";
+		cout << endl;
+	}
+	
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(my_rank ==1)
+	{
+		for(int i = 0; i < print_size; i++)
+			cout << recv->data[i] << " ";
+		cout << endl;
+	}
+	
+	MPI_Barrier(MPI_COMM_WORLD);
+
+
+}
+
+void test_MPI_MIC(int argc, char *argv[]){
+
+	ClusterNet *gpu = new ClusterNetCPU();
+
+	GradientAccumulator *ga = new GradientAccumulator(gpu);
+	ga->init_MPI(argc, argv);
+
+	if(ga->my_rank ==0)
+		gpu->setRandomState(23523);
+
+	Matrix<float> *B = gpu->rand(2,2);
+	
+	gpu->OPS->to_host(B,B->data);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(ga->my_rank==0)
+		for(int i = 0; i < 4; i++)
+	cout <<		B->data[i] << " ";
+	cout << endl;
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(ga->my_rank==1)
+		for(int i = 0; i < 4; i++)
+	cout <<		B->data[i] << " ";
+	cout << endl;
+	MPI_Barrier(MPI_COMM_WORLD);
+
+
+	ga->init_Matrix(B);
+	ga->send_MPI();
+	ga->recv_MPI();
+
+	gpu->OPS->to_host(B,B->data);
+
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(ga->my_rank == 0)
+	{
+		for(int i = 0; i < 4; i++)
+	//cout <<		ga->matrix->data[i] << " ";
+	cout <<		B->data[i] << " ";
+	cout << endl;
+	}
+	MPI_Barrier(MPI_COMM_WORLD);
+	if(ga->my_rank == 1)
+	{
+		cout << "Myrank " << ga->my_rank << endl;
+		for(int i = 0; i < 4; i++)
+	//cout <<		ga->matrix->data[i] << " ";
+	cout <<		B->data[i] << " ";
+	cout << endl;
+	}
+
+
+}
 int main(int argc, char *argv[]) {
 
 	printf("abc2\n");
@@ -564,11 +705,14 @@ int main(int argc, char *argv[]) {
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
 	test_phi();
-	test_rdm();
-	test_nonvectorized();
+	//test_rdm();
+	//filereader_test();
+	//test_MPI_simple(argc,argv);
+	//test_nonvectorized();
 	//test_gem();
-	test_MPI(argc, argv);
-	test_neural_network();
+	//test_MPI(argc, argv);
+	test_MPI_MIC(argc, argv);
+	//test_neural_network();
 	//test_lookup_time();
 
 

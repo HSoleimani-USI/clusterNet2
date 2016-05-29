@@ -5,6 +5,10 @@
 #include <unordered_map>
 #include <vector>
 #include <Matrix.h>
+#include <string.h>
+
+using std::endl;
+using std::cout;
 
 // Takes a filename and creates a hashtable char -> index
 freader::freader( const std::string newFname, ClusterNet *acc)
@@ -38,6 +42,20 @@ freader::freader( const std::string newFname, ClusterNet *acc)
     _file.close();
 }
 
+
+std::string freader::read_chunk(std::string path, int offset, int size)
+{
+	std::ifstream t(path);
+	t.seekg(0, std::ios::end);
+	size_t fullsize = t.tellg();
+	if(size > fullsize - offset){ size = fullsize - offset; }
+	std::string buffer(size, ' ');
+	t.seekg(offset, std::ios::cur);
+	t.read(&buffer[0], size);
+	_current_offset = 0;
+}
+
+
 void freader::printMap() {
     std::ifstream ifs( _fname, std::ifstream::in );
     char character = ifs.get();
@@ -56,8 +74,10 @@ std::vector<float> freader::getValues() {
     std::ifstream ifs( _fname, std::ifstream::in );
     float index = 0.0f;
     char character = ifs.get();
+    cout << character << ifs.good() << endl;
     while ( ifs.good() ) {
         character = tolower( character );
+	cout << character << endl;
 
         index = _char2indexTable[character];
         values.push_back( index );
@@ -80,9 +100,15 @@ Matrix<float> *freader::getMatrix(const int sequence_length, const int batch_siz
     _acc->OPS->to_host(ret,ret->data);
 
 
+    for(int i = 0; i < sequence_length; i++)
+	cout << indices[i] << " ";
+    cout << endl;
+
+    cout << "pre memcpy" << endl;
     for ( int i = 0; i <= sequence_length; i++ )
     {
-    	memcpy(&(ret->data[sequence_length*i]),&(indicies[(current_offset+i)]), sequence_length);
+	cout << i << endl;
+    	memcpy(&(ret->data[sequence_length*i]),&(indices[(_current_offset+i)]), sequence_length);
     }
 
     _current_offset += batch_size;
