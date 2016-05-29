@@ -4,15 +4,17 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
+#include <Matrix.h>
 
 // Takes a filename and creates a hashtable char -> index
-//
-freader::freader( const std::string newFname )
+freader::freader( const std::string newFname, ClusterNet *acc)
     : _fname( newFname ), _file( _fname, std::ifstream::in ) {
 
+	_acc = acc;
+	_current_offset = 0;
     // initialize the map with all ascii chars
     for ( int c = 0; c < 128; c++ ) {
-        _char2indexTable[c] = -1;
+        _char2indexTable[c] = -1.0f;
     }
 
     // std::string m =
@@ -26,7 +28,7 @@ freader::freader( const std::string newFname )
     while ( _file.good() ) {
         character = tolower( character );
         if ( _char2indexTable[character] == -1 ) {
-            _char2indexTable[character] = position;
+            _char2indexTable[character] = (float)position;
             position++;
         }
         character = _file.get();
@@ -49,10 +51,10 @@ void freader::printMap() {
     ifs.close();
 }
 
-std::vector<int> freader::getValues() {
-    std::vector<int> values;
+std::vector<float> freader::getValues() {
+    std::vector<float> values;
     std::ifstream ifs( _fname, std::ifstream::in );
-    int index = 0;
+    float index = 0.0f;
     char character = ifs.get();
     while ( ifs.good() ) {
         character = tolower( character );
@@ -66,40 +68,23 @@ std::vector<int> freader::getValues() {
     return values;
 }
 
-int& freader::operator[]( const char& k ) { return _char2indexTable[k]; }
+float& freader::operator[]( const char& k ) { return _char2indexTable[k]; }
 
 const std::string freader::filename() const { return _fname; }
 
-std::vector<std::vector<int>> freader::getMatrix(const int k)
+Matrix<float> *freader::getMatrix(const int sequence_length, const int batch_size)
 {
-    std::vector<int> indices = getValues();
-    
-    std::vector<std::vector<int> > matrix;
+    std::vector<float> indices = getValues();
 
-    for ( int i = 0; i <= indices.size() - k; i++ ) {
-        std::vector<int> row;
-        for ( int j = 0; j < k;  j++ ) {
-            row.push_back(indices.at( i + j ));
-        }
-        matrix.push_back(row);
+    Matrix<float> *ret = _acc->OPS->zeros(batch_size, sequence_length);
+    _acc->OPS->to_host(ret,ret->data);
+
+
+    for ( int i = 0; i <= sequence_length; i++ )
+    {
+    	memcpy(&(ret->data[sequence_length*i]),&(indicies[(current_offset+i)]), sequence_length);
     }
 
-    std::cout << "\nPrinting the matrix:" << std::endl;
-    for (auto& row : matrix) {
-        for(auto& a : row) {
-            std::cout << a << ", ";
-        }
-        std::cout << std::endl;
-    }
-
-    return matrix;
-}
-
-int main( int argc, const char* argv[] ) {
-    freader fr( "hanieh.txt" );
-
-    fr.printMap();
-    fr.getMatrix(3);
-
-    return 0;
+    _current_offset += batch_size;
+    return ret;
 }

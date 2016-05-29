@@ -5,25 +5,29 @@
 #include <iostream>
 #include <unordered_map>
 #include <vector>
+#include <Matrix.h>
+#include <ClusterNet.h>
 
 class freader {
 public:
 	std::vector<int> generateMatrix(int ifs, int k);
 
-    freader( const std::string );
+    freader( const std::string, ClusterNet *acc );
 
     void buildMap();
     void printMap();
-    std::vector<std::vector<int>> getMatrix(const int k);
+    Matrix<float> *getMatrix(const int sequence_length, const int batch_size);
 
-    int& operator[]( const char& k );
-    std::vector<int> getValues();
+    float& operator[]( const char& k );
+    std::vector<float> getValues();
     const std::string filename() const;
 
 private:
     const std::string _fname;
     std::ifstream _file;
-    std::unordered_map<char, int> _char2indexTable;
+    std::unordered_map<char, float> _char2indexTable;
+    int _current_offset;
+    ClusterNet *_acc;
 };
 
 #endif

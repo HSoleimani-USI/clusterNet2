@@ -20,6 +20,7 @@
 
 #include <mpi.h>
 #include <omp.h>
+#include <freader.h>
 
 
 using std::endl;
@@ -544,6 +545,17 @@ void test_nonvectorized()
 	acc->dot(a2,w3,a3);
 	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
 } 
+
+void filereader_test()
+{
+	freader r = new freader("hanieh.txt");
+
+	r.buildMap();
+	r.printMap();
+	r.getMatrix(3);
+
+
+}
 
 int main(int argc, char *argv[]) {
 
