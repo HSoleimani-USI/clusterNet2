@@ -28,9 +28,8 @@ using std::endl;
 
 
 
-	void GradientAccumulator::init_MPI(int argc, char** argv) {
+	void GradientAccumulator::init_MPI() {
 
-	  MPI_Init(&argc , &argv);
 	  
 	  int matrix_rank;
 	  MPI_Comm_rank(MPI_COMM_WORLD, &matrix_rank);
@@ -103,7 +102,7 @@ cout << "my b length`is" << b.size() << endl;
 
 			#pragma omp parallel for
 			for(int j=0; j < b[my_rank]->size ;j++)
-				b[my_rank]->data[j] = b[my_rank]->data[j] + b[i]->data[j];
+				b[my_rank]->data[j] = (b[my_rank]->data[j] + b[i]->data[j])/(float)node_count;
            }
 
 

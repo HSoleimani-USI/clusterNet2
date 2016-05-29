@@ -6,6 +6,7 @@
 #include <Configurator.h>
 #include <Transformer.h>
 #include <ActivationFunction.h>
+#include <mph.h>
 
 
 Network::Network(ClusterNet *gpu)
@@ -45,10 +46,20 @@ void Network::init_weights(WeightInitType_t wtype)
 		if(wtype == Gaussian)
 		{
 			prev->w_next = _gpu->normal(prev->UNITCOUNT,_layers[i]->UNITCOUNT,0.0f,0.0001f);
+			if(Is_initialized)
+			{
+				prev->_ga->init_MPI();
+				prev->_ga->init_Matrix(prev->w_next);
+			}
 		}
 		else if(wtype == UniformSqrt)
 		{
 			prev->w_next = _gpu->get_uniformsqrt_weight(prev->UNITCOUNT,_layers[i]->UNITCOUNT);
+			if(Is_initialized)
+			{
+				prev->_ga->init_MPI();
+				prev->_ga->init_Matrix(prev->w_next);
+			}
 		}
 
 		prev->w_rms_next = _gpu->OPS->zeros(prev->UNITCOUNT,_layers[i]->UNITCOUNT);
@@ -128,6 +139,8 @@ void Network::fit_partial(BatchAllocator *b, int batches)
 		//cout << "pre update" << endl;	
 		for(int j = 0; j < _layers.size()-1; j++)
 		{
+			_layers[j]->_ga->send_MPI();
+			_layers[j]->_ga->recv_MPI();
 			_opt->weight_update(_layers[j]->w_rms_next, _layers[j]->w_next,_layers[j]->w_grad_next,_conf->RMSPROP_MOMENTUM,_conf->LEARNING_RATE);
 			_opt->weight_update(_layers[j]->b_rms_next, _layers[j]->b_next,_layers[j]->b_grad_next,_conf->RMSPROP_MOMENTUM,_conf->LEARNING_RATE/100.0f);
 		}

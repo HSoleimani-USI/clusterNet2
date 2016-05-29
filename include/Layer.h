@@ -9,6 +9,7 @@
 #include <BasicOpsWrapper.h>
 #include <ClusterNet.h>
 #include <Matrix.h>
+#include <gradientAccumulator.h>
 
 class Network;
 class ActivationFunction;
@@ -65,6 +66,7 @@ public:
 	ActivationFunction *_func;
 
 	std::vector< Transformer*> _transformer;
+	GradientAccumulator *_ga;
 
 	Configurator *_conf;
 

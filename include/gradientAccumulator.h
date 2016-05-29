@@ -29,7 +29,7 @@ public:
 	std :: vector<Matrix <float> *> b;
 
 #ifdef PHI
-	void init_MPI(int argc, char** argv);
+	void init_MPI();
 	void init_Matrix (Matrix<float> * m);
 	void send_MPI();
 	void recv_MPI();
