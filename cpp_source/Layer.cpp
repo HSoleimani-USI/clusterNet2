@@ -38,7 +38,6 @@ void Layer::init(int unitcount, Unittype_t unitType, Layer_t layerType)
 	if( unitType != Softmax)
 		_transformer.push_back(new Transformer(DropoutTransform, this));
 
-	_ga = new GradientAccumulator();
 
 
 

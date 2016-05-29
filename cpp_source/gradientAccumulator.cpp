@@ -67,7 +67,6 @@ using std::endl;
 		
 	    cn->OPS->to_host(matrix,matrix->data);
         
-	cout << "The root  is ************* " << node_count;
 	//cout <<"the size of v is" <<  endl << v.size();//sizeof(v)/sizeof(v[0]);
 //	cout<<endl<<b.size();//sizeof(b)/sizeof(b[0]); 
 	//cn->OPS->to_host(matrix, matrix->data);
@@ -92,9 +91,6 @@ using std::endl;
 
 	void GradientAccumulator::recv_MPI(){
 
-	cout << "pre loop" << endl;
-cout << "my rank is" << my_rank << endl;
-cout << "my b length`is" << b.size() << endl;
 	  for(int i=0; i< node_count; i++){
 		
 		if(my_rank == i) continue;
@@ -106,7 +102,6 @@ cout << "my b length`is" << b.size() << endl;
            }
 
 
-	cout << "pre MPI" << endl;
 MPI_Barrier(MPI_COMM_WORLD);
   MPI_Allgather(
         b[my_rank]->data,
@@ -117,7 +112,6 @@ MPI_Barrier(MPI_COMM_WORLD);
         MPI_FLOAT,
         MPI_COMM_WORLD);
    
-	cout << "pre to gpu" << endl;
      cn->OPS->to_gpu(matrix->data,matrix);
 }
  

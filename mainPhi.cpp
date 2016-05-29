@@ -188,6 +188,115 @@ void test_phi()
 
 }
 
+void test_neural_network_MPI()
+{
+
+//	test_transfer_time();
+
+	//Timer t = Timer();
+	printf("init clusternet cpu\n");
+	ClusterNet *gpu = new ClusterNetCPU();
+
+
+
+//	gpu->useNervanaGPU = true;
+
+	  int matrix_rank;
+	  MPI_Comm_rank(MPI_COMM_WORLD, &matrix_rank);
+
+	printf("loading data\n");
+	Matrix<float> *X = gpu->OPS->read_csv("/home/dettmers/data/X.csv");
+	Matrix<float> *y = gpu->OPS->read_csv("/home/dettmers/data/y.csv");
+
+
+	for(int i = 0; i < 20; i++)
+	cout << y->data[i] << " ";
+	cout << endl;
+
+	int samples = X->rows;
+	int cv = 10000;
+	int dim = X->cols;
+	int classes = 10;
+
+	Matrix<float> *trainX;
+	Matrix<float> *trainy;
+
+	Matrix<float> *cvX;  
+	Matrix<float> *cvy;  
+
+	if(matrix_rank==0)
+	{
+		trainX = gpu->OPS->zeros(30000,dim);
+		trainy = gpu->OPS->zeros(30000,1);
+		cvX = gpu->OPS->zeros(10000,dim);
+		cvy = gpu->OPS->zeros(10000,1);
+
+		gpu->OPS->slice(X,trainX,0,30000,0,dim);
+		gpu->OPS->slice(y,trainy,0,30000,0,1);
+		gpu->OPS->slice(X,cvX,samples-cv,samples,0,dim);
+		gpu->OPS->slice(y,cvy,samples-cv,samples,0,1);
+	}
+	else
+	{
+		trainX = gpu->OPS->zeros(30000,dim);
+		trainy = gpu->OPS->zeros(30000,1);
+		cvX = gpu->OPS->zeros(10000,dim);
+		cvy = gpu->OPS->zeros(10000,1);
+		gpu->OPS->slice(X,trainX,30000,60000,0,dim);
+		gpu->OPS->slice(y,trainy,30000,60000,0,1);
+		gpu->OPS->slice(X,cvX,samples-cv,samples,0,dim);
+		gpu->OPS->slice(y,cvy,samples-cv,samples,0,1);
+	}
+	gpu->OPS->mul(trainX,trainX,1.0f/255.0f);
+
+	gpu->OPS->mul(cvX,cvX,1.0f/255.0f);
+
+	//gpu->OPS->to_host(trainX,trainX->data);
+	//gpu->OPS->to_host(cvX,cvX->data);
+
+	cout << gpu->OPS->max(cvX) << endl;
+
+	BatchAllocator *b_train = new CPUtoCPUBatchAllocator(gpu, trainX->data, trainy->data, trainX->rows, trainX->cols,trainy->cols,128);
+	BatchAllocator *b_cv = new CPUtoCPUBatchAllocator(gpu, cvX->data, cvy->data, cvX->rows, cvX->cols,cvy->cols,128);
+
+	Network net = Network(gpu);
+
+	net._conf->LEARNING_RATE = 0.003f;
+	net._conf->RMSPROP_MOMENTUM = 0.99f;
+
+	net.add(new FCLayer(784,Input));
+	net.add(new FCLayer(1200,Exponential_linear));
+	net.add(new FCLayer(1200,Exponential_linear));
+	net.add(new FCLayer(10,Softmax));
+
+	for(int i = 0; i < net._layers.size(); i++)
+		net._layers[i]->_transformer.clear();
+
+	net.copy_global_params_to_layers();
+	net._layers.front()->_conf->DROPOUT = 0.2f;
+
+	net._opt = new Optimizer(gpu, RMSProp);
+	net.init_weights(UniformSqrt);
+
+
+
+
+
+	//t.tick();
+	cout << "pre train" << endl;
+	net.train(b_train, b_cv, 20);
+
+	net._conf->DROPOUT = 0.25f;
+	net._conf->LEARNING_RATE *= 0.2f;
+	net._conf->LEARNING_RATE_DECAY = 0.95f;
+	net.copy_global_params_to_layers();
+	net._layers.front()->_conf->DROPOUT = 0.1f;
+
+	net.train(b_train, b_cv, 11);
+
+	//t.tock();
+}
+
 void test_neural_network()
 {
 
@@ -277,6 +386,7 @@ void test_neural_network()
 }
 
 
+
 void test_MPI(int argc, char *argv[]){
 
 	ClusterNet *gpu = new ClusterNetCPU();
@@ -286,7 +396,7 @@ void test_MPI(int argc, char *argv[]){
 	cout << "pre gradient init" << endl;
 	GradientAccumulator *ga = new GradientAccumulator(gpu);
 	cout << "pre init mpi" << endl;
-	ga->init_MPI(argc, argv);
+	ga->init_MPI();
 
 	float a[4] = {0,0,0,0};
 	if(ga->my_rank == 0)
@@ -664,7 +774,7 @@ void test_MPI_MIC(int argc, char *argv[]){
 	ClusterNet *gpu = new ClusterNetCPU();
 
 	GradientAccumulator *ga = new GradientAccumulator(gpu);
-	ga->init_MPI(argc, argv);
+	ga->init_MPI();
 
 	if(ga->my_rank ==0)
 		gpu->setRandomState(23523);
@@ -714,6 +824,7 @@ void test_MPI_MIC(int argc, char *argv[]){
 }
 int main(int argc, char *argv[]) {
 
+	MPI_Init(&argc, &argv);
 	printf("abc2\n");
 	cout << "a" << endl;
 	//test_LSTM_swapping();
@@ -726,8 +837,10 @@ int main(int argc, char *argv[]) {
 	//test_gem();
 	//test_MPI(argc, argv);
 	//test_MPI_MIC(argc, argv);
-	test_neural_network();
 	//test_lookup_time();
+	//test_neural_network();
+	test_neural_network_MPI();
+	MPI_Finalize();
 
 
 	return 0;

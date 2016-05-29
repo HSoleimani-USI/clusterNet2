@@ -6,7 +6,7 @@
 #include <Configurator.h>
 #include <Transformer.h>
 #include <ActivationFunction.h>
-#include <mph.h>
+#include <mpi.h>
 
 
 Network::Network(ClusterNet *gpu)
@@ -46,20 +46,20 @@ void Network::init_weights(WeightInitType_t wtype)
 		if(wtype == Gaussian)
 		{
 			prev->w_next = _gpu->normal(prev->UNITCOUNT,_layers[i]->UNITCOUNT,0.0f,0.0001f);
-			if(Is_initialized)
-			{
+#ifdef PHI
+				prev->_ga = new GradientAccumulator(_gpu);
 				prev->_ga->init_MPI();
 				prev->_ga->init_Matrix(prev->w_next);
-			}
+#endif
 		}
 		else if(wtype == UniformSqrt)
 		{
 			prev->w_next = _gpu->get_uniformsqrt_weight(prev->UNITCOUNT,_layers[i]->UNITCOUNT);
-			if(Is_initialized)
-			{
+#ifdef PHI
+				prev->_ga = new GradientAccumulator(_gpu);
 				prev->_ga->init_MPI();
 				prev->_ga->init_Matrix(prev->w_next);
-			}
+#endif
 		}
 
 		prev->w_rms_next = _gpu->OPS->zeros(prev->UNITCOUNT,_layers[i]->UNITCOUNT);
