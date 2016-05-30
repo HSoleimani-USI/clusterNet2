@@ -283,8 +283,9 @@ void test_neural_network_MPI()
 
 
 	//t.tick();
+	double t0 = omp_get_wtime();
 	cout << "pre train" << endl;
-	net.train(b_train, b_cv, 20);
+	net.train(b_train, b_cv, 2);
 
 	net._conf->DROPOUT = 0.25f;
 	net._conf->LEARNING_RATE *= 0.2f;
@@ -292,7 +293,9 @@ void test_neural_network_MPI()
 	net.copy_global_params_to_layers();
 	net._layers.front()->_conf->DROPOUT = 0.1f;
 
-	net.train(b_train, b_cv, 11);
+	
+	//net.train(b_train, b_cv, 11);
+	cout << "time: " << omp_get_wtime()-t0 << endl;
 
 	//t.tock();
 }
@@ -357,8 +360,8 @@ void test_neural_network()
 	net.add(new FCLayer(1200,Exponential_linear));
 	net.add(new FCLayer(10,Softmax));
 
-	for(int i = 0; i < net._layers.size(); i++)
-		net._layers[i]->_transformer.clear();
+	//for(int i = 0; i < net._layers.size(); i++)
+		//net._layers[i]->_transformer.clear();
 
 	net.copy_global_params_to_layers();
 	net._layers.front()->_conf->DROPOUT = 0.2f;
@@ -366,13 +369,10 @@ void test_neural_network()
 	net._opt = new Optimizer(gpu, RMSProp);
 	net.init_weights(UniformSqrt);
 
-
-
-
-
 	//t.tick();
+	double t0 = omp_get_wtime();
 	cout << "pre train" << endl;
-	net.train(b_train, b_cv, 20);
+	net.train(b_train, b_cv, 2);
 
 	net._conf->DROPOUT = 0.25f;
 	net._conf->LEARNING_RATE *= 0.2f;
@@ -380,7 +380,7 @@ void test_neural_network()
 	net.copy_global_params_to_layers();
 	net._layers.front()->_conf->DROPOUT = 0.1f;
 
-	net.train(b_train, b_cv, 11);
+	cout << "time: " << omp_get_wtime()-t0 << endl;
 
 	//t.tock();
 }
@@ -602,7 +602,7 @@ void test_nonvectorized()
 		acc->dot(a1,w2,a2);
 		acc->dot(a2,w3,a3);
 	}
-	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	cout << "time forward dot full: " << omp_get_wtime()-t0 << endl;
 	t0 = omp_get_wtime();
 	for(int i = 0; i < 100; i++)
 	{
@@ -610,7 +610,7 @@ void test_nonvectorized()
 		acc->dot(a2,w4,a4);
 		acc->dot(a4,w5,a5);
 	}
-	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	cout << "time forward dot 1200 only: " << omp_get_wtime()-t0 << endl;
 	
 	t0 = omp_get_wtime();
 	for(int i = 0; i < 100; i++)
@@ -621,7 +621,7 @@ void test_nonvectorized()
 		acc->dot(a4,w5,a5);
 		acc->dot(a5,w3,a3);
 	}
-	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	cout << "time forward dot full + 3x1200: " << omp_get_wtime()-t0 << endl;
 	for(int i = 0; i < 100; i++)
 		acc->dot(A,B,C);
 	t0 = omp_get_wtime();
@@ -629,7 +629,7 @@ void test_nonvectorized()
 	{
 	acc->dot(x,w1,a1);
 	}
-	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	cout << "time forward dot 784: " << omp_get_wtime()-t0 << endl;
 	for(int i = 0; i < 100; i++)
 		acc->dot(A,B,C);
 	t0 = omp_get_wtime();
@@ -637,7 +637,7 @@ void test_nonvectorized()
 	{
 	acc->dot(a1,w2,a2);
 	}
-	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	cout << "time forward dot 1200: " << omp_get_wtime()-t0 << endl;
 	for(int i = 0; i < 100; i++)
 		acc->dot(A,B,C);
 	t0 = omp_get_wtime();
@@ -645,29 +645,60 @@ void test_nonvectorized()
 	{
 	acc->dot(a2,w3,a3);
 	}
-	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	cout << "time forward dot 10: " << omp_get_wtime()-t0 << endl;
 
 	for(int i = 0; i < 100; i++)
 		acc->dot(A,B,C);
 	t0 = omp_get_wtime();
+	for(int i = 0; i < 100; i++)
+	{
 	acc->dot(x,w1,a1);
 	acc->dot(a1,w2,a2);
-	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	}
+	cout << "time forward dot 784 + 1200: " << omp_get_wtime()-t0 << endl;
 
 	for(int i = 0; i < 100; i++)
 		acc->dot(A,B,C);
 	t0 = omp_get_wtime();
+	for(int i = 0; i < 100; i++)
+	{
 	acc->dot(a1,w2,a2);
 	acc->dot(a2,w3,a3);
-	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+}
+	cout << "time forward dot 1200 + 10: " << omp_get_wtime()-t0 << endl;
 
 
 	for(int i = 0; i < 100; i++)
 		acc->dot(A,B,C);
 	t0 = omp_get_wtime();
+	for(int i = 0; i < 100; i++)
+	{
 	acc->dot(x,w1,a1);
 	acc->dot(a2,w3,a3);
-	cout << "time forward dot: " << omp_get_wtime()-t0 << endl;
+	}
+	cout << "time forward dot 784 + 10: " << omp_get_wtime()-t0 << endl;
+
+
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t0 = omp_get_wtime();
+	for(int i = 0; i < 100; i++)
+	{
+		acc->rand(128,1200);
+		acc->rand(128,1200);
+	}
+	cout << "random same size: " << omp_get_wtime()-t0 << endl;
+
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t0 = omp_get_wtime();
+	for(int i = 0; i < 100; i++)
+	{
+		acc->rand(128,1200);
+		acc->rand(128,600);
+		acc->rand(128,300);
+	}
+	cout << "random same size: " << omp_get_wtime()-t0 << endl;
 } 
 
 void filereader_test()
@@ -833,13 +864,13 @@ int main(int argc, char *argv[]) {
 	//test_rdm();
 	//filereader_test();
 	//test_MPI_simple(argc,argv);
-	//test_nonvectorized();
+	test_nonvectorized();
 	//test_gem();
 	//test_MPI(argc, argv);
 	//test_MPI_MIC(argc, argv);
 	//test_lookup_time();
-	//test_neural_network();
-	test_neural_network_MPI();
+//	test_neural_network();
+	//test_neural_network_MPI();
 	MPI_Finalize();
 
 

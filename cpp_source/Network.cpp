@@ -119,14 +119,14 @@ void Network::fit_partial(BatchAllocator *b, int batches)
 
 	for(int i = 0; i < batches; i++)
 	{
-		cout << "current batchno: " << i << endl;
+		//cout << "current batchno: " << i << endl;
 		//cout << "pre alloc" << endl;	
 		b->replace_current_with_next_batch();
 		b->allocate_next_batch_async();
 
 		//cout << "sum batch: " << _gpu->OPS->sum(b->get_current_batchX()) << endl;
 		//cout << _gpu->OPS->sum(b->get_current_batchX()) << endl;
-		cout << "w sum: " << _gpu->OPS->sum(_layers.front()->w_next) << endl;
+		//cout << "w sum: " << _gpu->OPS->sum(_layers.front()->w_next) << endl;
 
 		_layers.front()->activation = b->get_current_batchX();
 		_layers.back()->target = b->get_current_batchY();
