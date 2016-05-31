@@ -33,6 +33,172 @@ void test_timer()
 	t.tock();
 }
 
+void test_nonvectorized()
+{
+	ClusterNet *acc = new ClusterNetCPU();
+
+	int size = 1200;
+
+	Matrix<float> *a = acc->rand(128,10);
+	Matrix<float> *b = acc->rand(128,10);
+
+
+	Matrix<float> *A = acc->OPS->zeros(size,size);
+	Matrix<float> *B = acc->OPS->zeros(size,size);
+	Matrix<float> *C = acc->OPS->zeros(size,size);
+
+
+
+	//warm up
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+
+
+	Timer t = Timer();
+	t.tick("softmax");
+	acc->OPS->softmax(a,b);
+	t.tock("softmax");
+
+	Matrix<float> *y = acc->OPS->read_csv("/home/dettmers/data/y.csv");
+
+	Matrix<float> *X = acc->OPS->zeros(60000,10);
+
+	//warm up
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+
+
+	t.tick("t matrix");
+	acc->OPS->get_t_matrix(y,X);
+	t.tock("t matrix");
+
+
+	Matrix<float> *x = acc->rand(128,784);
+	Matrix<float> *w1 = acc->rand(784,1200);
+	Matrix<float> *a1 = acc->rand(128,1200);
+
+	Matrix<float> *w2 = acc->rand(1200,1200);
+	Matrix<float> *a2 = acc->rand(128,1200);
+	Matrix<float> *w3 = acc->rand(1200,10);
+	Matrix<float> *a3 = acc->rand(128,10);
+
+
+	Matrix<float> *w4 = acc->rand(1200,1200);
+	Matrix<float> *a4 = acc->rand(128,1200);
+
+
+	Matrix<float> *w5 = acc->rand(1200,1200);
+	Matrix<float> *a5 = acc->rand(128,1200);
+
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+
+	t.tick("forward dot full");
+	for(int i = 0; i < 100; i++)
+	{
+		acc->dot(x,w1,a1);
+		acc->dot(a1,w2,a2);
+		acc->dot(a2,w3,a3);
+	}
+	t.tock("forward dot full");
+	t.tick("forward dot 1200 only");
+	for(int i = 0; i < 100; i++)
+	{
+		acc->dot(a1,w2,a2);
+		acc->dot(a2,w4,a4);
+		acc->dot(a4,w5,a5);
+	}
+	t.tock("forward dot 1200 only");
+
+	t.tick("time forward dot full + 3x1200: ");
+	for(int i = 0; i < 100; i++)
+	{
+		acc->dot(x,w1,a1);
+		acc->dot(a1,w2,a2);
+		acc->dot(a2,w4,a4);
+		acc->dot(a4,w5,a5);
+		acc->dot(a5,w3,a3);
+	}
+	t.tock("time forward dot full + 3x1200: ");
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t.tick("time forward dot 784: ");
+	for(int i = 0; i < 100; i++)
+	{
+	acc->dot(x,w1,a1);
+	}
+	t.tock("time forward dot 784: ");
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t.tick("time forward dot 1200: ");
+	for(int i = 0; i < 100; i++)
+	{
+	acc->dot(a1,w2,a2);
+	}
+	t.tock("time forward dot 1200: ");
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t.tick("time forward dot 10 ");
+	for(int i = 0; i < 100; i++)
+	{
+	acc->dot(a2,w3,a3);
+	}
+	t.tock("time forward dot 10 ");
+
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t.tick("time forward dot 784 + 1200 ");
+	for(int i = 0; i < 100; i++)
+	{
+	acc->dot(x,w1,a1);
+	acc->dot(a1,w2,a2);
+	}
+	t.tock("time forward dot 784 + 1200 ");
+
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t.tick("time forward dot 1200 + 10 ");
+	for(int i = 0; i < 100; i++)
+	{
+	acc->dot(a1,w2,a2);
+	acc->dot(a2,w3,a3);
+}
+	t.tock("time forward dot 1200 + 10 ");
+
+
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t.tick("time forward dot 784 + 10 ");
+	for(int i = 0; i < 100; i++)
+	{
+	acc->dot(x,w1,a1);
+	acc->dot(a2,w3,a3);
+	}
+	t.tock("time forward dot 784 + 10 ");
+
+
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t.tick("random same size");
+	for(int i = 0; i < 100; i++)
+	{
+		acc->rand(128,1200);
+		acc->rand(128,1200);
+	}
+	t.tock("random same size");
+
+	for(int i = 0; i < 100; i++)
+		acc->dot(A,B,C);
+	t.tick("random same size");
+	for(int i = 0; i < 100; i++)
+	{
+		acc->rand(128,1200);
+		acc->rand(128,600);
+		acc->rand(128,300);
+	}
+	t.tock("random same size");
+}
+
 void get_csv_mnist_test()
 {
 
@@ -308,8 +474,6 @@ void test_neural_network()
 
 	t.tock();
 
-	cout << "The root  is ************* " << node_count;
-	cout << "The root  is ************* " << node_count;
 }
 
 void run_astro()
@@ -385,9 +549,8 @@ int main(int argc, char const *argv[]) {
 	//test_LSTM_swapping();
 	//deeplearningdb_test();
 	//run_astro();
-	test_neural_network();
+	test_nonvectorized();
+	//test_neural_network();
 	//test_lookup_time();
-
-         freader fr("/home/soleimah/clusterNet2/hanieh.txt");
 	return 0;
 }

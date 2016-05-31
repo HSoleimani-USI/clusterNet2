@@ -6,7 +6,6 @@
 #include <Configurator.h>
 #include <Transformer.h>
 #include <ActivationFunction.h>
-#include <mpi.h>
 
 
 Network::Network(ClusterNet *gpu)
@@ -139,8 +138,10 @@ void Network::fit_partial(BatchAllocator *b, int batches)
 		//cout << "pre update" << endl;	
 		for(int j = 0; j < _layers.size()-1; j++)
 		{
+#ifdef PHI
 			_layers[j]->_ga->send_MPI();
 			_layers[j]->_ga->recv_MPI();
+#endif
 			_opt->weight_update(_layers[j]->w_rms_next, _layers[j]->w_next,_layers[j]->w_grad_next,_conf->RMSPROP_MOMENTUM,_conf->LEARNING_RATE);
 			_opt->weight_update(_layers[j]->b_rms_next, _layers[j]->b_next,_layers[j]->b_grad_next,_conf->RMSPROP_MOMENTUM,_conf->LEARNING_RATE/100.0f);
 		}
