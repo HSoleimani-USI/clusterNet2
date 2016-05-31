@@ -698,7 +698,7 @@ void test_nonvectorized()
 		acc->rand(128,600);
 		acc->rand(128,300);
 	}
-	cout << "random same size: " << omp_get_wtime()-t0 << endl;
+	cout << "different size: " << omp_get_wtime()-t0 << endl;
 } 
 
 void filereader_test()
@@ -776,7 +776,6 @@ int test_MPI_simple(int argc, char *argv[])
 */
 
 
-sleep(1);
 for(int i =0; i < size; i++)
 	MPI_Scatter(A->data, A->size/size, MPI_FLOAT, b[i]->data, recv->size/size, MPI_FLOAT, i, MPI_COMM_WORLD);
 	MPI_Barrier(MPI_COMM_WORLD);
@@ -869,7 +868,7 @@ int main(int argc, char *argv[]) {
 	//test_MPI(argc, argv);
 	//test_MPI_MIC(argc, argv);
 	//test_lookup_time();
-//	test_neural_network();
+	test_neural_network();
 	//test_neural_network_MPI();
 	MPI_Finalize();
 
