@@ -10,17 +10,21 @@ template ClusterNet2<float>::ClusterNet2();
 template<typename T>
 ClusterNet2<T>::ClusterNet2()
 {
-    cudaError_t res = cudaFree(0);
-    if (res != cudaSuccess)
-    {
-        std::cout << "CUDA did not initialize correctly" << std::endl;
-        exit(1);
-    }
+  cudaError_t res = cudaFree(0);
+  if (res != cudaSuccess)
+  {
+      std::cout << "CUDA did not initialize correctly" << std::endl;
+      exit(1);
+  }
 
 	setRandomState(time(0));
 	curandCreateGenerator(&m_generator, CURAND_RNG_PSEUDO_DEFAULT);
 	curandSetPseudoRandomGeneratorSeed(m_generator, time(0));//random seed
 	curandSetGeneratorOffset(m_generator, 100);//burn in the rdm generator
+
+  cublasHandle_t handle;
+ 	cublasCreate_v2(&handle);
+ 	m_handle = handle;
 
 
 	/*
@@ -58,8 +62,11 @@ template<typename T> void ClusterNet2<T>::setRandomState(int seed)
 template Matrix<float> *ClusterNet2<float>::rand(int rows, int cols);
 template <typename T> Matrix<T> *ClusterNet2<T>::rand(int rows, int cols)
 {
+  cout << "a" << endl;
 	Matrix<T> *out = empty<T>(rows, cols);
+  cout << "b" << endl;
 	curandGenerateUniform(m_generator, out->data, rows * cols);
+  cout << "c" << endl;
 
 	return out;
 }
@@ -82,20 +89,32 @@ template <typename T> void ClusterNet2<T>::dot(Matrix<T> *A, Matrix<T> *B, Matri
 template void ClusterNet2<float>::dot(Matrix<float> *A, Matrix<float> *B, Matrix<float> *out, bool T1, bool T2);
 template <typename T> void ClusterNet2<T>::dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out, bool T1, bool T2)
 {
-		const float alpha = 1.0f;
+    const float alpha = 1.0f;
 		const float beta = 0.0f;
-		int A_rows = A->rows, A_cols = A->cols, B_cols = B->cols;
+		int A_rows = A->rows, A_cols = A->cols, B_rows = B->rows, B_cols = B->cols;
 		if (T1){ A_rows = A->cols; A_cols = A->rows; }
-		if (T2){ B_cols = B->rows; }
+		if (T2){ B_cols = B->rows; B_rows = B->cols; }
 
-		//bool success = nervana_sgemm(A->data, B->data, out->data, T1,T2,
-		//							 A_rows, B_cols, A_cols,
-		//							 A->cols,B->cols,out->cols,
-		//							 alpha,beta,
-		//							 NULL, false, false,0);
+    cout << A->rows << "x" << A->cols << endl;
+    cout << B->rows << "x" << B->cols << endl;
+    cout << out->rows << "x" << out->cols << endl;
 
+    cublasStatus_t status;
+    status = cublasSgemm_v2(m_handle,
+ 					T2 ? CUBLAS_OP_T : CUBLAS_OP_N,
+ 					T1 ? CUBLAS_OP_T : CUBLAS_OP_N,
+ 					B_cols, A_rows,	B_rows,
+ 					&alpha, B->data, B->cols, A->data, A->cols, &beta,
+ 					out->data, out->cols);
 
-//#if (!success){ throw "NERVANA ERROR"; }
+    cout << status << endl;
+ 
+ 			if (status != CUBLAS_STATUS_SUCCESS)
+ 			{
+ 				std::cout << "CUBLAS ERROR: Status " << status << std::endl;
+ 				throw "CUBLAS ERROR";
+ 
+ 			}
 }
 
 

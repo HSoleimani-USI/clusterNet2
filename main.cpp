@@ -4,26 +4,20 @@ using namespace std;
 
 int main(int argc, char const *argv[])
 {
-	ClusterNet2<float>* fooClass = new ClusterNet2<float>();
+	ClusterNet2<float>* gpu = new ClusterNet2<float>();
 
 
-    Matrix<int> *A = empty<int>(10,10);
+    Matrix<float> *A = gpu->rand(10,10);
+    Matrix<float> *B = gpu->rand(10,10);
+    Matrix<float> *C = empty<float>(10,10);
 
+    gpu->dot(A,B,C);
 
+    float *cpu = (float*)malloc(C->bytes);
+    to_host<float>(C, cpu);
 
-
-    Matrix<int> *C =  fill_matrix<int>(10,10,17);
-
-    
-    Matrix<int> *B = C->to_host();
-
-    for(int i =0; i < 100; i++)
-    {
-    	std::cout << B->data[i] << std::endl;
-    }
-    
-    
-
+    for(int i = 0; i < 10; i++)
+      std::cout << cpu[i] << std::endl;
 
 
     return 0;

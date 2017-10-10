@@ -17,9 +17,11 @@ setup(
     license = "GNU",
     keywords = "bash",
     url = "http://packages.python.org/gpuir",
-    packages=['bashmagic'],
+    packages=['gpuir'],
     long_description=read('README.md'),
+    classifiers=[
         "Development Status :: 1 - Alpha",
+        "Topic :: Bash",
     ],
 )
 

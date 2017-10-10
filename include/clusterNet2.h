@@ -44,7 +44,7 @@ typedef enum Costfunction_t
 template<typename T> class ClusterNet2
 {
     public:
-        ClusterNet2();
+			ClusterNet2();
   		void setRandomState(int seed);
   		Matrix<T> *rand(int rows, int cols);
   		Matrix<T> *randn(int rows, int cols);
@@ -52,7 +52,10 @@ template<typename T> class ClusterNet2
   		void dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out);
   		void dot(Matrix<T> *A, Matrix<T> *B, Matrix<T> *out, bool T1, bool T2);
   		curandGenerator_t m_generator;
-  	    void dropout(Matrix<T> *A, Matrix <T> *out, const float dropout);
+			void dropout(Matrix<T> *A, Matrix <T> *out, const float dropout);
+
+		private:
+			cublasHandle_t m_handle;
 
 };
 

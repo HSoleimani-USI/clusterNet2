@@ -1,4 +1,4 @@
-import library_interface as lib
+from gpuir import library_interface as lib
 import numpy as np
 import ctypes as ct
 
@@ -54,12 +54,12 @@ class BatchAllocator(object):
 
 class array(object):
 	def __init__(self, numpy_array=None, pt=None, shape=None):
-		if pt != None: self.pt = pt
-		if shape != None: 
+		if pt is not None: self.pt = pt
+		if shape is not None: 
 			self.shape = shape
 			if self.shape[1] == 1:
 				self.shape = (shape[0],)		
-		if numpy_array != None:
+		if numpy_array is not None:
 			if len(numpy_array.shape) > 2: raise Exception("Array must be one or two dimensional!")
 			self.shape = numpy_array.shape
 			if len(self.shape) == 1:
@@ -73,7 +73,7 @@ class array(object):
 
 
 	def tocpu(self):
-		if self.cpu_arr == None: self.cpu_arr = np.empty(self.shape, dtype=np.float32)
+		if self.cpu_arr is None: self.cpu_arr = np.empty(self.shape, dtype=np.float32)
 		lib.funcs.fto_host(self.pt,self.cpu_arr.ctypes.data_as(ct.POINTER(ct.c_float)))
 		return self.cpu_arr
 	
