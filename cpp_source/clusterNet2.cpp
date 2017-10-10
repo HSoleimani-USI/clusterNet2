@@ -2,10 +2,6 @@
 #include <stdlib.h>
 #include "leveldb/db.h"
 #include <iostream>     // std::cout
-#include "json.hpp"
-
-// for convenience
-using json = nlohmann::json;
 
 using std::cout;
 using std::endl;
@@ -18,12 +14,6 @@ ClusterNet2<T>::ClusterNet2()
     if (res != cudaSuccess)
     {
         std::cout << "CUDA did not initialize correctly" << std::endl;
-        exit(1);
-    }
-
-    if (!nervana_loadKernels("../cubin/"))
-    {
-        std::cerr << "Couldn't load all kernels" << std::endl;
         exit(1);
     }
 
@@ -98,14 +88,14 @@ template <typename T> void ClusterNet2<T>::dot(Matrix<T> *A, Matrix<T> *B, Matri
 		if (T1){ A_rows = A->cols; A_cols = A->rows; }
 		if (T2){ B_cols = B->rows; }
 
-		bool success = nervana_sgemm(A->data, B->data, out->data, T1,T2,
-									 A_rows, B_cols, A_cols,
-									 A->cols,B->cols,out->cols,
-									 alpha,beta,
-									 NULL, false, false,0);
+		//bool success = nervana_sgemm(A->data, B->data, out->data, T1,T2,
+		//							 A_rows, B_cols, A_cols,
+		//							 A->cols,B->cols,out->cols,
+		//							 alpha,beta,
+		//							 NULL, false, false,0);
 
 
-		if (!success){ throw "NERVANA ERROR"; }
+//#if (!success){ throw "NERVANA ERROR"; }
 }
 
 

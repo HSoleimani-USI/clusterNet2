@@ -67,8 +67,8 @@ void BatchAllocator::replace_current_with_next_batch()
 	if(CURRENT_BATCH < BATCHES-1)
 	{
 		//because these batches have the same size we can just swap them
-		boost::swap(batchX,nextbatchX);
-		boost::swap(batchY,nextbatchY);
+		//boost::swap(batchX,nextbatchX);
+		//boost::swap(batchY,nextbatchY);
 
 		CURRENT_BATCH += 1;
 	}

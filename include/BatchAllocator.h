@@ -7,7 +7,6 @@
 
 #include <cuda_runtime_api.h>
 #include <basicOps.cuh>
-#include <boost/swap.hpp>
 
 
 #ifndef BATCHALLOCATOR_H_
